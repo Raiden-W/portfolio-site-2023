@@ -1,4 +1,77 @@
-#root {
-	width: 100vw;
-	height: 100vh;
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+#canvas-container {
+	width: 100%;
+	height: 100%;
+}
+
+.opening {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	font-family: "Poppins", sans-serif;
+}
+.text {
+	display: flex;
+	justify-content: left;
+	align-items: center;
+	width: 100%;
+	height: 25%;
+}
+.opening p {
+	margin: 0;
+	padding: 0;
+	font-size: 18vh;
+	line-height: 100%;
+	white-space: nowrap;
+	text-transform: uppercase;
+}
+.text:nth-child(odd) {
+	color: black;
+	background-color: yellow;
+	font-weight: 600;
+}
+.text:nth-child(even) {
+	color: yellow;
+	background-color: black;
+	font-weight: 500;
+}
+
+.scroll:nth-child(odd) p:nth-child(1) {
+	animation: loop-scroll-1 60s linear infinite;
+	animation-delay: -60s;
+}
+.scroll:nth-child(odd) p:nth-child(2) {
+	animation: loop-scroll-2 60s linear infinite;
+	animation-delay: -30s;
+}
+.scroll:nth-child(even) p:nth-child(1) {
+	animation: loop-scroll-1 80s linear infinite;
+	animation-delay: -80s;
+	animation-direction: reverse;
+}
+.scroll:nth-child(even) p:nth-child(2) {
+	animation: loop-scroll-2 80s linear infinite;
+	animation-delay: -40s;
+	animation-direction: reverse;
+}
+
+@keyframes loop-scroll-1 {
+	0% {
+		transform: translateX(100%);
+	}
+	100% {
+		transform: translateX(-100%);
+	}
+}
+@keyframes loop-scroll-2 {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-200%);
+	}
 }
