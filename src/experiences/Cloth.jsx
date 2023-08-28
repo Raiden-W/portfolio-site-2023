@@ -31,18 +31,21 @@ export default function Cloth({ openingCanvas }) {
 		const world = new CANNON.World();
 		world.gravity.set(0, -1, 0);
 		//defualt iteration number is 10
-		// world.solver.iterations = 15;
+		world.solver.iterations = 15;
 
 		const Nx = 15;
 		const Ny = 15;
-		const clothMass = 0.1;
+		const clothMass = 0.001;
 		const clothInitWidth = state.viewport.width;
 		const clothInitHeight = state.viewport.height;
 		const initDistX = clothInitWidth / Nx;
 		const initDistY = clothInitHeight / Ny;
-		const dist = initDistY * 0.8;
+		const distX = initDistX * (initDistX > initDistY ? 0.5 : 0.7);
+		const distY = initDistY * (initDistX > initDistY ? 0.6 : 0.5);
 
-		const shape = new CANNON.Sphere(0.17);
+		const limitBase = initDistX > initDistY ? distX : distY;
+
+		const shape = new CANNON.Sphere(limitBase * 0.6);
 
 		const particles = [];
 
@@ -50,7 +53,6 @@ export default function Cloth({ openingCanvas }) {
 			particles.push([]);
 			for (let j = 0; j < Ny + 1; j++) {
 				const particle = new CANNON.Body({
-					// mass: j === Ny ? 0 : clothMass,
 					mass: i === 6 && j === 8 ? 0 : clothMass,
 					shape,
 				});
@@ -66,7 +68,7 @@ export default function Cloth({ openingCanvas }) {
 			}
 		}
 
-		const connect = (i1, j1, i2, j2) => {
+		const connect = (i1, j1, i2, j2, dist) => {
 			world.addConstraint(
 				new CANNON.DistanceConstraint(
 					particles[i1][j1],
@@ -78,27 +80,22 @@ export default function Cloth({ openingCanvas }) {
 
 		for (let i = 0; i < Nx + 1; i++) {
 			for (let j = 0; j < Ny + 1; j++) {
-				if (i < Nx) connect(i, j, i + 1, j);
-				if (j < Ny) connect(i, j, i, j + 1);
+				if (i < Nx) connect(i, j, i + 1, j, distX);
+				if (j < Ny) connect(i, j, i, j + 1, distY);
 			}
 		}
 
 		const updateClothGeo = () => {
+			const positionAttribute = clothGeoRef.current.attributes.position;
 			for (let i = 0; i < Nx + 1; i++) {
 				for (let j = 0; j < Ny + 1; j++) {
 					const index = j * (Nx + 1) + i;
-
-					const positionAttribute = clothGeoRef.current.attributes.position;
-
 					const position = particles[i][Ny - j].position;
-
 					positionAttribute.setXYZ(index, position.x, position.y, position.z);
-
-					positionAttribute.needsUpdate = true;
-
-					clothGeoRef.current.computeVertexNormals();
 				}
 			}
+			positionAttribute.needsUpdate = true;
+			clothGeoRef.current.computeVertexNormals();
 		};
 
 		return { Nx, Ny, world, updateClothGeo, particles };

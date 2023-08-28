@@ -23,7 +23,7 @@ export default function MyScene(props) {
 				<Cloth {...props} />
 				{/* <OrbitControls /> */}
 				<ambientLight color="white" intensity={1} />
-				<directionalLight intensity={0.5} color="white" position={[0, 0, 5]} />
+				<directionalLight intensity={0.5} color="white" position={[3, 0, 5]} />
 			</Canvas>
 		</div>
 	);
