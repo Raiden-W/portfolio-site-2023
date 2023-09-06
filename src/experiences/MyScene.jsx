@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { OrbitControls } from "@react-three/drei";
 import Cloth from "./Cloth";
+import PaperPlane from "./PaperPlane";
 
 export default function MyScene(props) {
 	return (
@@ -20,8 +21,9 @@ export default function MyScene(props) {
 				}}
 				style={{ background: "grey" }}
 			>
-				<Cloth {...props} />
-				{/* <OrbitControls /> */}
+				{/* <Cloth {...props} /> */}
+				<PaperPlane />
+				<OrbitControls />
 				<ambientLight color="white" intensity={1} />
 				<directionalLight intensity={0.5} color="white" position={[3, 0, 5]} />
 			</Canvas>

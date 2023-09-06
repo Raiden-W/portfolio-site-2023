@@ -117,6 +117,7 @@ export default function Cloth({ openingCanvas }) {
 
 	return (
 		<>
+			{/* plane to catch the mouse raycast */}
 			<Plane
 				visible={false}
 				args={[15, 10]}

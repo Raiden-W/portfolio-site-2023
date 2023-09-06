@@ -9,7 +9,7 @@ function App() {
 	return (
 		<>
 			<MyScene openingCanvas={openingCanvasSt} />
-			<Opening setOpeningCanvas={setOpeningCanvas} />
+			{/* <Opening setOpeningCanvas={setOpeningCanvas} /> */}
 		</>
 	);
 }
