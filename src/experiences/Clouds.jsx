@@ -51,7 +51,7 @@ export default function Clouds(props) {
 					azimuth={0.5}
 					turbidity={1}
 					rayleigh={0.3}
-					inclination={0.6}
+					inclination={0.5}
 					distance={1000}
 				/>
 			</Environment>

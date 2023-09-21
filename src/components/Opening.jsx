@@ -1,3 +1,4 @@
+import "./Openning.css";
 import html2canvas from "html2canvas";
 import { useEffect, useRef } from "react";
 import { myEventEmitter } from "../utils/EventEmitter";
@@ -44,7 +45,6 @@ export default function Opening({ setOpeningCanvas }) {
 			domElement.remove();
 
 			setOpeningCanvas(canvas);
-			// myEventEmitter.emit("OpeningEnd");
 			myEventEmitter.once("TextureReady", () => {
 				//remove the original Dom
 				openingRef.current.remove();
