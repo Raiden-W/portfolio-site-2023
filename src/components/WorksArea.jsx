@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import "./WorksArea.scss";
 import { useWidthStore } from "../utils/GlobalStore";
+import Work from "./Work";
 
 function WorksArea() {
 	const areaWidthSt = useWidthStore((state) => state.worksAreaWSt);
@@ -9,19 +10,23 @@ function WorksArea() {
 	const openWorksArea = useWidthStore((state) => state.openWorksArea);
 	const closeWorksArea = useWidthStore((state) => state.closeWorksArea);
 
+	const containerRef = useRef();
+
 	const activeWroksArea = () => {
-		areaActiveSt ? closeWorksArea() : openWorksArea();
+		areaActiveSt
+			? closeWorksArea(containerRef.current)
+			: openWorksArea(containerRef.current);
 	};
 
 	return (
 		<div className="works-area" style={{ width: `${areaWidthSt}%` }}>
-			<div className="works-bar" onClick={activeWroksArea}>
+			<div className="works-area__bar" onClick={activeWroksArea}>
 				<span>works</span>
-				<div className="works-logo"></div>
+				<div className="works-area__bar-logo"></div>
 			</div>
-			{/* <p className="works-area__contatiner--tem">
-				aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-			</p> */}
+			<div className="works-area__container" ref={containerRef}>
+				<Work />
+			</div>
 		</div>
 	);
 }

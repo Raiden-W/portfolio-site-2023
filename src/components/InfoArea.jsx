@@ -9,18 +9,22 @@ function InfoArea() {
 	const openInfoArea = useWidthStore((state) => state.openInfoArea);
 	const closeInfoArea = useWidthStore((state) => state.closeInfoArea);
 
+	const containerRef = useRef();
+
 	const activeInfoBar = () => {
-		areaActiveSt ? closeInfoArea() : openInfoArea();
+		areaActiveSt
+			? closeInfoArea(containerRef.current)
+			: openInfoArea(containerRef.current);
 	};
 
 	return (
 		<div className="info-area" style={{ width: `${areaWidthSt}%` }}>
-			<div className="info-bar" onClick={activeInfoBar}>
+			<div className="info-area__bar" onClick={activeInfoBar}>
 				<span>about</span>
 			</div>
-			{/* <p className="works-area__contatiner--tem">
-				aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-			</p> */}
+			<div className="info-area__container" ref={containerRef}>
+				Info Info Info Info Info Info Info Info
+			</div>
 		</div>
 	);
 }
