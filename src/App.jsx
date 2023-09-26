@@ -2,17 +2,20 @@ import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import MyScene from "./experiences/MyScene";
 import Opening from "./components/Opening";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 
 function App() {
 	const [openingCanvasSt, setOpeningCanvas] = useState(null);
 
+	const canvasContainerRef = useRef();
+
 	return (
 		<>
 			<WorksArea />
-			<div className="canvas-container">
+			<InfoArea />
+			<div className="canvas-container" ref={canvasContainerRef}>
 				<Canvas
 					camera={{
 						fov: 50,
@@ -26,10 +29,12 @@ function App() {
 					}}
 					style={{ background: "grey" }}
 				>
-					<MyScene openingCanvas={openingCanvasSt} />
+					<MyScene
+						openingCanvas={openingCanvasSt}
+						canvasContainerRef={canvasContainerRef}
+					/>
 				</Canvas>
 			</div>
-			<InfoArea />
 			{/* <Opening setOpeningCanvas={setOpeningCanvas} /> */}
 		</>
 	);
