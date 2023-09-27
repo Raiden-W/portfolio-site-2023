@@ -47,12 +47,6 @@ function Work({
 		}
 	}, [mediaContainerWidth, windowWidth]);
 
-	// useEffect(() => {
-	// 	if (mediaOffsetXRef.current < borderLeftRef.current - mediaOffsetMargin) {
-	// 		smoothTo(borderLeftRef.current - mediaOffsetMargin);
-	// 	}
-	// }, [windowWidth]);
-
 	const bind = useDrag(
 		({ offset: [ox, _] }) => {
 			smoothTo(ox);
