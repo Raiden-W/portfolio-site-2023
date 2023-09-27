@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./WorksArea.scss";
 import { useWidthStore } from "../utils/GlobalStore";
 import Work from "./Work";
@@ -11,6 +11,20 @@ function WorksArea() {
 	const closeWorksArea = useWidthStore((state) => state.closeWorksArea);
 
 	const containerRef = useRef();
+
+	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
+
+	useEffect(() => {
+		const updateWindowWidth = () => {
+			setWindowWidth(window.innerWidth);
+		};
+
+		window.addEventListener("resize", updateWindowWidth);
+
+		return () => {
+			window.removeEventListener("resize", updateWindowWidth);
+		};
+	}, []);
 
 	const activeWroksArea = () => {
 		areaActiveSt
@@ -25,7 +39,7 @@ function WorksArea() {
 				<div className="works-area__bar-logo"></div>
 			</div>
 			<div className="works-area__container" ref={containerRef}>
-				<Work />
+				<Work windowWidth={windowWidthSt} />
 			</div>
 		</div>
 	);
