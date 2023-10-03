@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./WorksArea.scss";
 import { useWidthStore } from "../utils/GlobalStore";
+import { useGetWorks } from "../utils/serviceHooks";
 import Work from "./Work";
 
 function WorksArea() {
@@ -13,6 +14,8 @@ function WorksArea() {
 	const containerRef = useRef();
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
+
+	const { worksDataSt } = useGetWorks();
 
 	useEffect(() => {
 		const updateWindowWidth = () => {
@@ -39,7 +42,18 @@ function WorksArea() {
 				<div className="works-area__bar-logo"></div>
 			</div>
 			<div className="works-area__container" ref={containerRef}>
-				<Work windowWidth={windowWidthSt} />
+				{worksDataSt.map((workData) => (
+					<Work
+						windowWidth={windowWidthSt}
+						key={workData.id}
+						title={workData.title}
+						techTools={workData.techTools}
+						description={workData.description}
+						viewLink={workData.viewLink}
+						repoLink={workData.repoLink}
+						mediaSet={workData.mediaSet}
+					/>
+				))}
 			</div>
 		</div>
 	);

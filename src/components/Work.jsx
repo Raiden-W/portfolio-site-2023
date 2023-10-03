@@ -3,15 +3,15 @@ import "./Work.scss";
 import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
 
-const mediaOffsetMargin = 10;
+const mediaOffsetMargin = 32;
 
 function Work({
-	workTitle = "Unknown Title",
-	workMedia = "Blank",
-	workTechTools = "Unity Three.js Node.js React",
-	workDescription = "Bah Lah Bah Lah Bah Lah Bah Lah",
-	workViewLink = "/",
-	workRepoLink = "https://www.github.com",
+	title = "Unknown Title",
+	mediaSet = [],
+	techTools = "Unity Three.js Node.js React",
+	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
+	viewLink,
+	repoLink,
 	windowWidth,
 }) {
 	const mediaContainerRef = useRef();
@@ -56,7 +56,7 @@ function Work({
 			bounds: () => {
 				return {
 					left: borderLeftRef.current - mediaOffsetMargin,
-					right: mediaOffsetMargin,
+					right: 0,
 				};
 			},
 			rubberband: 0.2,
@@ -65,27 +65,33 @@ function Work({
 
 	return (
 		<div className="work">
-			<h3 className="work__title">{workTitle}</h3>
-			<div className="work__media" {...bind()}>
-				<div className="work__media-container" ref={mediaContainerRef}>
-					{[...Array(5)].map((_, i) => {
-						return (
-							<div key={i} className="work__media-item">
-								{i + 1}
-							</div>
-						);
-					})}
+			<h2 className="work__title">{title}</h2>
+			<div className="work__media-set" {...bind()}>
+				<div className="work__media-set-container" ref={mediaContainerRef}>
+					{mediaSet.map((media) => (
+						<div key={media.id} className="work__media-set-container-item">
+							{media.type === "video" ? (
+								<video muted autoPlay loop src={media.url}></video>
+							) : (
+								<img draggable="false" src={media.url} />
+							)}
+						</div>
+					))}
 				</div>
 			</div>
-			<p className="work__tech-tools">{workTechTools}</p>
-			<p className="work__description">{workDescription}</p>
+			<p className="work__tech-tools">{techTools}</p>
+			<p className="work__description">{description}</p>
 			<div className="work__links-container">
-				<a target="_blank" href={workViewLink}>
-					Visit Site
-				</a>
-				<a target="_blank" href={workRepoLink}>
-					Repo Link
-				</a>
+				{viewLink && (
+					<a target="_blank" href={viewLink}>
+						Visit Site <span>&#8594;</span>
+					</a>
+				)}
+				{repoLink && (
+					<a target="_blank" href={repoLink}>
+						GitHub Repo <span>&#8594;</span>
+					</a>
+				)}
 			</div>
 		</div>
 	);
