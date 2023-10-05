@@ -11,6 +11,8 @@ export default function Cloth({ openingCanvas }) {
 	const clothGeoRef = useRef();
 	const planeRef = useRef();
 
+	// const staticParticleIndex = useRef({ i: 6, j: 8 });
+
 	const isGrabing = useRef(false);
 	const isPhysics = useRef(false);
 
@@ -146,6 +148,7 @@ export default function Cloth({ openingCanvas }) {
 						specular="#b0b0b0"
 						shininess={18}
 						side={THREE.DoubleSide}
+						// wireframe
 					></meshPhongMaterial>
 				) : null}
 			</mesh>
