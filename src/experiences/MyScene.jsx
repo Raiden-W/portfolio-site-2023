@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { useWidthStore } from "../utils/GlobalStore";
 
-export default function MyScene({ openingCanvas, canvasContainerRef }) {
+export default function MyScene({ openingOutputSt, canvasContainerRef }) {
 	const [animValSt, setAnimVal] = useState(0);
 
 	const setSize = useThree((state) => state.setSize);
@@ -23,15 +23,12 @@ export default function MyScene({ openingCanvas, canvasContainerRef }) {
 	return (
 		<>
 			{/* <color args={["lightgrey"]} attach="background" /> */}
-
-			{/* <Cloth openingCanvas={openingCanvas} /> */}
-
-			<PaperPlanePhong setAnimVal={setAnimVal} />
-			<Clouds animVal={animValSt} />
-			<OrbitControls />
-
+			<Cloth openingOutputSt={openingOutputSt} />
+			{/* <PaperPlanePhong setAnimVal={setAnimVal} />
+			<Clouds animVal={animValSt} /> */}
+			{/* <OrbitControls /> */}
 			<ambientLight color="white" intensity={1} />
-			<directionalLight intensity={0.5} color="white" position={[0, 0, 3]} />
+			<directionalLight intensity={1} color="white" position={[0, 0, 3]} />
 			{/* <pointLight intensity={0.8} color="white" position={[3, 3, 0]} /> */}
 		</>
 	);

@@ -33,18 +33,23 @@ const useGetWorks = () => {
 	const { dataSt, errorSt, loadingSt } = useFetch(
 		`${
 			import.meta.env.VITE_BASE_API_URL
-		}/api/works?populate[0]=work_medias&populate[1]=work_medias.media`
+		}/api/works-area?populate[works][populate][work_medias][populate][0]=media&populate[works][populate][links][populate]=*`
 	);
 
 	useEffect(() => {
 		if (dataSt) {
-			const worksData = dataSt.data.map((workData) => {
+			const worksData = dataSt.data.attributes.works.data.map((workData) => {
 				const id = workData.id;
 				const title = workData.attributes.title;
 				const description = workData.attributes.description;
 				const techTools = workData.attributes.tech_tools;
-				const viewLink = workData.attributes.view_link;
-				const repoLink = workData.attributes.repo_link;
+				const externalLinks = workData.attributes.links.map((linkData) => {
+					const displayedText = linkData.displayed_text;
+					const url = linkData.url;
+					const id = linkData.id;
+
+					return { displayedText, url, id };
+				});
 				const mediaSet = workData.attributes.work_medias.data.map(
 					(mediaData) => {
 						const id = mediaData.id;
@@ -66,8 +71,7 @@ const useGetWorks = () => {
 					title,
 					description,
 					techTools,
-					viewLink,
-					repoLink,
+					externalLinks,
 					mediaSet,
 				};
 			});

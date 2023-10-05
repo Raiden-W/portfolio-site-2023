@@ -10,14 +10,14 @@ $padding-side: 1.5rem;
 
 	&__title {
 		text-transform: uppercase;
-		padding: 1rem 0;
+		margin: 1rem 0 1.2rem 0;
 		font-family: "Oswald", sans-serif;
 		font-size: 3rem;
 		font-weight: 500;
 	}
 
 	&__tech-tools {
-		padding: 1.5rem 0 0 0;
+		margin: 1.8rem 0 0.5rem 0;
 		font-size: 0.85rem;
 		font-style: italic;
 		font-weight: 400;
@@ -25,22 +25,20 @@ $padding-side: 1.5rem;
 	}
 
 	&__description {
-		padding: 0.3rem 0;
 		font-size: 1rem;
-		line-height: 130%;
 		font-weight: 400;
 	}
 
 	&__links-container {
-		padding: 0.5rem 0;
+		margin: 1rem 0 0.6rem 0;
 		display: flex;
 		justify-content: space-between;
 		a {
 			text-decoration: none;
-			color: black;
+			color: rgb(0, 0, 0);
 			font-size: 0.85rem;
 			font-style: italic;
-			font-weight: 600;
+			font-weight: 400;
 
 			span {
 				display: inline-block;
@@ -61,7 +59,6 @@ $padding-side: 1.5rem;
 			display: flex;
 
 			&-item {
-				display: inline-block;
 				height: $media-height;
 				margin-right: 1rem;
 				text-align: center;
@@ -69,8 +66,9 @@ $padding-side: 1.5rem;
 
 				video,
 				img {
-					height: inherit;
+					height: 100%;
 					border: 0.05rem solid rgb(211, 211, 211);
+					border-radius: 0.6rem;
 				}
 			}
 		}

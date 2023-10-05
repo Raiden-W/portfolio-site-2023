@@ -1,5 +1,5 @@
 {
-	"name": "cloth-page",
+	"name": "portfolio_site_frontend",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -21,6 +21,8 @@
 		"leva": "^0.9.35",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"react-markdown": "^9.0.0",
+		"simplebar-react": "^3.2.4",
 		"three": "^0.154.0",
 		"three-custom-shader-material": "^5.4.0",
 		"zustand": "^4.4.1"

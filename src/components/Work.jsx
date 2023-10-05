@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./Work.scss";
 import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
+import ReactMarkdown from "react-markdown";
 
 const mediaOffsetMargin = 32;
 
@@ -10,8 +11,7 @@ function Work({
 	mediaSet = [],
 	techTools = "Unity Three.js Node.js React",
 	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
-	viewLink,
-	repoLink,
+	externalLinks = [],
 	windowWidth,
 }) {
 	const mediaContainerRef = useRef();
@@ -71,27 +71,26 @@ function Work({
 					{mediaSet.map((media) => (
 						<div key={media.id} className="work__media-set-container-item">
 							{media.type === "video" ? (
-								<video muted autoPlay loop src={media.url}></video>
+								<video muted autoPlay loop src={media.url} />
 							) : (
-								<img draggable="false" src={media.url} />
+								<img
+									draggable="false"
+									src={media.url}
+									alt={media.alternativeText}
+								/>
 							)}
 						</div>
 					))}
 				</div>
 			</div>
 			<p className="work__tech-tools">{techTools}</p>
-			<p className="work__description">{description}</p>
+			<ReactMarkdown className="work__description">{description}</ReactMarkdown>
 			<div className="work__links-container">
-				{viewLink && (
-					<a target="_blank" href={viewLink}>
-						Visit Site <span>&#8594;</span>
+				{externalLinks.map((link) => (
+					<a target="_blank" href={link.url} key={link.id}>
+						{link.displayedText} <span>&#8594;</span>
 					</a>
-				)}
-				{repoLink && (
-					<a target="_blank" href={repoLink}>
-						GitHub Repo <span>&#8594;</span>
-					</a>
-				)}
+				))}
 			</div>
 		</div>
 	);

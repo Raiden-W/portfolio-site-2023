@@ -7,7 +7,7 @@ import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 
 function App() {
-	const [openingCanvasSt, setOpeningCanvas] = useState(null);
+	const [openingOutputSt, setOpeningOutput] = useState(null);
 
 	const canvasContainerRef = useRef();
 
@@ -30,12 +30,12 @@ function App() {
 					style={{ background: "grey" }}
 				>
 					<MyScene
-						openingCanvas={openingCanvasSt}
+						openingOutputSt={openingOutputSt}
 						canvasContainerRef={canvasContainerRef}
 					/>
 				</Canvas>
 			</div>
-			{/* <Opening setOpeningCanvas={setOpeningCanvas} /> */}
+			<Opening setOpeningOutput={setOpeningOutput} />
 		</>
 	);
 }

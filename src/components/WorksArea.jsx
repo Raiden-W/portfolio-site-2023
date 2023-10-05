@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "./WorksArea.scss";
 import { useWidthStore } from "../utils/GlobalStore";
 import { useGetWorks } from "../utils/serviceHooks";
+import SimpleBar from "simplebar-react";
+import "simplebar-react/dist/simplebar.min.css";
 import Work from "./Work";
 
 function WorksArea() {
@@ -42,18 +44,19 @@ function WorksArea() {
 				<div className="works-area__bar-logo"></div>
 			</div>
 			<div className="works-area__container" ref={containerRef}>
-				{worksDataSt.map((workData) => (
-					<Work
-						windowWidth={windowWidthSt}
-						key={workData.id}
-						title={workData.title}
-						techTools={workData.techTools}
-						description={workData.description}
-						viewLink={workData.viewLink}
-						repoLink={workData.repoLink}
-						mediaSet={workData.mediaSet}
-					/>
-				))}
+				<SimpleBar style={{ maxHeight: "100%" }}>
+					{worksDataSt.map((workData) => (
+						<Work
+							windowWidth={windowWidthSt}
+							key={workData.id}
+							title={workData.title}
+							techTools={workData.techTools}
+							description={workData.description}
+							externalLinks={workData.externalLinks}
+							mediaSet={workData.mediaSet}
+						/>
+					))}
+				</SimpleBar>
 			</div>
 		</div>
 	);
