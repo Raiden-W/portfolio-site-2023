@@ -3,35 +3,40 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as CANNON from "cannon-es";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { myEventEmitter } from "../utils/EventEmitter";
 import gsap from "gsap";
+import appStateManager from "../utils/appStateManager";
+import { useSelector } from "@xstate/react";
 
-export default function Cloth({ openingOutputSt }) {
-	const state = useThree();
-
-	const clothGeoRef = useRef();
-	const clothMeshRef = useRef();
+export default function Cloth({ setGeo, setMat }) {
+	const { viewport } = useThree();
 
 	const initParticlePos = useRef([]);
 
-	const isGrabing = useRef(false);
-	const isPhysics = useRef(false);
-	const isClothFree = useRef(false);
-
-	const [clothTextureSt, setClothTexture] = useState(null);
 	const [activePlaneSt, setActivePlane] = useState(true);
+
+	const { clothGrabInitPos, clonedCanvas, currState } = useSelector(
+		appStateManager,
+		(s) => {
+			return {
+				clothGrabInitPos: s.context.clothGrabInitPos,
+				clonedCanvas: s.context.clonedCanvas,
+				currState: s.value,
+			};
+		}
+	);
 
 	const clothPhysics = useMemo(() => {
 		const world = new CANNON.World();
 		world.gravity.set(0, -2, 0);
 		//defualt iteration number is 10
-		world.solver.iterations = 15;
+		world.solver.iterations = 8;
+		world.allowSleep = true;
 
 		const Nx = 15;
 		const Ny = 15;
 		const clothMass = 0.01;
-		const clothInitWidth = state.viewport.width;
-		const clothInitHeight = state.viewport.height;
+		const clothInitWidth = viewport.width;
+		const clothInitHeight = viewport.height;
 		const initDistX = clothInitWidth / Nx;
 		const initDistY = clothInitHeight / Ny;
 		const distX = initDistX * (initDistX > initDistY ? 0.5 : 0.7);
@@ -45,52 +50,50 @@ export default function Cloth({ openingOutputSt }) {
 
 		const particles = [];
 
-		const initClothPhysics = (iStatic, jStatic) => {
-			for (let i = 0; i < Nx + 1; i++) {
-				particles.push([]);
-				initParticlePos.current.push([]);
-				for (let j = 0; j < Ny + 1; j++) {
-					const particle = new CANNON.Body({
-						mass: i === iStatic && j === jStatic ? 0 : clothMass,
-						shape,
-					});
-					particle.position.set(
-						(i - Nx / 2) * initDistX,
-						(j - Ny / 2) * initDistY,
-						0
-					);
-
-					initParticlePos.current[i][j] = {
-						x: (i - Nx / 2) * resetDist,
-						y: (j - Ny / 2) * resetDist,
-					};
-					particle.velocity.set(0, 0, 0.01 * (Ny - j));
-
-					particles[i].push(particle);
-					world.addBody(particle);
-				}
-			}
-
-			const connect = (i1, j1, i2, j2, dist) => {
-				world.addConstraint(
-					new CANNON.DistanceConstraint(
-						particles[i1][j1],
-						particles[i2][j2],
-						dist
-					)
+		for (let i = 0; i < Nx + 1; i++) {
+			particles.push([]);
+			initParticlePos.current.push([]);
+			for (let j = 0; j < Ny + 1; j++) {
+				const particle = new CANNON.Body({
+					mass: clothMass,
+					shape,
+				});
+				particle.position.set(
+					(i - Nx / 2) * initDistX,
+					(j - Ny / 2) * initDistY,
+					0
 				);
-			};
 
-			for (let i = 0; i < Nx + 1; i++) {
-				for (let j = 0; j < Ny + 1; j++) {
-					if (i < Nx) connect(i, j, i + 1, j, distX);
-					if (j < Ny) connect(i, j, i, j + 1, distY);
-				}
+				initParticlePos.current[i][j] = {
+					x: (i - Nx / 2) * resetDist,
+					y: (j - Ny / 2) * resetDist,
+				};
+				particle.velocity.set(0, 0, 0.01 * (Ny - j));
+
+				particles[i].push(particle);
+				world.addBody(particle);
 			}
+		}
+
+		const connect = (i1, j1, i2, j2, dist) => {
+			world.addConstraint(
+				new CANNON.DistanceConstraint(
+					particles[i1][j1],
+					particles[i2][j2],
+					dist
+				)
+			);
 		};
 
+		for (let i = 0; i < Nx + 1; i++) {
+			for (let j = 0; j < Ny + 1; j++) {
+				if (i < Nx) connect(i, j, i + 1, j, distX);
+				if (j < Ny) connect(i, j, i, j + 1, distY);
+			}
+		}
+
 		const updateClothGeo = () => {
-			const positionAttribute = clothGeoRef.current.attributes.position;
+			const positionAttribute = squareGeo.attributes.position;
 			for (let i = 0; i < Nx + 1; i++) {
 				for (let j = 0; j < Ny + 1; j++) {
 					const index = j * (Nx + 1) + i;
@@ -99,8 +102,11 @@ export default function Cloth({ openingOutputSt }) {
 				}
 			}
 			positionAttribute.needsUpdate = true;
-			clothGeoRef.current.computeVertexNormals();
+			squareGeo.computeVertexNormals();
 		};
+
+		const centerPos =
+			particles[Math.floor(Nx / 2)][Math.floor(Ny / 2)].position;
 
 		return {
 			Nx,
@@ -110,50 +116,83 @@ export default function Cloth({ openingOutputSt }) {
 			clothMass,
 			world,
 			updateClothGeo,
-			initClothPhysics,
 			particles,
+			centerPos,
 		};
 	}, []);
 
-	const { iStatic, jStatic } = useMemo(() => {
-		if (openingOutputSt) {
-			setClothTexture(new THREE.CanvasTexture(openingOutputSt.canvas));
+	const squareGeo = useMemo(() => {
+		return new THREE.PlaneGeometry(
+			clothPhysics.clothInitWidth,
+			clothPhysics.clothInitHeight,
+			clothPhysics.Nx,
+			clothPhysics.Ny
+		);
+	}, []);
 
-			const iStatic = Math.round(openingOutputSt.pointPos.x * clothPhysics.Nx);
-			const jStatic = Math.round(openingOutputSt.pointPos.y * clothPhysics.Ny);
+	const squareMat = useMemo(() => {
+		return new THREE.MeshPhongMaterial({
+			specular: "#6c6c6c",
+			shininess: 18,
+			side: THREE.DoubleSide,
+			emissive: "#000000",
+		});
+	}, []);
 
-			clothPhysics.initClothPhysics(iStatic, jStatic);
+	useEffect(() => {
+		setGeo(squareGeo);
+		appStateManager.send("init some context", { squareGeo, squareMat });
+	}, []);
 
-			isGrabing.current = true;
-			setTimeout(() => {
-				isPhysics.current = true;
-			}, 20);
-			myEventEmitter.emit("TextureReady");
-			return { iStatic, jStatic };
-		} else {
-			return { iStatic: 0, jStatic: 0 };
+	useEffect(() => {
+		//set canvas texture to cloth
+		if (clonedCanvas) {
+			squareMat.map = new THREE.CanvasTexture(clonedCanvas);
+			squareMat.needsUpdate = true;
+			setMat(squareMat);
+			appStateManager.send("set cloth texture");
 		}
-	}, [openingOutputSt]);
+	}, [clonedCanvas]);
 
-	const grabPositionHandler = (e) => {
-		if (isGrabing.current) {
-			const staticParticle = clothPhysics.particles[iStatic][jStatic];
+	const staticParticle = useMemo(() => {
+		//init static particle
+		if (clothGrabInitPos) {
+			const iStatic = Math.round(clothGrabInitPos.x * clothPhysics.Nx);
+			const jStatic = Math.round(clothGrabInitPos.y * clothPhysics.Ny);
+			const theParticle = clothPhysics.particles[iStatic][jStatic];
+			theParticle.mass = 0;
+			theParticle.updateMassProperties();
+			return theParticle;
+		} else {
+			return clothPhysics.particles[0][0];
+		}
+	}, [clothGrabInitPos]);
+
+	const updateGrabingParticlePos = (e) => {
+		if (currState === "Cloth Grabing") {
 			staticParticle.position.x = e.point.x;
 			staticParticle.position.y = e.point.y;
 		}
 	};
 
 	const setFreeCloth = () => {
-		const staticParticle = clothPhysics.particles[iStatic][jStatic];
 		staticParticle.mass = clothPhysics.clothMass;
 		staticParticle.updateMassProperties();
 		staticParticle.type = 1;
 	};
 
-	const resetClothGeo = () => {
+	useEffect(() => {
+		if (currState === "Cloth Falling") {
+			setTimeout(() => {
+				setFreeCloth();
+			}, [100]);
+		}
+	}, [currState]);
+
+	const clothToSquareGeoTrans = () => {
 		const Nx = clothPhysics.Nx;
 		const Ny = clothPhysics.Ny;
-		const positionAttribute = clothGeoRef.current.attributes.position;
+		const positionAttribute = squareGeo.attributes.position;
 		for (let i = 0; i < Nx + 1; i++) {
 			for (let j = 0; j < Ny + 1; j++) {
 				const index = j * (Nx + 1) + i;
@@ -179,43 +218,43 @@ export default function Cloth({ openingOutputSt }) {
 						);
 						if (i === Nx && j === Ny) {
 							positionAttribute.needsUpdate = true;
-							clothGeoRef.current.computeVertexNormals();
+							squareGeo.computeVertexNormals();
 						}
 					},
 				});
 			}
 		}
+		gsap.to(squareMat.emissive, {
+			r: 1,
+			b: 1,
+			g: 1,
+			duration: 0.5,
+			ease: "power3.in",
+			delay: 0.5,
+			onComplete: () => {
+				appStateManager.send("cloth to square finished");
+				squareMat.map.dispose();
+				squareMat.map = null;
+			},
+		});
 		setActivePlane(false);
 	};
 
-	// const rotateClothMesh = () => {
-	// 	gsap.to(clothMeshRef.current.rotation, {
-	// 		x: -Math.PI / 2.5,
-	// 		duration: 1.5,
-	// 		ease: "expo.inOut",
-	// 	});
-	// };
-
 	useFrame(() => {
-		if (isPhysics.current) {
+		if (currState === "Cloth Grabing" || currState === "Cloth Falling") {
 			clothPhysics.world.fixedStep();
 			clothPhysics.updateClothGeo();
-		}
-		if (isClothFree.current) {
-			const centerParticle =
-				clothPhysics.particles[Math.floor(clothPhysics.Nx / 2)][
-					Math.floor(clothPhysics.Ny / 2)
-				];
-			if (
-				centerParticle.position.y < -state.viewport.height * 0.9 ||
-				centerParticle.position.y > state.viewport.height * 0.8 ||
-				centerParticle.position.x < -state.viewport.width * 0.7 ||
-				centerParticle.position.x > state.viewport.width * 0.7
-			) {
-				isPhysics.current = false;
-				isClothFree.current = false;
-				resetClothGeo();
-				// rotateClothMesh();
+
+			if (currState === "Cloth Falling") {
+				if (
+					clothPhysics.centerPos.y < -viewport.height * 0.8 ||
+					clothPhysics.centerPos.y > viewport.height * 0.8 ||
+					clothPhysics.centerPos.x < -viewport.width * 0.7 ||
+					clothPhysics.centerPos.x > viewport.width * 0.7
+				) {
+					clothToSquareGeoTrans();
+					appStateManager.send("cloth nearly out");
+				}
 			}
 		}
 	});
@@ -227,15 +266,13 @@ export default function Cloth({ openingOutputSt }) {
 				<Plane
 					visible={false}
 					args={[15, 10]}
-					onPointerMove={grabPositionHandler}
+					onPointerMove={updateGrabingParticlePos}
 					onPointerUp={() => {
-						isGrabing.current = false;
-						setFreeCloth();
-						isClothFree.current = true;
+						appStateManager.send("mouse up canvas");
 					}}
 				/>
 			)}
-			<mesh ref={clothMeshRef}>
+			{/* <mesh ref={clothMeshRef}>
 				<planeGeometry
 					args={[
 						clothPhysics.clothInitWidth,
@@ -254,7 +291,7 @@ export default function Cloth({ openingOutputSt }) {
 						// wireframe
 					></meshPhongMaterial>
 				) : null}
-			</mesh>
+			</mesh> */}
 		</>
 	);
 }

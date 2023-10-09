@@ -2,13 +2,12 @@ import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import MyScene from "./experiences/MyScene";
 import Opening from "./components/Opening";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import { Perf } from "r3f-perf";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 
 function App() {
-	const [openingOutputSt, setOpeningOutput] = useState(null);
-
 	const canvasContainerRef = useRef();
 
 	return (
@@ -29,13 +28,11 @@ function App() {
 					}}
 					style={{ background: "grey" }}
 				>
-					<MyScene
-						openingOutputSt={openingOutputSt}
-						canvasContainerRef={canvasContainerRef}
-					/>
+					<Perf position="top-left" />
+					<MyScene canvasContainerRef={canvasContainerRef} />
 				</Canvas>
 			</div>
-			<Opening setOpeningOutput={setOpeningOutput} />
+			<Opening />
 		</>
 	);
 }

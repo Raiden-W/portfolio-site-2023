@@ -1,9 +1,9 @@
 import "./Openning.scss";
 import html2canvas from "html2canvas";
 import { useEffect, useRef } from "react";
-import { myEventEmitter } from "../utils/EventEmitter";
+import appStateManager from "../utils/appStateManager";
 
-export default function Opening({ setOpeningOutput }) {
+export default function Opening() {
 	const openingRef = useRef();
 	const text2Ref = useRef();
 	const text4Ref = useRef();
@@ -11,53 +11,27 @@ export default function Opening({ setOpeningOutput }) {
 	useEffect(() => {
 		text2Ref.current.addEventListener("mousedown", getScreenShot);
 		text4Ref.current.addEventListener("mousedown", getScreenShot);
+		openingRef.current.addEventListener("mouseup", handleMouseUp);
 	}, []);
 
 	const getScreenShot = async (e) => {
-		const pEleOrigList = openingRef.current.querySelectorAll("p");
-
-		const clonedOpeningDom = openingRef.current.cloneNode(true);
-		const pEleClonedList = clonedOpeningDom.querySelectorAll("p");
-
-		clonedOpeningDom.classList.remove("scroll");
-
-		pEleOrigList.forEach((ele, i) => {
-			const style = window.getComputedStyle(ele);
-			const matrix = new WebKitCSSMatrix(style.transform);
-			const translateX = matrix.m41;
-			pEleClonedList[i].style.transform = `translateX(${translateX}px)`;
-		});
-
-		text2Ref.current.removeEventListener("mousedown", getScreenShot);
-		text4Ref.current.removeEventListener("mousedown", getScreenShot);
-
-		const canvas = await captureHTML(clonedOpeningDom);
 		const pointPos = {
 			x: e.clientX / window.innerWidth,
 			y: 1 - e.clientY / window.innerHeight,
 		};
-		setOpeningOutput({ canvas, pointPos });
+
+		appStateManager.send("mouse down opening", {
+			pointPos,
+			openningDom: openingRef.current,
+			html2canvas,
+		});
+
+		text2Ref.current.removeEventListener("mousedown", getScreenShot);
+		text4Ref.current.removeEventListener("mousedown", getScreenShot);
 	};
 
-	const captureHTML = async (domElement) => {
-		let canvas = null;
-		document.body.appendChild(domElement);
-		domElement.style.zIndex = "-1";
-		try {
-			canvas = await html2canvas(domElement, { logging: false });
-
-			//remove temporary cloned Dom
-			domElement.remove();
-
-			myEventEmitter.once("TextureReady", () => {
-				//remove the original Dom
-				openingRef.current.remove();
-				myEventEmitter.removeAllListeners("TextureReady");
-			});
-		} catch (error) {
-			console.log(error);
-		}
-		return canvas;
+	const handleMouseUp = (e) => {
+		appStateManager.send("mouse up opening");
 	};
 
 	return (

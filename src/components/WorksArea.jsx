@@ -5,6 +5,7 @@ import { useGetWorks } from "../utils/serviceHooks";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import Work from "./Work";
+import appStateManager from "../utils/appStateManager";
 
 function WorksArea() {
 	const areaWidthSt = useWidthStore((state) => state.worksAreaWSt);
@@ -32,6 +33,7 @@ function WorksArea() {
 	}, []);
 
 	const activeWroksArea = () => {
+		appStateManager.send("works bar click");
 		areaActiveSt
 			? closeWorksArea(containerRef.current)
 			: openWorksArea(containerRef.current);
@@ -44,7 +46,7 @@ function WorksArea() {
 				<div className="works-area__bar-logo"></div>
 			</div>
 			<div className="works-area__container" ref={containerRef}>
-				<SimpleBar style={{ maxHeight: "100%" }}>
+				{/* <SimpleBar style={{ maxHeight: "100%" }}>
 					{worksDataSt.map((workData) => (
 						<Work
 							windowWidth={windowWidthSt}
@@ -56,7 +58,7 @@ function WorksArea() {
 							mediaSet={workData.mediaSet}
 						/>
 					))}
-				</SimpleBar>
+				</SimpleBar> */}
 			</div>
 		</div>
 	);

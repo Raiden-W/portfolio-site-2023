@@ -1,22 +1,21 @@
 import * as THREE from "three";
-import { useRef, useMemo, useEffect } from "react";
-import { useControls } from "leva";
+import { useRef, useMemo, useEffect, useState, useCallback } from "react";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import paperPlaneVert from "./shaders/paperPlanePhong.vert";
 import paperPlanFrag from "./shaders/paperPlanePhong.frag";
 import { useGLTF } from "@react-three/drei";
 import { gsap } from "gsap";
+import appStateManager from "../utils/appStateManager";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
 
-export default function PaperPlanePhong({ setAnimVal }) {
-	const paperPlaneMatRef = useRef();
-	// const depthMat = useRef();
-	const meshRef = useRef();
-
-	// const [planeValSt, setPlaneVal] = useState(0);
-
-	const jetPlane = useGLTF("./model/jetPlane-draco.glb");
+export default function PaperPlane({
+	setGeo,
+	setMat,
+	squareMeshRef,
+	setAnimVal,
+}) {
+	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
 
 	const planeMat = useMemo(() => {
 		const material = new CustomShaderMaterial({
@@ -33,6 +32,7 @@ export default function PaperPlanePhong({ setAnimVal }) {
 			silent: true,
 			side: THREE.DoubleSide,
 			color: 0xd3d3d3,
+			emissive: 0xffffff,
 			metalness: 1,
 			roughness: 0,
 			flatShading: true,
@@ -42,71 +42,81 @@ export default function PaperPlanePhong({ setAnimVal }) {
 		return material;
 	}, []);
 
-	useEffect(() => {
-		if (jetPlane)
-			meshRef.current.geometry = jetPlane.scene.children[0].geometry;
-		meshRef.current.material = planeMat;
-	}, [jetPlane]);
-
-	const [{ temValue, toPlane, rotateLevel1, rotateLevel2, rotateLevel3 }, set] =
-		useControls(() => ({
-			temValue: {
-				value: 0,
-				min: 0,
-				max: 1,
-				step: 0.01,
-			},
-			toPlane: false,
-			rotateLevel1: {
-				value: Math.PI / 2.3,
-				min: 0,
-				max: Math.PI / 2.2,
-				step: 0.01,
-			},
-			rotateLevel2: {
-				value: Math.PI / 1.8,
-				min: 0,
-				max: Math.PI / 1.6,
-				step: 0.01,
-			},
-			rotateLevel3: {
-				value: Math.PI * 0.85,
-				min: -Math.PI * 0.93,
-				max: Math.PI * 0.85,
-				step: 0.01,
-			},
-		}));
-
-	useEffect(() => {
-		const aniVal = { v: temValue };
-		if (toPlane) {
-			gsap.to(meshRef.current.rotation, {
-				x: -Math.PI / 2,
-				z: Math.PI / 4,
-			});
-			gsap.to(aniVal, {
-				v: 1,
-				duration: 1,
-				onUpdate: () => {
-					set({ temValue: aniVal.v });
-					setAnimVal(aniVal.v);
-				},
-			});
-		} else {
-			gsap.to(meshRef.current.rotation, {
-				x: 0,
-				z: 0,
-			});
-			gsap.to(aniVal, {
-				v: 0,
-				duration: 1,
-				onUpdate: () => {
-					set({ temValue: aniVal.v });
-					setAnimVal(aniVal.v);
-				},
-			});
+	const jetGeo = useMemo(() => {
+		if (jetPlaneModel) {
+			return jetPlaneModel.scene.children[0].geometry;
 		}
-	}, [toPlane]);
+		return null;
+	}, [jetPlaneModel]);
+
+	const rotateLevel1 = Math.PI / 2.3;
+	const rotateLevel2 = Math.PI / 1.8;
+	const rotateLevel3 = Math.PI * 0.85;
+
+	const [temValueSt, setTemValue] = useState(0);
+	const temValueRef = useRef();
+
+	const squareToJet = (onCompleteFunction) => {
+		setGeo(jetGeo);
+		setMat(planeMat);
+		gsap.to(planeMat.emissive, {
+			r: 0,
+			g: 0,
+			b: 0,
+			duration: 0.3,
+			ease: "power3",
+		});
+		gsap.to(squareMeshRef.current.rotation, {
+			x: -Math.PI / 2,
+			z: Math.PI / 4,
+			duration: 0.5,
+		});
+		gsap.to(temValueRef, {
+			current: 1,
+			duration: 1,
+			onUpdate: () => {
+				setTemValue(temValueRef.current);
+				setAnimVal(temValueRef.current);
+			},
+			onComplete: () => {
+				onCompleteFunction();
+			},
+		});
+	};
+
+	const jetToSquare = (onCompleteFunction) => {
+		gsap.to(planeMat.emissive, {
+			r: 1,
+			g: 1,
+			b: 1,
+			duration: 0.3,
+			delay: 0.7,
+			ease: "power3.in",
+		});
+		gsap.to(squareMeshRef.current.rotation, {
+			x: 0,
+			z: 0,
+			duration: 0.5,
+		});
+		gsap.to(temValueRef, {
+			current: 0,
+			duration: 1,
+			onUpdate: () => {
+				setTemValue(temValueRef.current);
+				setAnimVal(temValueRef.current);
+			},
+			onComplete: () => {
+				onCompleteFunction();
+			},
+		});
+	};
+
+	useEffect(() => {
+		appStateManager.send("init some context", {
+			squareToJet,
+			jetToSquare,
+		});
+	}, []);
 
 	const {
 		axisL1Trans,
@@ -133,9 +143,9 @@ export default function PaperPlanePhong({ setAnimVal }) {
 	}, []);
 
 	useEffect(() => {
-		const rL1 = gsap.utils.interpolate(0, rotateLevel1, temValue);
-		const rL2 = gsap.utils.interpolate(0, rotateLevel2, temValue);
-		const rL3 = gsap.utils.interpolate(0, rotateLevel3, temValue);
+		const rL1 = gsap.utils.interpolate(0, rotateLevel1, temValueSt);
+		const rL2 = gsap.utils.interpolate(0, rotateLevel2, temValueSt);
+		const rL3 = gsap.utils.interpolate(0, rotateLevel3, temValueSt);
 		// //conner creases
 		const rotateL3Left = planeMat.uniforms.uRotateL3Left.value;
 		const rotateL3Right = planeMat.uniforms.uRotateL3Right.value;
@@ -161,11 +171,7 @@ export default function PaperPlanePhong({ setAnimVal }) {
 		rotateL1.makeRotationY(rL1).multiply(axisL1Trans);
 		rotateL1.premultiply(axisL1Trans.invert());
 		axisL1Trans.invert();
-	}, [rotateLevel1, rotateLevel2, rotateLevel3, temValue]);
+	}, [temValueSt]);
 
-	return (
-		<>
-			<mesh ref={meshRef}></mesh>
-		</>
-	);
+	return <></>;
 }
