@@ -8,7 +8,7 @@ import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 
 export default function Cloth({ setGeo, setMat }) {
-	const { viewport } = useThree();
+	const viewport = useThree((state) => state.viewport);
 
 	const initParticlePos = useRef([]);
 
@@ -207,7 +207,7 @@ export default function Cloth({ setGeo, setMat }) {
 					currPosX: targetPos.x,
 					currPosY: targetPos.y,
 					currPosZ: 0,
-					duration: 1,
+					duration: 0.7,
 					ease: "expo.inOut",
 					onUpdate: () => {
 						positionAttribute.setXYZ(
@@ -247,10 +247,10 @@ export default function Cloth({ setGeo, setMat }) {
 
 			if (currState === "Cloth Falling") {
 				if (
-					clothPhysics.centerPos.y < -viewport.height * 0.8 ||
-					clothPhysics.centerPos.y > viewport.height * 0.8 ||
-					clothPhysics.centerPos.x < -viewport.width * 0.7 ||
-					clothPhysics.centerPos.x > viewport.width * 0.7
+					clothPhysics.centerPos.y < -viewport.height * 0.7 ||
+					clothPhysics.centerPos.y > viewport.height * 0.7 ||
+					clothPhysics.centerPos.x < -viewport.width * 0.6 ||
+					clothPhysics.centerPos.x > viewport.width * 0.6
 				) {
 					clothToSquareGeoTrans();
 					appStateManager.send("cloth nearly out");
@@ -265,33 +265,13 @@ export default function Cloth({ setGeo, setMat }) {
 			{activePlaneSt && (
 				<Plane
 					visible={false}
-					args={[15, 10]}
+					args={[viewport.width, viewport.height]}
 					onPointerMove={updateGrabingParticlePos}
 					onPointerUp={() => {
 						appStateManager.send("mouse up canvas");
 					}}
 				/>
 			)}
-			{/* <mesh ref={clothMeshRef}>
-				<planeGeometry
-					args={[
-						clothPhysics.clothInitWidth,
-						clothPhysics.clothInitHeight,
-						clothPhysics.Nx,
-						clothPhysics.Ny,
-					]}
-					ref={clothGeoRef}
-				/>
-				{clothTextureSt ? (
-					<meshPhongMaterial
-						map={clothTextureSt}
-						specular="#6c6c6c"
-						shininess={18}
-						side={THREE.DoubleSide}
-						// wireframe
-					></meshPhongMaterial>
-				) : null}
-			</mesh> */}
 		</>
 	);
 }

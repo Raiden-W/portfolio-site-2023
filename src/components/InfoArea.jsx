@@ -1,29 +1,38 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import "./InfoArea.scss";
-import { useWidthStore } from "../utils/GlobalStore";
+import appStateManager from "../utils/appStateManager";
+import { useSelector } from "@xstate/react";
+import SimpleBar from "simplebar-react";
 
 function InfoArea() {
-	const areaWidthSt = useWidthStore((state) => state.infoAreaWSt);
-	const areaActiveSt = useWidthStore((state) => state.infoAreaActiveSt);
-
-	const openInfoArea = useWidthStore((state) => state.openInfoArea);
-	const closeInfoArea = useWidthStore((state) => state.closeInfoArea);
-
 	const containerRef = useRef();
 
-	const activeInfoBar = () => {
-		areaActiveSt
-			? closeInfoArea(containerRef.current)
-			: openInfoArea(containerRef.current);
-	};
+	const infoAreaWidthSt = useSelector(
+		appStateManager,
+		(s) => s.context.infoAreaWidth
+	);
+
+	useEffect(() => {
+		appStateManager.send("init some context", {
+			infoDom: containerRef.current,
+		});
+	}, []);
 
 	return (
-		<div className="info-area" style={{ width: `${areaWidthSt}%` }}>
-			<div className="info-area__bar" onClick={activeInfoBar}>
+		<div className="info-area" style={{ width: `${infoAreaWidthSt}%` }}>
+			<div
+				className="info-area__bar"
+				onClick={() => {
+					appStateManager.send("info bar click");
+				}}
+			>
 				<span>about</span>
 			</div>
 			<div className="info-area__container" ref={containerRef}>
-				Info Info Info Info Info Info Info Info
+				<SimpleBar style={{ maxHeight: "100%" }}>
+					Info Info Info Info Info Info Info Info Info Info Info Info Info Info
+					Info Info Info Info Info Info Info Info Info Info
+				</SimpleBar>
 			</div>
 		</div>
 	);

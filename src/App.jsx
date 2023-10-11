@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { Perf } from "r3f-perf";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
+import appStateManager from "./utils/appStateManager";
 
 function App() {
 	const canvasContainerRef = useRef();
@@ -14,7 +15,13 @@ function App() {
 		<>
 			<WorksArea />
 			<InfoArea />
-			<div className="canvas-container" ref={canvasContainerRef}>
+			<div
+				className="canvas-container"
+				ref={canvasContainerRef}
+				onClick={() => {
+					appStateManager.send("canvas click");
+				}}
+			>
 				<Canvas
 					camera={{
 						fov: 50,

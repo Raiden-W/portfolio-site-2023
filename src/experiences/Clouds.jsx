@@ -2,11 +2,11 @@ import { Cloud, Sky, Environment } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef } from "react";
 
-export function MovingCloud({ position, animVal }) {
+export function MovingCloud({ position, cloudAniValRef }) {
 	const cloudRef = useRef();
 	useFrame((_, delta) => {
-		const custDelta = delta * animVal;
-		if (animVal > 0) {
+		const custDelta = delta * cloudAniValRef.current;
+		if (cloudAniValRef.current > 0) {
 			cloudRef.current.position.z += custDelta * 20;
 			if (cloudRef.current.position.z > 10) cloudRef.current.position.z = -80;
 			const scale = 1 - Math.pow((-cloudRef.current.position.z + 10) / 90, 2);

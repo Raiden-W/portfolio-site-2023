@@ -1,24 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import "./WorksArea.scss";
-import { useWidthStore } from "../utils/GlobalStore";
 import { useGetWorks } from "../utils/serviceHooks";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import Work from "./Work";
 import appStateManager from "../utils/appStateManager";
+import { useSelector } from "@xstate/react";
 
 function WorksArea() {
-	const areaWidthSt = useWidthStore((state) => state.worksAreaWSt);
-	const areaActiveSt = useWidthStore((state) => state.worksAreaActiveSt);
-
-	const openWorksArea = useWidthStore((state) => state.openWorksArea);
-	const closeWorksArea = useWidthStore((state) => state.closeWorksArea);
-
 	const containerRef = useRef();
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
 
 	const { worksDataSt } = useGetWorks();
+
+	const worksAreaWidthSt = useSelector(
+		appStateManager,
+		(s) => s.context.worksAreaWidth
+	);
 
 	useEffect(() => {
 		const updateWindowWidth = () => {
@@ -27,26 +26,28 @@ function WorksArea() {
 
 		window.addEventListener("resize", updateWindowWidth);
 
+		appStateManager.send("init some context", {
+			worksDom: containerRef.current,
+		});
+
 		return () => {
 			window.removeEventListener("resize", updateWindowWidth);
 		};
 	}, []);
 
-	const activeWroksArea = () => {
-		appStateManager.send("works bar click");
-		areaActiveSt
-			? closeWorksArea(containerRef.current)
-			: openWorksArea(containerRef.current);
-	};
-
 	return (
-		<div className="works-area" style={{ width: `${areaWidthSt}%` }}>
-			<div className="works-area__bar" onClick={activeWroksArea}>
+		<div className="works-area" style={{ width: `${worksAreaWidthSt}%` }}>
+			<div
+				className="works-area__bar"
+				onClick={() => {
+					appStateManager.send("works bar click");
+				}}
+			>
 				<span>works</span>
 				<div className="works-area__bar-logo"></div>
 			</div>
 			<div className="works-area__container" ref={containerRef}>
-				{/* <SimpleBar style={{ maxHeight: "100%" }}>
+				<SimpleBar style={{ maxHeight: "100%" }}>
 					{worksDataSt.map((workData) => (
 						<Work
 							windowWidth={windowWidthSt}
@@ -58,7 +59,7 @@ function WorksArea() {
 							mediaSet={workData.mediaSet}
 						/>
 					))}
-				</SimpleBar> */}
+				</SimpleBar>
 			</div>
 		</div>
 	);

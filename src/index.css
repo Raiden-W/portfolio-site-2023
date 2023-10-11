@@ -39,3 +39,7 @@ video {
 	-ms-user-select: none; /* IE 10 and IE 11 */
 	user-select: none; /* Standard syntax */
 }
+
+.simplebar-scrollbar::before {
+	background-color: rgb(150, 150, 150);
+}

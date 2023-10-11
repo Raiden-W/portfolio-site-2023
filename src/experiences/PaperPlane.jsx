@@ -13,7 +13,7 @@ export default function PaperPlane({
 	setGeo,
 	setMat,
 	squareMeshRef,
-	setAnimVal,
+	cloudAniValRef,
 }) {
 	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
 
@@ -76,7 +76,7 @@ export default function PaperPlane({
 			duration: 1,
 			onUpdate: () => {
 				setTemValue(temValueRef.current);
-				setAnimVal(temValueRef.current);
+				cloudAniValRef.current = temValueRef.current;
 			},
 			onComplete: () => {
 				onCompleteFunction();
@@ -103,7 +103,7 @@ export default function PaperPlane({
 			duration: 1,
 			onUpdate: () => {
 				setTemValue(temValueRef.current);
-				setAnimVal(temValueRef.current);
+				cloudAniValRef.current = temValueRef.current;
 			},
 			onComplete: () => {
 				onCompleteFunction();
