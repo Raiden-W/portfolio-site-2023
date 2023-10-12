@@ -9,7 +9,7 @@ import { gsap } from "gsap";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
 
-export default function PaperPlaneControl({ setAnimVal }) {
+export default function PaperPlaneLeva({ setAnimVal }) {
 	const paperPlaneMatRef = useRef();
 	// const depthMat = useRef();
 	const meshRef = useRef();

@@ -69,20 +69,24 @@ export default function Opening() {
 		<>
 			<div className="opening scroll" ref={openingRef}>
 				<div className="opening__text">
-					<p>guess what I am, a plain html or a soft cloth&nbsp;</p>
-					<p>guess what I am, a plain html or a soft cloth&nbsp;</p>
+					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
+					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
 				</div>
 				<div className="opening__text" ref={text2Ref}>
-					<p>press me and see what you get, figure it out youself&nbsp;</p>
-					<p>press me and see what you get, figure it out youself&nbsp;</p>
+					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
+					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
 				</div>
 				<div className="opening__text">
-					<p>guess what I am, a plain html or a soft cloth&nbsp;</p>
-					<p>guess what I am, a plain html or a soft cloth&nbsp;</p>
+					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
+					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
 				</div>
 				<div className="opening__text" ref={text4Ref}>
-					<p>press me and see what you get, figure it out youself&nbsp;</p>
-					<p>press me and see what you get, figure it out youself&nbsp;</p>
+					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
+					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
+				</div>
+				<div className="opening__text">
+					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
+					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
 				</div>
 			</div>
 		</>

@@ -1,30 +1,47 @@
 .opening {
 	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 	position: absolute;
 	left: 0;
 	top: 0;
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	font-family: "Poppins", sans-serif;
+	font-family: "Koulen", sans-serif;
 
 	&__text {
 		display: flex;
+		flex-grow: 1;
 		justify-content: left;
 		align-items: center;
 		width: 100%;
-		height: 25%;
+		// height: 19.8%;
+		position: relative;
+		color: white;
+		background-color: #acacac;
+		// font-weight: 600;
 
-		&:nth-child(odd) {
-			color: black;
-			background-color: yellow;
-			font-weight: 600;
+		&:not(:last-child)::after {
+			content: "";
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			height: 0.3vh;
+			background-color: #9c9c9c;
 		}
-		&:nth-child(even) {
-			color: yellow;
-			background-color: black;
-			font-weight: 500;
-		}
+
+		// &:nth-child(odd) {
+		// 	color: black;
+		// 	background-color: yellow;
+		// 	font-weight: 600;
+		// }
+		// &:nth-child(even) {
+		// 	color: yellow;
+		// 	background-color: black;
+		// 	font-weight: 500;
+		// }
 	}
 
 	p {

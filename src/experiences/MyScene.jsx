@@ -25,12 +25,11 @@ export default function MyScene(props) {
 		<>
 			{/* <color args={["lightgrey"]} attach="background" /> */}
 
-			<CanvasControl {...props} />
 			<mesh ref={squareMeshRef}>
 				<primitive object={geoSt} />
 				<primitive object={matSt} />
 			</mesh>
-			<Cloth setGeo={setGeo} setMat={setMat} />
+			<Cloth setGeo={setGeo} setMat={setMat} squareMeshRef={squareMeshRef} />
 			<PaperPlane
 				setGeo={setGeo}
 				setMat={setMat}
@@ -38,9 +37,10 @@ export default function MyScene(props) {
 				cloudAniValRef={cloudAniValRef}
 			/>
 			<Clouds cloudAniValRef={cloudAniValRef} />
+			<CanvasControl {...props} />
 			{/* <OrbitControls /> */}
-			<ambientLight color="white" intensity={1} />
-			<directionalLight intensity={1} color="white" position={[0, 0, 3]} />
+			<ambientLight color="white" intensity={0.5} />
+			<directionalLight intensity={0.6} color="white" position={[0, 3, 3]} />
 			{/* <pointLight intensity={0.8} color="white" position={[3, 3, 0]} /> */}
 		</>
 	);

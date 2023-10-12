@@ -7,7 +7,7 @@ import gsap from "gsap";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 
-export default function Cloth({ setGeo, setMat }) {
+export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 	const viewport = useThree((state) => state.viewport);
 
 	const initParticlePos = useRef([]);
@@ -27,7 +27,7 @@ export default function Cloth({ setGeo, setMat }) {
 
 	const clothPhysics = useMemo(() => {
 		const world = new CANNON.World();
-		world.gravity.set(0, -2, 0);
+		world.gravity.set(0, 0, -2);
 		//defualt iteration number is 10
 		world.solver.iterations = 8;
 		world.allowSleep = true;
@@ -105,9 +105,6 @@ export default function Cloth({ setGeo, setMat }) {
 			squareGeo.computeVertexNormals();
 		};
 
-		const centerPos =
-			particles[Math.floor(Nx / 2)][Math.floor(Ny / 2)].position;
-
 		return {
 			Nx,
 			Ny,
@@ -117,7 +114,6 @@ export default function Cloth({ setGeo, setMat }) {
 			world,
 			updateClothGeo,
 			particles,
-			centerPos,
 		};
 	}, []);
 
@@ -207,7 +203,7 @@ export default function Cloth({ setGeo, setMat }) {
 					currPosX: targetPos.x,
 					currPosY: targetPos.y,
 					currPosZ: 0,
-					duration: 0.7,
+					duration: 0.5,
 					ease: "expo.inOut",
 					onUpdate: () => {
 						positionAttribute.setXYZ(
@@ -230,7 +226,6 @@ export default function Cloth({ setGeo, setMat }) {
 			g: 1,
 			duration: 0.5,
 			ease: "power3.in",
-			delay: 0.5,
 			onComplete: () => {
 				appStateManager.send("cloth to square finished");
 				squareMat.map.dispose();
@@ -246,12 +241,7 @@ export default function Cloth({ setGeo, setMat }) {
 			clothPhysics.updateClothGeo();
 
 			if (currState === "Cloth Falling") {
-				if (
-					clothPhysics.centerPos.y < -viewport.height * 0.7 ||
-					clothPhysics.centerPos.y > viewport.height * 0.7 ||
-					clothPhysics.centerPos.x < -viewport.width * 0.6 ||
-					clothPhysics.centerPos.x > viewport.width * 0.6
-				) {
+				if (staticParticle.position.z < -1) {
 					clothToSquareGeoTrans();
 					appStateManager.send("cloth nearly out");
 				}

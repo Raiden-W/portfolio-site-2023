@@ -89,6 +89,7 @@ export const machine = createMachine(
 				},
 			},
 			"Jet Idle/ Aeras Closed": {
+				entry: "add point track",
 				on: {
 					"works bar click": {
 						target: "Jet To Square/ Work Areas Opening",
@@ -99,6 +100,7 @@ export const machine = createMachine(
 				},
 			},
 			"Jet To Square/ Work Areas Opening": {
+				entry: "remove point track",
 				invoke: [
 					{
 						src: "jet to square animating",
@@ -124,6 +126,7 @@ export const machine = createMachine(
 				},
 			},
 			"Jet To Square/ Info Areas Opening": {
+				entry: "remove point track",
 				invoke: [
 					{
 						src: "jet to square animating",
@@ -287,6 +290,14 @@ export const machine = createMachine(
 				canvasWidth: (_, event) => event.canvasWidth,
 				infoAreaWidth: (_, event) => event.infoAreaWidth,
 			}),
+			"add point track": (ctx) => {
+				ctx.initContext.addMoveCamera();
+				ctx.initContext.resumeSmoothCamera();
+			},
+			"remove point track": (ctx) => {
+				ctx.initContext.removeMoveCamera();
+				ctx.initContext.pauseSmoothCamera();
+			},
 		},
 		services: {
 			"square to jet animating": (ctx, _) => (callback) => {

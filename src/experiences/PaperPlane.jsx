@@ -1,11 +1,12 @@
 import * as THREE from "three";
-import { useRef, useMemo, useEffect, useState, useCallback } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import paperPlaneVert from "./shaders/paperPlanePhong.vert";
 import paperPlanFrag from "./shaders/paperPlanePhong.frag";
 import { useGLTF } from "@react-three/drei";
 import { gsap } from "gsap";
 import appStateManager from "../utils/appStateManager";
+import { useThree } from "@react-three/fiber";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
 
@@ -16,6 +17,7 @@ export default function PaperPlane({
 	cloudAniValRef,
 }) {
 	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
+	const camera = useThree((s) => s.camera);
 
 	const planeMat = useMemo(() => {
 		const material = new CustomShaderMaterial({
@@ -59,12 +61,15 @@ export default function PaperPlane({
 	const squareToJet = (onCompleteFunction) => {
 		setGeo(jetGeo);
 		setMat(planeMat);
+		gsap.to(camera.position, { y: 4, z: 7, duration: 0.5, delay: 0.3 });
+		gsap.to(camera.rotation, { x: -Math.PI / 6, duration: 0.5, delay: 0.3 });
 		gsap.to(planeMat.emissive, {
 			r: 0,
 			g: 0,
 			b: 0,
 			duration: 0.3,
 			ease: "power3",
+			onStart: () => {},
 		});
 		gsap.to(squareMeshRef.current.rotation, {
 			x: -Math.PI / 2,
@@ -85,6 +90,8 @@ export default function PaperPlane({
 	};
 
 	const jetToSquare = (onCompleteFunction) => {
+		gsap.to(camera.position, { x: 0, y: 0, z: 5, duration: 0.5 });
+		gsap.to(camera.rotation, { x: 0, duration: 0.5 });
 		gsap.to(planeMat.emissive, {
 			r: 1,
 			g: 1,
