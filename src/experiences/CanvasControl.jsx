@@ -25,14 +25,24 @@ export default function CanvasControl({ canvasContainerRef }) {
 		ease: "power2",
 	});
 
+	const pauseSmoothCamera = () => {
+		smoothCameraX.tween.pause();
+		smoothCameraY.tween.pause();
+	};
+
+	const resumeSmoothCamera = () => {
+		smoothCameraX.tween.invalidate();
+		smoothCameraY.tween.invalidate();
+	};
+
 	const moveCamera = useCallback((e) => {
 		const canvasW = canvasContainerRef.current.clientWidth;
 		const canvasH = canvasContainerRef.current.clientHeight;
-		const factor = 0.01;
+		const factor = 0.005;
 		const unitX = e.clientX / canvasW - 0.5;
 		const unitY = 1 - e.clientY / canvasH - 0.5;
 		smoothCameraX(unitX * canvasW * factor);
-		smoothCameraY(unitY * canvasH * factor + 4);
+		smoothCameraY(unitY * canvasH * factor + 3);
 	}, []);
 
 	const addMoveCamera = () => {
@@ -45,16 +55,6 @@ export default function CanvasControl({ canvasContainerRef }) {
 			moveCamera,
 			true
 		);
-	};
-
-	const pauseSmoothCamera = () => {
-		smoothCameraX.tween.pause();
-		smoothCameraY.tween.pause();
-	};
-
-	const resumeSmoothCamera = () => {
-		smoothCameraX.tween.invalidate();
-		smoothCameraY.tween.invalidate();
 	};
 
 	useEffect(() => {

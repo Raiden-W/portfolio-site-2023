@@ -15,12 +15,22 @@ export const machine = createMachine(
 		},
 		id: "appStateManager",
 		initial: "Opening Idle",
+		// initial: "Tem Start",
 		on: {
 			"init some context": {
 				actions: "assign some context",
 			},
 		},
 		states: {
+			"Tem Start": {
+				after: {
+					1000: [
+						{
+							target: "#appStateManager.Square To Jet",
+						},
+					],
+				},
+			},
 			"Opening Idle": {
 				on: {
 					"mouse down opening": {

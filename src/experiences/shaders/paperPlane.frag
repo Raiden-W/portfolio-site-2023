@@ -1,5 +1,5 @@
 varying vec2 v_uv;
 
 void main() {
-    gl_FragColor = vec4(v_uv.x,v_uv.y,.0,1.0);
+    // csm_DiffuseColor = vec4(0.8, 0.5, 0.0, 1.0);
 }

@@ -1,12 +1,14 @@
 import * as THREE from "three";
 import { useRef, useMemo, useEffect, useState } from "react";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
-import paperPlaneVert from "./shaders/paperPlanePhong.vert";
-import paperPlanFrag from "./shaders/paperPlanePhong.frag";
+import paperPlaneVert from "./shaders/paperPlane.vert";
+import paperPlanFrag from "./shaders/paperPlane.frag";
 import { useGLTF } from "@react-three/drei";
 import { gsap } from "gsap";
 import appStateManager from "../utils/appStateManager";
-import { useThree } from "@react-three/fiber";
+import { useSelector } from "@xstate/react";
+import { useFrame, useThree } from "@react-three/fiber";
+import quickNoise from "quick-perlin-noise-js";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
 
@@ -15,6 +17,7 @@ export default function PaperPlane({
 	setMat,
 	squareMeshRef,
 	cloudAniValRef,
+	envMap,
 }) {
 	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
 	const camera = useThree((s) => s.camera);
@@ -33,11 +36,12 @@ export default function PaperPlane({
 			fragmentShader: paperPlanFrag,
 			silent: true,
 			side: THREE.DoubleSide,
-			color: 0xd3d3d3,
+			color: 0xbbd3d1,
 			emissive: 0xffffff,
-			metalness: 1,
-			roughness: 0,
+			metalness: 0.83,
+			roughness: 0.05,
 			flatShading: true,
+			envMap: envMap,
 			// wireframe:true
 		});
 
@@ -62,7 +66,7 @@ export default function PaperPlane({
 		setGeo(jetGeo);
 		setMat(planeMat);
 		gsap.to(camera.position, { y: 4, z: 7, duration: 0.5, delay: 0.3 });
-		gsap.to(camera.rotation, { x: -Math.PI / 6, duration: 0.5, delay: 0.3 });
+		gsap.to(camera.rotation, { x: -Math.PI / 8, duration: 0.5, delay: 0.3 });
 		gsap.to(planeMat.emissive, {
 			r: 0,
 			g: 0,
@@ -149,35 +153,67 @@ export default function PaperPlane({
 		};
 	}, []);
 
+	const middleCreaseFold = (angle) => {
+		const rotateL1 = planeMat.uniforms.uRotateL1.value;
+		rotateL1.makeRotationY(angle).multiply(axisL1Trans);
+		rotateL1.premultiply(axisL1Trans.invert());
+		axisL1Trans.invert();
+	};
+
+	const sideCreaseFold = (angleL, angleR) => {
+		const rotateL2Left = planeMat.uniforms.uRotateL2Left.value;
+		const rotateL2Right = planeMat.uniforms.uRotateL2Right.value;
+		rotateL2Left.makeRotationY(angleL).multiply(axisL2TransLeft);
+		rotateL2Left.premultiply(axisL2TransLeft.invert());
+		axisL2TransLeft.invert();
+		rotateL2Right.makeRotationY(angleR).multiply(axisL2TransRight);
+		rotateL2Right.premultiply(axisL2TransRight.invert());
+		axisL2TransRight.invert();
+	};
+
+	const connerCreaseFold = (angleL, angleR) => {
+		const rotateL3Left = planeMat.uniforms.uRotateL3Left.value;
+		const rotateL3Right = planeMat.uniforms.uRotateL3Right.value;
+		rotateL3Left.makeRotationY(angleL).multiply(axisL3TransLeft);
+		rotateL3Left.premultiply(axisL3TransLeft.invert());
+		axisL3TransLeft.invert();
+		rotateL3Right.makeRotationY(angleR).multiply(axisL3TransRight);
+		rotateL3Right.premultiply(axisL3TransRight.invert());
+		axisL3TransRight.invert();
+	};
+
+	const isFlying = useSelector(appStateManager, (s) =>
+		s.matches("Jet Idle/ Aeras Closed")
+	);
+
+	useFrame(({ clock }) => {
+		if (isFlying) {
+			const oscL1 =
+				rotateLevel1 +
+				(quickNoise.noise(clock.elapsedTime * 5, 0, 0) * Math.PI) / 12;
+			middleCreaseFold(oscL1);
+			const oscL2Left =
+				-rotateLevel2 +
+				(quickNoise.noise(clock.elapsedTime * 5, 10, 0) * Math.PI) / 8;
+			const oscL2Right =
+				rotateLevel2 +
+				(quickNoise.noise(clock.elapsedTime * 5, 20, 0) * Math.PI) / 8;
+			sideCreaseFold(oscL2Left, oscL2Right);
+		}
+	});
+
 	useEffect(() => {
 		const rL1 = gsap.utils.interpolate(0, rotateLevel1, temValueSt);
 		const rL2 = gsap.utils.interpolate(0, rotateLevel2, temValueSt);
 		const rL3 = gsap.utils.interpolate(0, rotateLevel3, temValueSt);
-		// //conner creases
-		const rotateL3Left = planeMat.uniforms.uRotateL3Left.value;
-		const rotateL3Right = planeMat.uniforms.uRotateL3Right.value;
-		rotateL3Left.makeRotationY(-rL3).multiply(axisL3TransLeft);
-		rotateL3Left.premultiply(axisL3TransLeft.invert());
-		axisL3TransLeft.invert();
-		rotateL3Right.makeRotationY(rL3).multiply(axisL3TransRight);
-		rotateL3Right.premultiply(axisL3TransRight.invert());
-		axisL3TransRight.invert();
+		//conner creases
+		connerCreaseFold(-rL3, rL3);
 
 		//side creases
-		const rotateL2Left = planeMat.uniforms.uRotateL2Left.value;
-		const rotateL2Right = planeMat.uniforms.uRotateL2Right.value;
-		rotateL2Left.makeRotationY(-rL2).multiply(axisL2TransLeft);
-		rotateL2Left.premultiply(axisL2TransLeft.invert());
-		axisL2TransLeft.invert();
-		rotateL2Right.makeRotationY(rL2).multiply(axisL2TransRight);
-		rotateL2Right.premultiply(axisL2TransRight.invert());
-		axisL2TransRight.invert();
+		sideCreaseFold(-rL2, rL2);
 
 		// //middle crease
-		const rotateL1 = planeMat.uniforms.uRotateL1.value;
-		rotateL1.makeRotationY(rL1).multiply(axisL1Trans);
-		rotateL1.premultiply(axisL1Trans.invert());
-		axisL1Trans.invert();
+		middleCreaseFold(rL1);
 	}, [temValueSt]);
 
 	return <></>;

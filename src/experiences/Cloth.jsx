@@ -7,7 +7,7 @@ import gsap from "gsap";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 
-export default function Cloth({ setGeo, setMat, squareMeshRef }) {
+export default function Cloth({ setGeo, setMat }) {
 	const viewport = useThree((state) => state.viewport);
 
 	const initParticlePos = useRef([]);
@@ -203,7 +203,7 @@ export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 					currPosX: targetPos.x,
 					currPosY: targetPos.y,
 					currPosZ: 0,
-					duration: 0.5,
+					duration: 0.8,
 					ease: "expo.inOut",
 					onUpdate: () => {
 						positionAttribute.setXYZ(
@@ -225,6 +225,7 @@ export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 			b: 1,
 			g: 1,
 			duration: 0.5,
+			delay: 0.3,
 			ease: "power3.in",
 			onComplete: () => {
 				appStateManager.send("cloth to square finished");
@@ -241,7 +242,13 @@ export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 			clothPhysics.updateClothGeo();
 
 			if (currState === "Cloth Falling") {
-				if (staticParticle.position.z < -1) {
+				if (
+					staticParticle.position.z < -1 ||
+					staticParticle.position.x > viewport.width * 0.6 ||
+					staticParticle.position.x < viewport.width * -0.6 ||
+					staticParticle.position.y > viewport.height * 0.7 ||
+					staticParticle.position.y < viewport.height * -0.7
+				) {
 					clothToSquareGeoTrans();
 					appStateManager.send("cloth nearly out");
 				}

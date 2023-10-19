@@ -1,6 +1,6 @@
 import "./Openning.scss";
 import html2canvas from "html2canvas";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import appStateManager from "../utils/appStateManager";
 
 export default function Opening() {
@@ -9,15 +9,15 @@ export default function Opening() {
 	const text4Ref = useRef();
 
 	useEffect(() => {
-		text2Ref.current.addEventListener("mousedown", getScreenShot);
-		text4Ref.current.addEventListener("mousedown", getScreenShot);
-		openingRef.current.addEventListener("mouseup", handleMouseUp);
+		text2Ref.current.addEventListener("mousedown", getScreenShot, true);
+		text4Ref.current.addEventListener("mousedown", getScreenShot, true);
+		openingRef.current.addEventListener("mouseup", handleMouseUp, true);
 		appStateManager.send("init some context", {
 			openningDom: openingRef.current,
 		});
 	}, []);
 
-	const getScreenShot = (e) => {
+	const getScreenShot = useCallback((e) => {
 		const pointPos = {
 			x: e.clientX / window.innerWidth,
 			y: 1 - e.clientY / window.innerHeight,
@@ -28,9 +28,15 @@ export default function Opening() {
 			cloneOpeningDom,
 		});
 
-		text2Ref.current.removeEventListener("mousedown", getScreenShot);
-		text4Ref.current.removeEventListener("mousedown", getScreenShot);
-	};
+		text2Ref.current.removeEventListener("mousedown", getScreenShot, true);
+		text4Ref.current.removeEventListener("mousedown", getScreenShot, true);
+	}, []);
+
+	const handleMouseUp = useCallback((e) => {
+		appStateManager.send("mouse up opening");
+
+		openingRef.current.removeEventListener("mouseup", handleMouseUp, true);
+	}, []);
 
 	const cloneOpeningDom = async () => {
 		const openningDom = openingRef.current;
@@ -59,10 +65,6 @@ export default function Opening() {
 		} catch (error) {
 			console.log(error);
 		}
-	};
-
-	const handleMouseUp = (e) => {
-		appStateManager.send("mouse up opening");
 	};
 
 	return (
