@@ -35,6 +35,14 @@ function WorksArea() {
 		};
 	}, []);
 
+	const foldOtherWorks = () => {
+		Array.from(containerRef.current.children).forEach((e) => {
+			if (e.classList.contains("unfold")) {
+				e.classList.replace("unfold", "fold");
+			}
+		});
+	};
+
 	return (
 		<div className="works-area" style={{ width: `${worksAreaWidthSt}%` }}>
 			<div
@@ -46,8 +54,8 @@ function WorksArea() {
 				<span>works</span>
 				<div className="works-area__bar-logo"></div>
 			</div>
-			<div className="works-area__container" ref={containerRef}>
-				<SimpleBar style={{ maxHeight: "100%" }}>
+			<SimpleBar style={{ maxHeight: "100%" }}>
+				<div className="works-area__container" ref={containerRef}>
 					{worksDataSt.map((workData) => (
 						<Work
 							windowWidth={windowWidthSt}
@@ -57,10 +65,11 @@ function WorksArea() {
 							description={workData.description}
 							externalLinks={workData.externalLinks}
 							mediaSet={workData.mediaSet}
+							foldOtherWorks={foldOtherWorks}
 						/>
 					))}
-				</SimpleBar>
-			</div>
+				</div>
+			</SimpleBar>
 		</div>
 	);
 }

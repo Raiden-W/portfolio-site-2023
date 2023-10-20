@@ -13,10 +13,14 @@ function Work({
 	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
 	externalLinks = [],
 	windowWidth,
+	foldOtherWorks,
 }) {
 	const mediaContainerRef = useRef();
 	const borderLeftRef = useRef(-300);
 	const mediaOffsetXRef = useRef(0);
+
+	// const [unfoldSt, setUnfold] = useState("fold");
+	const workRef = useRef();
 
 	const mediaContainerWidth = useMemo(
 		() =>
@@ -63,34 +67,55 @@ function Work({
 		}
 	);
 
+	const handleDropDown = () => {
+		const classList = workRef.current.classList;
+		if (classList.contains("fold")) {
+			foldOtherWorks();
+			classList.replace("fold", "unfold");
+		} else {
+			classList.replace("unfold", "fold");
+		}
+	};
+
 	return (
-		<div className="work">
-			<h2 className="work__title">{title}</h2>
-			<div className="work__media-set" {...bind()}>
-				<div className="work__media-set-container" ref={mediaContainerRef}>
-					{mediaSet.map((media) => (
-						<div key={media.id} className="work__media-set-container-item">
-							{media.type === "video" ? (
-								<video muted autoPlay loop src={media.url} />
-							) : (
-								<img
-									draggable="false"
-									src={media.url}
-									alt={media.alternativeText}
-								/>
-							)}
-						</div>
+		<div className="work fold" ref={workRef}>
+			<h2 className="work__title" onClick={handleDropDown}>
+				{title}
+			</h2>
+			<div className="work__foldable">
+				<div className="work__media-set" {...bind()}>
+					<div className="work__media-set-container" ref={mediaContainerRef}>
+						{mediaSet.map((media) => (
+							<div key={media.id} className="work__media-set-container-item">
+								{media.type === "video" ? (
+									<video
+										muted
+										autoPlay
+										loop
+										// src={media.url}
+									/>
+								) : (
+									<img
+										draggable="false"
+										src={media.url}
+										alt={media.alternativeText}
+									/>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+				<p className="work__tech-tools">{techTools}</p>
+				<ReactMarkdown className="work__description">
+					{description}
+				</ReactMarkdown>
+				<div className="work__links-container">
+					{externalLinks.map((link) => (
+						<a target="_blank" href={link.url} key={link.id}>
+							{link.displayedText} <span>&#8594;</span>
+						</a>
 					))}
 				</div>
-			</div>
-			<p className="work__tech-tools">{techTools}</p>
-			<ReactMarkdown className="work__description">{description}</ReactMarkdown>
-			<div className="work__links-container">
-				{externalLinks.map((link) => (
-					<a target="_blank" href={link.url} key={link.id}>
-						{link.displayedText} <span>&#8594;</span>
-					</a>
-				))}
 			</div>
 		</div>
 	);

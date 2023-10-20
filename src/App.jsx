@@ -35,7 +35,7 @@ function App() {
 					}}
 					// style={{ background: "white" }}
 				>
-					<Perf position="top-left" />
+					{/* <Perf position="top-left" /> */}
 					<MyScene canvasContainerRef={canvasContainerRef} />
 				</Canvas>
 			</div>
