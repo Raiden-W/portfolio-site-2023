@@ -64,18 +64,18 @@ vec4 getCropedImage (sampler2D tex, vec2 Uv, float ratioHW) {
 }
 
 void main() {
-    float noise = pnoise(vPosition * 5.0 + uSeed) * 0.5 + 0.5;
-    float displaceCurr = noise * 1.0 * uTransition;
-    vec2 coordCurr = vec2(vUv.x - displaceCurr, vUv.y - displaceCurr); 
+    vec3 tiltPos = vPosition;
+    tiltPos.y *= 30.0;
+    float noise = pnoise(tiltPos * 10.0 + uSeed) * 0.5 + 0.5;
+    float displaceCurr = noise * 0.3 * uTransition;
+    vec2 coordCurr = vec2(vUv.x - displaceCurr * 1.5, vUv.y ); 
     vec4 colorCurr = getCropedImage(uTextureCurr, coordCurr, uTextureCurrRatioHW);
 
-    float displaceNext = noise * 1.0 * (1.0 - uTransition);
-    vec2 coordNext = vec2(vUv.x + displaceNext, vUv.y + displaceNext); 
-    vec4 colorNext = getCropedImage(uTextureNext, vUv, uTextureNextRatioHW);
+    float displaceNext = noise * 0.3 * (1.0 - uTransition);
+    vec2 coordNext = vec2(vUv.x + displaceNext * 1.5, vUv.y ); 
+    vec4 colorNext = getCropedImage(uTextureNext, coordNext, uTextureNextRatioHW);
 
     vec4 color = colorCurr * (1.0 - uTransition) + colorNext * uTransition;
-    // vec4 color = colorCurr;
     color *= 0.9;
     gl_FragColor = color + uEmissive;
-    // gl_FragColor = vec4(vec3(displaceCurr), 1.0);
 }

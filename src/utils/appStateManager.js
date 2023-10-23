@@ -362,13 +362,15 @@ export const machine = createMachine(
 					}
 					gsap.to(squareWorkMat, {
 						uTransition: 1,
-						duration: 1.5,
+						duration: 1.2,
 						ease: "power1.out",
 						onStart: () => {
 							ctx.imageTransition.done = false;
 						},
 						onComplete: () => {
 							squareWorkMat.uTextureCurr = squareWorkMat.uTextureNext;
+							squareWorkMat.uTextureCurrRatioHW =
+								squareWorkMat.uTextureNextRatioHW;
 							squareWorkMat.uTransition = 0;
 							squareWorkMat.currWorkId = nextWorkId;
 							ctx.imageTransition.done = true;
