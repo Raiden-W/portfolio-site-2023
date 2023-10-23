@@ -55,7 +55,7 @@ void main() {
     movement.z += pow(uv.y, 2.0) * 10.0 * pnoise(vec3((uTime + 5.4564 + uSeed) * 0.2)) * uDynamic;
 
     vec3 newPosition = movement + vNormal * vec3(dist); 
-    newPosition.xz *= get2dRotateMatrix( uv.y * 5.0 * pnoise(vec3((uTime + uSeed) * 0.1)));
+    newPosition.xz *= get2dRotateMatrix( uv.y * 8.0 * pnoise(vec3((uTime + uSeed) * 0.1)) * uDynamic);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 }

@@ -3,13 +3,15 @@ import "./Work.scss";
 import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
 import ReactMarkdown from "react-markdown";
+import appStateManager from "../utils/appStateManager";
 
 const mediaOffsetMargin = 32;
 
 function Work({
 	title = "Unknown Title",
+	workId,
 	mediaSet = [],
-	techTools = "Unity Three.js Node.js React",
+	techTools = "Boring tech stuff",
 	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
 	externalLinks = [],
 	windowWidth,
@@ -78,7 +80,13 @@ function Work({
 	};
 
 	return (
-		<div className="work fold" ref={workRef}>
+		<div
+			className="work fold"
+			ref={workRef}
+			onMouseEnter={() => {
+				appStateManager.send("enter one work", { workId });
+			}}
+		>
 			<h2 className="work__title" onClick={handleDropDown}>
 				{title}
 			</h2>

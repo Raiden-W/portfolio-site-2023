@@ -60,6 +60,7 @@ function WorksArea() {
 						<Work
 							windowWidth={windowWidthSt}
 							key={workData.id}
+							workId={workData.id}
 							title={workData.title}
 							techTools={workData.techTools}
 							description={workData.description}

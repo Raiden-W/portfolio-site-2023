@@ -2,25 +2,23 @@ import { Lathe, shaderMaterial } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { extend, useFrame } from "@react-three/fiber";
-import tunnelFlyingFrag from "../experiences/shaders/tunnelFlying.frag";
-import tunnelFlyingVert from "../experiences/shaders/tunnelFlying.Vert";
+import tunnelFrag from "../experiences/shaders/tunnel.frag";
+import tunnelVert from "../experiences/shaders/tunnel.Vert";
 import appStateManager from "../utils/appStateManager";
-import { useSelector } from "@xstate/react";
-import gsap from "gsap";
 
 const seed = Math.random() * 100;
 
-const TunnelFlyingMat = shaderMaterial(
+const TunnelMat = shaderMaterial(
 	{
 		uTime: 0,
 		uSeed: seed,
-		uDynamic: 1,
+		uDynamic: 0,
 	},
-	tunnelFlyingVert,
-	tunnelFlyingFrag
+	tunnelVert,
+	tunnelFrag
 );
 
-extend({ TunnelFlyingMat });
+extend({ TunnelMat });
 
 export default function Tunnel() {
 	const matRef = useRef();
@@ -42,22 +40,14 @@ export default function Tunnel() {
 		matRef.current.uTime += delta;
 	});
 
-	const isFlying = useSelector(appStateManager, (s) =>
-		s.matches("Jet Idle/ Aeras Closed")
-	);
-
 	useEffect(() => {
-		if (isFlying) {
-			gsap.to(matRef.current, { uDynamic: 1, duration: 1 });
-		} else {
-			gsap.to(matRef.current, { uDynamic: 0, duration: 1 });
-		}
-	}, [isFlying]);
+		appStateManager.send("init some context", { tunnelMat: matRef.current });
+	}, []);
 
 	return (
 		<Lathe args={[points, 90, 0, Math.PI * 2]} rotation-x={-Math.PI / 2}>
-			<tunnelFlyingMat
-				key={TunnelFlyingMat.key}
+			<tunnelMat
+				key={TunnelMat.key}
 				ref={matRef}
 				// wireframe
 				side={THREE.BackSide}

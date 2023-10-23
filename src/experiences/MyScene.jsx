@@ -1,14 +1,12 @@
 import { CubeCamera, OrbitControls } from "@react-three/drei";
 import Cloth from "./Cloth";
-import Clouds from "./Clouds";
 import { useEffect, useState, useRef } from "react";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import PaperPlane from "./PaperPlane";
 import appStateManager from "../utils/appStateManager";
-import { useSelector } from "@xstate/react";
 import CanvasControl from "./CanvasControl";
 import Tunnel from "../components/Tunnel";
-import gsap from "gsap";
+import SquareDisplay from "./SquareDisplay";
 
 export default function MyScene(props) {
 	const cloudAniValRef = useRef(0);
@@ -21,30 +19,19 @@ export default function MyScene(props) {
 	const [effectOnSt, setEffectOn] = useState(false);
 
 	useEffect(() => {
+		colorRef.current.convertLinearToSRGB();
 		appStateManager.send("init some context", {
 			setGeo,
 			setMat,
 			squareMeshRef,
+			bgColor: colorRef.current,
+			setEffectOn,
 		});
 	}, []);
 
-	const isFlying = useSelector(appStateManager, (s) =>
-		s.matches("Jet Idle/ Aeras Closed")
-	);
-
-	useEffect(() => {
-		if (isFlying) {
-			gsap.to(colorRef.current, { r: 1, g: 1, b: 1, duration: 1 });
-			setEffectOn(true);
-		} else {
-			gsap.to(colorRef.current, { r: 0.12, g: 0.12, b: 0.12, duration: 1 });
-			// setEffectOn(false);
-		}
-	}, [isFlying]);
-
 	return (
 		<>
-			<color ref={colorRef} args={["rgb(12%,12%,12%)"]} attach="background" />
+			<color ref={colorRef} args={[0x1f1f1f]} attach="background" />
 			<Tunnel />
 			<mesh ref={squareMeshRef}>
 				<primitive object={geoSt} />
@@ -62,7 +49,7 @@ export default function MyScene(props) {
 					/>
 				)}
 			</CubeCamera>
-			{/* <Clouds cloudAniValRef={cloudAniValRef} /> */}
+			<SquareDisplay />
 			<CanvasControl {...props} />
 			{/* <OrbitControls /> */}
 			<ambientLight color="white" intensity={0.5} />
@@ -71,8 +58,8 @@ export default function MyScene(props) {
 
 			<EffectComposer enabled={effectOnSt}>
 				<Bloom
-					luminanceThreshold={0.1}
-					luminanceSmoothing={0.8}
+					luminanceThreshold={0.2}
+					luminanceSmoothing={0.5}
 					height={500}
 					intensity={2}
 				/>

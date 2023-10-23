@@ -1,9 +1,9 @@
-varying vec2 vUv;
 varying vec3 vNormal;
+varying vec2 vUv;
+varying vec3 vPosition;
 
 uniform float uTime;
 uniform float uSeed;
-uniform float uDynamic;
 
 #define PI 3.14159265358979
 #define MOD3 vec3(.1031,.11369,.13787)
@@ -38,25 +38,19 @@ float pnoise(vec3 p) {
 }
 
 void main() {
-    float r = pnoise(vec3(vNormal.x * 0.5  - (uTime + uSeed) * 0.5)) * 9.0;
-    float g = pnoise(vec3(vNormal.y  - (uTime + uSeed) * 0.3)) * 3.0 ;
-    vec3 baseColor = vec3(r * 0.9, g * 0.9, 5.0);
-    baseColor = clamp(baseColor, 0.0, 1.0);
-    baseColor = baseColor * 0.45 + 0.65;
-    
-    float noiseLine = pnoise(vec3(-vUv.y * 0.8  - (uTime + uSeed) * 1.0 , 0.0, vUv.x * 250.0 )) - 0.1;
-    noiseLine = clamp(noiseLine, 0.0, 1.0) * (uDynamic * 0.7 + 0.3);
+    vUv = uv;
+    vNormal = normal;
+    vPosition = position;
 
-    float noiseSpot = pnoise(vec3(-vUv.y * 30.0 - (uTime  + uSeed) * 30.0 , 0.0, vUv.x * 300.0)) - 0.3;
-    noiseSpot = clamp(noiseSpot, 0.0 , 1.0) * uDynamic;
-    
-    float noiseComplex = noiseLine + noiseSpot;
-    noiseComplex = clamp(noiseComplex, 0.0, 1.0) * 1.8;
-    
+    vec2 coord = uv;
+    coord.y -= uTime * 2.4;
+    coord *= 0.8;
+    float zPerOffset = pnoise(vec3(coord, uSeed)) * 0.2;
 
-    vec3 color = baseColor * noiseComplex + 0.12 ;
-    // float cutOff = clamp((1.0 - vUv.y) * 8.0, 0.0, 1.0);
+    float zSinOffset = sin(coord.x * 5.0 - uTime * 1.5) * 0.15;
 
-    gl_FragColor = vec4(color, 1.0) ;
-    // gl_FragColor = vec4(vec3(vUv.y), 1.0);
+    vec3 newPosition = position;
+    newPosition.z += zSinOffset + zPerOffset;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 }

@@ -27,7 +27,7 @@ function App() {
 						fov: 50,
 						near: 0.1,
 						far: 500,
-						position: [0, 0, 5],
+						position: [0, 0, 4.5],
 					}}
 					gl={{
 						outputColorSpace: "srgb-linear",

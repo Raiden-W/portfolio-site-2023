@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { stringify } from "qs";
 
 const useFetch = (url) => {
 	const [dataSt, setData] = useState(null);
@@ -27,13 +28,85 @@ const useFetch = (url) => {
 	return { dataSt, errorSt, loadingSt };
 };
 
+const getHeroImagesQuery = stringify({
+	populate: {
+		works: {
+			fields: ["hero_image"],
+			populate: {
+				hero_image: {
+					populate: ["media"],
+				},
+			},
+		},
+	},
+});
+
+const useGetHeroImages = () => {
+	const [heroImagesDataSt, setHeroImagesData] = useState([]);
+
+	const { dataSt, errorSt, loadingSt } = useFetch(
+		`${import.meta.env.VITE_BASE_API_URL}/api/works-area?${getHeroImagesQuery}`
+	);
+
+	useEffect(() => {
+		if (dataSt) {
+			const heroImagesData = dataSt.data.attributes.works.data.map(
+				(workData) => {
+					const workId = workData.id;
+					let url;
+					let width;
+					let height;
+					if (workData.attributes.hero_image.data.attributes.formats.medium) {
+						url =
+							workData.attributes.hero_image.data.attributes.formats.medium.url;
+						width =
+							workData.attributes.hero_image.data.attributes.formats.medium
+								.width;
+						height =
+							workData.attributes.hero_image.data.attributes.formats.medium
+								.height;
+					} else {
+						url = workData.attributes.hero_image.data.attributes.url;
+						width = workData.attributes.hero_image.data.attributes.width;
+						height = workData.attributes.hero_image.data.attributes.height;
+					}
+
+					return {
+						workId,
+						url,
+						width,
+						height,
+					};
+				}
+			);
+
+			setHeroImagesData(heroImagesData);
+		}
+	}, [dataSt]);
+
+	return { heroImagesDataSt, errorSt, loadingSt };
+};
+
+const getWorksQuery = stringify({
+	populate: {
+		works: {
+			populate: {
+				work_medias: {
+					populate: ["media"],
+				},
+				links: {
+					populate: "*",
+				},
+			},
+		},
+	},
+});
+
 const useGetWorks = () => {
 	const [worksDataSt, setWorksData] = useState([]);
 
 	const { dataSt, errorSt, loadingSt } = useFetch(
-		`${
-			import.meta.env.VITE_BASE_API_URL
-		}/api/works-area?populate[works][populate][work_medias][populate][0]=media&populate[works][populate][links][populate]=*`
+		`${import.meta.env.VITE_BASE_API_URL}/api/works-area?${getWorksQuery}`
 	);
 
 	useEffect(() => {
@@ -83,4 +156,4 @@ const useGetWorks = () => {
 	return { worksDataSt, errorSt, loadingSt };
 };
 
-export { useGetWorks };
+export { useGetWorks, useGetHeroImages };

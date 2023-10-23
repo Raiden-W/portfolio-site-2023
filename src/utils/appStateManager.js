@@ -12,6 +12,7 @@ export const machine = createMachine(
 			canvasWidth: 100,
 			infoAreaWidth: 0,
 			animTasks: { canvasDone: false, areaDone: false },
+			imageTransition: { done: true, latestWorkId: 1 },
 		},
 		id: "appStateManager",
 		initial: "Opening Idle",
@@ -81,6 +82,7 @@ export const machine = createMachine(
 				},
 			},
 			"Cloth To Square": {
+				exit: "turn on post effect",
 				on: {
 					"cloth to square finished": {
 						target: "Square To Jet",
@@ -162,6 +164,8 @@ export const machine = createMachine(
 				},
 			},
 			"Square Idle/ Work Areas Opened": {
+				entry: "set work square",
+				exit: "light sqaure mat",
 				on: {
 					"info bar click": {
 						target: "Info Areas Opening",
@@ -172,9 +176,13 @@ export const machine = createMachine(
 					"canvas click": {
 						target: "Square To Jet/ Work Area closing",
 					},
+					"enter one work": {
+						actions: "set next image to square mat",
+					},
 				},
 			},
 			"Square Idle/ Info Areas Opened": {
+				entry: "set info sqaure",
 				on: {
 					"canvas click": {
 						target: "Square To Jet/ Info Area closing",
@@ -300,19 +308,94 @@ export const machine = createMachine(
 				canvasWidth: (_, event) => event.canvasWidth,
 				infoAreaWidth: (_, event) => event.infoAreaWidth,
 			}),
+
 			"add point track": (ctx) => {
 				ctx.initContext.addMoveCamera();
 				ctx.initContext.resumeSmoothCamera();
 			},
+
 			"remove point track": (ctx) => {
 				ctx.initContext.removeMoveCamera();
 				ctx.initContext.pauseSmoothCamera();
+			},
+
+			"turn on post effect": (ctx) => {
+				const { setEffectOn } = ctx.initContext;
+				setEffectOn(true);
+			},
+
+			"set work square": (ctx) => {
+				const { setGeo, squareGeo, setMat, squareWorkMat } = ctx.initContext;
+				//set square geo and mat
+				setGeo(squareGeo);
+				setMat(squareWorkMat);
+				gsap.to(squareWorkMat, { uEmissive: 0, duration: 0.2 });
+			},
+
+			"set info sqaure": (ctx) => {
+				const { setGeo, squareGeo, setMat, squareWorkMat } = ctx.initContext;
+				//set square geo and mat
+				setGeo(squareGeo);
+				setMat(squareWorkMat);
+				gsap.to(squareWorkMat, { uEmissive: 0, duration: 0.2 });
+			},
+
+			"light sqaure mat": (ctx) => {
+				const { squareWorkMat } = ctx.initContext;
+				// animate squareWorkMat emissive
+				gsap.to(squareWorkMat, { uEmissive: 1, duration: 0.2 });
+			},
+
+			"set next image to square mat": (ctx, event) => {
+				const { squareWorkMat, heroImages } = ctx.initContext;
+				ctx.imageTransition.latestWorkId = event.workId;
+
+				const imageTransit = () => {
+					let nextWorkId = 1;
+					for (let i = 0; i < heroImages.length; i++) {
+						if (heroImages[i].workId === ctx.imageTransition.latestWorkId) {
+							squareWorkMat.uTextureNext = heroImages[i].texture;
+							squareWorkMat.uTextureNextRatioHW = heroImages[i].ratioHW;
+							nextWorkId = ctx.imageTransition.latestWorkId;
+							break;
+						}
+					}
+					gsap.to(squareWorkMat, {
+						uTransition: 1,
+						duration: 1.5,
+						ease: "power1.out",
+						onStart: () => {
+							ctx.imageTransition.done = false;
+						},
+						onComplete: () => {
+							squareWorkMat.uTextureCurr = squareWorkMat.uTextureNext;
+							squareWorkMat.uTransition = 0;
+							squareWorkMat.currWorkId = nextWorkId;
+							ctx.imageTransition.done = true;
+							if (nextWorkId !== ctx.imageTransition.latestWorkId) {
+								imageTransit();
+							}
+						},
+					});
+				};
+
+				if (
+					ctx.imageTransition.done &&
+					squareWorkMat.currWorkId !== event.workId
+				) {
+					ctx.imageTransition.done = false;
+					imageTransit();
+				}
 			},
 		},
 		services: {
 			"square to jet animating": (ctx, _) => (callback) => {
 				ctx.animTasks.canvasDone = false;
-				const { squareToJet } = ctx.initContext;
+				const { squareToJet, tunnelMat, bgColor } = ctx.initContext;
+				//set canvas bg color to white
+				gsap.to(bgColor, { r: 1, g: 1, b: 1, duration: 1 });
+				//activate tunnel
+				gsap.to(tunnelMat, { uDynamic: 1, duration: 1 });
 				//animate square to jet
 				squareToJet(() => {
 					ctx.animTasks.canvasDone = true;
@@ -321,13 +404,13 @@ export const machine = createMachine(
 			},
 			"jet to square animating": (ctx, _) => (callback) => {
 				ctx.animTasks.canvasDone = false;
-				const { jetToSquare, setGeo, squareGeo, setMat, squareMat } =
-					ctx.initContext;
+				const { jetToSquare, tunnelMat, bgColor } = ctx.initContext;
+				//set canvas bg color to grey
+				gsap.to(bgColor, { r: 0.12, g: 0.12, b: 0.12, duration: 1 });
+				//activate tunnel
+				gsap.to(tunnelMat, { uDynamic: 0, duration: 1 });
 				//animate square to jet
 				jetToSquare(() => {
-					//set jet geo and mat
-					setGeo(squareGeo);
-					setMat(squareMat);
 					ctx.animTasks.canvasDone = true;
 					callback("jet to square finished");
 				});
@@ -353,7 +436,6 @@ export const machine = createMachine(
 				return ctx.animTasks.areaDone && ctx.animTasks.canvasDone;
 			},
 		},
-		// delays: {},
 	}
 );
 

@@ -126,7 +126,7 @@ export default function Cloth({ setGeo, setMat }) {
 		);
 	}, []);
 
-	const squareMat = useMemo(() => {
+	const clothMat = useMemo(() => {
 		return new THREE.MeshPhongMaterial({
 			specular: "#6c6c6c",
 			shininess: 18,
@@ -136,16 +136,13 @@ export default function Cloth({ setGeo, setMat }) {
 	}, []);
 
 	useEffect(() => {
-		setGeo(squareGeo);
-		appStateManager.send("init some context", { squareGeo, squareMat });
-	}, []);
-
-	useEffect(() => {
-		//set canvas texture to cloth
+		//set canvas texture to cloth mat and set cloth geo and mat to mesh
 		if (clonedCanvas) {
-			squareMat.map = new THREE.CanvasTexture(clonedCanvas);
-			squareMat.needsUpdate = true;
-			setMat(squareMat);
+			clothMat.map = new THREE.CanvasTexture(clonedCanvas);
+			clothMat.needsUpdate = true;
+			setMat(clothMat);
+			setGeo(squareGeo);
+			appStateManager.send("init some context", { squareGeo });
 			appStateManager.send("set cloth texture");
 		}
 	}, [clonedCanvas]);
@@ -220,7 +217,7 @@ export default function Cloth({ setGeo, setMat }) {
 				});
 			}
 		}
-		gsap.to(squareMat.emissive, {
+		gsap.to(clothMat.emissive, {
 			r: 1,
 			b: 1,
 			g: 1,
@@ -229,8 +226,9 @@ export default function Cloth({ setGeo, setMat }) {
 			ease: "power3.in",
 			onComplete: () => {
 				appStateManager.send("cloth to square finished");
-				squareMat.map.dispose();
-				squareMat.map = null;
+				clothMat.map.dispose();
+				clothMat.map = null;
+				clothMat.dispose();
 			},
 		});
 		setActivePlane(false);
