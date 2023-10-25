@@ -165,7 +165,6 @@ export const machine = createMachine(
 			},
 			"Square Idle/ Work Areas Opened": {
 				entry: "set work square",
-				exit: "light sqaure mat",
 				on: {
 					"info bar click": {
 						target: "Info Areas Opening",
@@ -329,21 +328,17 @@ export const machine = createMachine(
 				//set square geo and mat
 				setGeo(squareGeo);
 				setMat(squareWorkMat);
-				gsap.to(squareWorkMat, { uEmissive: 0, duration: 0.2 });
+				squareWorkMat.uEmissive = 1;
+				gsap.to(squareWorkMat, { uEmissive: 0, duration: 0.3 });
 			},
 
 			"set info sqaure": (ctx) => {
-				const { setGeo, squareGeo, setMat, squareWorkMat } = ctx.initContext;
+				const { setGeo, infoGeo, setMat, squareInfoMat } = ctx.initContext;
 				//set square geo and mat
-				setGeo(squareGeo);
-				setMat(squareWorkMat);
-				gsap.to(squareWorkMat, { uEmissive: 0, duration: 0.2 });
-			},
-
-			"light sqaure mat": (ctx) => {
-				const { squareWorkMat } = ctx.initContext;
-				// animate squareWorkMat emissive
-				gsap.to(squareWorkMat, { uEmissive: 1, duration: 0.2 });
+				setGeo(infoGeo);
+				setMat(squareInfoMat);
+				squareInfoMat.emissive.set(0xffffff);
+				gsap.to(squareInfoMat.emissive, { r: 0, g: 0, b: 0, duration: 0.3 });
 			},
 
 			"set next image to square mat": (ctx, event) => {

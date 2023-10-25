@@ -1,4 +1,3 @@
-varying vec3 vNormal;
 varying vec2 vUv;
 varying vec3 vPosition;
 
@@ -39,7 +38,6 @@ float pnoise(vec3 p) {
 
 void main() {
     vUv = uv;
-    vNormal = normal;
     vPosition = position;
 
     vec2 coord = uv;

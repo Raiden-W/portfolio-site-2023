@@ -1,11 +1,7 @@
-varying vec2 vUv;
-varying vec3 vNormal;
-
 uniform float uTime;
 uniform float uSeed;
-uniform float uDynamic;
+uniform sampler2D uTextureDepth;
 
-#define PI 3.14159265358979
 #define MOD3 vec3(.1031,.11369,.13787)
 
 vec3 hash33(vec3 p3) {
@@ -38,26 +34,37 @@ float pnoise(vec3 p) {
 }
 
 void main() {
-    float r = pnoise(vec3(vNormal.x * 0.5  - (uTime + uSeed) * 0.5)) * 9.0;
-    float g = pnoise(vec3(vNormal.y  - (uTime + uSeed) * 0.3)) * 3.0 ;
-    vec3 baseColor = vec3(r * 0.9, g * 0.9, 5.0);
-    baseColor = clamp(baseColor, 0.0, 1.0);
-    baseColor = baseColor * 0.45 + 0.65;
-    
-    float noiseLine = pnoise(vec3(-vUv.y * 0.8  - (uTime + uSeed) * 1.0 , 0.0, vUv.x * 250.0)) - 0.1;
-    noiseLine = clamp(noiseLine, 0.0, 1.0) * (uDynamic * 0.9 + 0.1);
+    vec4 depthMap = texture2D(uTextureDepth, uv);
+    vec3 newPosition = position;
+    float depth = pow(depthMap.x, 5.0);
+    newPosition.z += depth * 0.2;
 
-    float noiseSpot = pnoise(vec3(-vUv.y * 30.0 - (uTime  + uSeed) * 30.0 , 0.0, vUv.x * 300.0)) - 0.3;
-    noiseSpot = clamp(noiseSpot, 0.0 , 1.0) * uDynamic;
-    
-    float noiseComplex = noiseLine + noiseSpot;
-    noiseComplex = clamp(noiseComplex, 0.0, 1.0) * 1.8;
-    
-    vec3 color = baseColor * noiseComplex + 0.12 ;
+    vec2 coord = uv;
+    coord.y -= uTime * 0.5;
+    coord *= 1.2;
+    float zPerOffset = pnoise(vec3(coord, 0)) * 0.1;
+    newPosition.z += zPerOffset;
 
-    float addOffColor = clamp(pow(vUv.y - 0.7, 3.0) * 15.0, 0.0, 1.0) * uDynamic;
-    color += addOffColor;
-    color = clamp(color, 0.0, 1.0);
-    gl_FragColor = vec4(color , 1.0) ;
-    // gl_FragColor = vec4(vec3(addOffWidth), 1.0);
+    float zCutOff = float(depth > 0.05); 
+    
+    vec3 baseNoisePos = position * 15.0;
+    baseNoisePos.x *= 0.1;
+    baseNoisePos.x += uTime * 0.7;
+    float baseNoise = clamp(pnoise((baseNoisePos)) * 0.01, -1.0, 0.0) * (1.0 - zCutOff);
+    newPosition.z += baseNoise;
+
+    vec3 noisePosZ = position * 25.0;
+    noisePosZ.x += uTime * 3.0;
+    float noiseZ = clamp(pnoise(noisePosZ) * 0.01, 0.0, 1.0) * zCutOff;
+    newPosition.z += noiseZ;
+
+    vec3 noisePosX = position * 80.0;
+    noisePosX.x += uTime * 0.3;
+    float noiseX = clamp(pnoise(noisePosX) * 0.02, 0.0, 1.0) * 350.0;
+    float xCutOff = pow(0.73 - uv.x, 2.0) * float(uv.x < 0.7) * pow(uv.y, 0.6);
+    noiseX *= zCutOff * xCutOff;
+    noiseX = clamp(noiseX, 0.0, 0.5);
+    newPosition.x -= noiseX;
+
+    csm_Position = newPosition.xyz;
 }

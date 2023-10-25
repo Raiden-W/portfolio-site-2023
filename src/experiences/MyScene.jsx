@@ -53,8 +53,7 @@ export default function MyScene(props) {
 			<CanvasControl {...props} />
 			{/* <OrbitControls /> */}
 			<ambientLight color="white" intensity={0.5} />
-			<directionalLight intensity={0.6} color="white" position={[0, 3, 3]} />
-			{/* <pointLight intensity={0.8} color="white" position={[3, 3, 0]} /> */}
+			<directionalLight intensity={0.6} color="white" position={[0, 2.5, 3]} />
 
 			<EffectComposer enabled={effectOnSt}>
 				<Bloom

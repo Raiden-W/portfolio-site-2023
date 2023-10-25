@@ -5,6 +5,8 @@ import * as THREE from "three";
 import appStateManager from "../utils/appStateManager";
 import squareWorkVert from "./shaders/squareWork.vert";
 import squareWorkFrag from "./shaders/squareWork.frag";
+import squareInfoVert from "./shaders/squareInfo.vert";
+import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import { useFrame } from "@react-three/fiber";
 
 const seed = Math.random() * 100;
@@ -24,6 +26,25 @@ const SquareWorkMat = shaderMaterial(
 	squareWorkFrag
 );
 
+const squareInfoMat = new CustomShaderMaterial({
+	baseMaterial: THREE.MeshPhongMaterial,
+	uniforms: {
+		uTime: { value: 0 },
+		uTextureDepth: { value: new THREE.Texture() },
+		uSeed: { value: Math.random() * 100 },
+		uWave: { value: 1 },
+	},
+	vertexShader: squareInfoVert,
+	silent: true,
+	color: 0x82807d,
+	emissive: 0xffffff,
+	specular: 0x7f7d7a,
+	shininess: 27,
+	flatShading: true,
+});
+
+const infoGeo = new THREE.PlaneGeometry(2, 2, 75, 150);
+
 export default function SquareDisplay() {
 	const { heroImagesDataSt } = useGetHeroImages();
 
@@ -38,6 +59,15 @@ export default function SquareDisplay() {
 	}, [heroImagesDataSt]);
 
 	const heroImageTextures = useTexture(imageUrls);
+
+	const profileDepthTexture = useTexture("./img/depth_s.png");
+
+	useEffect(() => {
+		if (profileDepthTexture) {
+			squareInfoMat.transparent = true;
+			squareInfoMat.uniforms.uTextureDepth.value = profileDepthTexture;
+		}
+	}, [profileDepthTexture]);
 
 	const heroImages = useMemo(() => {
 		if (heroImageTextures.length > 0) {
@@ -60,12 +90,15 @@ export default function SquareDisplay() {
 			appStateManager.send("init some context", {
 				heroImages,
 				squareWorkMat,
+				squareInfoMat,
+				infoGeo,
 			});
 		}
 	}, [heroImages, squareWorkMat]);
 
 	useFrame((_, delta) => {
 		squareWorkMat.uTime += delta;
+		squareInfoMat.uniforms.uTime.value += delta;
 	});
 
 	return null;

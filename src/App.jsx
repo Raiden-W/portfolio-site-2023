@@ -33,9 +33,8 @@ function App() {
 						outputColorSpace: "srgb-linear",
 						toneMapping: THREE.LinearToneMapping,
 					}}
-					// style={{ background: "white" }}
 				>
-					{/* <Perf position="top-left" /> */}
+					<Perf position="top-left" />
 					<MyScene canvasContainerRef={canvasContainerRef} />
 				</Canvas>
 			</div>

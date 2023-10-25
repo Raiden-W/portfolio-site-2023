@@ -6,12 +6,10 @@ import tunnelFrag from "../experiences/shaders/tunnel.frag";
 import tunnelVert from "../experiences/shaders/tunnel.Vert";
 import appStateManager from "../utils/appStateManager";
 
-const seed = Math.random() * 100;
-
 const TunnelMat = shaderMaterial(
 	{
 		uTime: 0,
-		uSeed: seed,
+		uSeed: Math.random() * 100,
 		uDynamic: 0,
 	},
 	tunnelVert,

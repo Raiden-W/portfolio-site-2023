@@ -229,6 +229,7 @@ export default function Cloth({ setGeo, setMat }) {
 				clothMat.map.dispose();
 				clothMat.map = null;
 				clothMat.dispose();
+				squareGeo.dispose();
 			},
 		});
 		setActivePlane(false);
