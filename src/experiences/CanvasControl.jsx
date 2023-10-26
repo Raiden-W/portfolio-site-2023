@@ -63,9 +63,10 @@ export default function CanvasControl({ canvasContainerRef }) {
 			removeMoveCamera,
 			pauseSmoothCamera,
 			resumeSmoothCamera,
+			camera,
 		});
 	}, []);
-
+	// console.log(smoothCameraY.tween.parent._onUpdate);
 	useEffect(() => {
 		setSize(canvasWidthSt * 0.01 * window.innerWidth, window.innerHeight, true);
 		canvasContainerRef.current.style.width = `${canvasWidthSt}%`;

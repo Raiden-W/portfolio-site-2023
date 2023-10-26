@@ -34,7 +34,7 @@ function App() {
 						toneMapping: THREE.LinearToneMapping,
 					}}
 				>
-					<Perf position="top-left" />
+					{/* <Perf position="top-left" /> */}
 					<MyScene canvasContainerRef={canvasContainerRef} />
 				</Canvas>
 			</div>

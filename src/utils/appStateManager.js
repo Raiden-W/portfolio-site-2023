@@ -192,6 +192,9 @@ export const machine = createMachine(
 					"works bar click": {
 						target: "Work Areas Opening",
 					},
+					"joystick moves": {
+						actions: "update camera",
+					},
 				},
 			},
 			"Info Areas Opening": {
@@ -216,7 +219,7 @@ export const machine = createMachine(
 					},
 					{
 						src: "close works area",
-						id: "invoke-3mn7m",
+						id: "close works area",
 					},
 				],
 				on: {
@@ -241,7 +244,7 @@ export const machine = createMachine(
 					},
 					{
 						src: "close info area",
-						id: "invoke-ln4bc",
+						id: "close info area",
 					},
 				],
 				on: {
@@ -339,6 +342,20 @@ export const machine = createMachine(
 				setMat(squareInfoMat);
 				squareInfoMat.emissive.set(0xffffff);
 				gsap.to(squareInfoMat.emissive, { r: 0, g: 0, b: 0, duration: 0.3 });
+			},
+
+			"update camera": (ctx, event) => {
+				const { camera } = ctx.initContext;
+				const { x, y } = event;
+				gsap.to(camera.position, {
+					x: -x * 0.05,
+					y: y * 0.05,
+					duration: 1.5,
+					ease: "power3.out",
+					onUpdate: () => {
+						camera.lookAt(0, 0, 0);
+					},
+				});
 			},
 
 			"set next image to square mat": (ctx, event) => {

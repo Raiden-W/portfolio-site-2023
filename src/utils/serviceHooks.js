@@ -114,6 +114,7 @@ const useGetWorks = () => {
 			const worksData = dataSt.data.attributes.works.data.map((workData) => {
 				const id = workData.id;
 				const title = workData.attributes.title;
+				const sub = workData.attributes.sub;
 				const description = workData.attributes.description;
 				const techTools = workData.attributes.tech_tools;
 				const externalLinks = workData.attributes.links.map((linkData) => {
@@ -142,6 +143,7 @@ const useGetWorks = () => {
 				return {
 					id,
 					title,
+					sub,
 					description,
 					techTools,
 					externalLinks,
@@ -156,4 +158,51 @@ const useGetWorks = () => {
 	return { worksDataSt, errorSt, loadingSt };
 };
 
-export { useGetWorks, useGetHeroImages };
+const getInfoQuery = stringify({
+	populate: {
+		contact_links: {
+			populate: "*",
+		},
+	},
+});
+
+const useGetInfo = () => {
+	const [infoDataSt, setInfoData] = useState(null);
+
+	const { dataSt, errorSt, loadingSt } = useFetch(
+		`${import.meta.env.VITE_BASE_API_URL}/api/info-area?${getInfoQuery}`
+	);
+
+	useEffect(() => {
+		if (dataSt) {
+			const infoData = {};
+			infoData.title = dataSt.data.attributes.title;
+			infoData.description = dataSt.data.attributes.description;
+			infoData.foot = dataSt.data.attributes.foot;
+			infoData.contactLinks = dataSt.data.attributes.contact_links.map(
+				(comp) => {
+					if (comp.__component === "dy-component.list-item") {
+						return {
+							type: "text",
+							displayedText: comp.displayed_text,
+							id: comp.id,
+						};
+					} else if (comp.__component === "dy-component.link") {
+						return {
+							type: "link",
+							url: comp.url,
+							displayedText: comp.displayed_text,
+							id: comp.id,
+						};
+					}
+				}
+			);
+
+			setInfoData(infoData);
+		}
+	}, [dataSt]);
+
+	return { infoDataSt, errorSt, loadingSt };
+};
+
+export { useGetWorks, useGetHeroImages, useGetInfo };

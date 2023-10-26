@@ -4,6 +4,7 @@ import { useGetWorks } from "../utils/serviceHooks";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import Work from "./Work";
+import arrowIcon from "../assets/arrow.svg";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 
@@ -52,7 +53,15 @@ function WorksArea() {
 				}}
 			>
 				<span>works</span>
-				<div className="works-area__bar-logo"></div>
+				<img
+					className={
+						worksAreaWidthSt > 0
+							? "works-area__bar-arrow unfold"
+							: "works-area__bar-arrow"
+					}
+					src={arrowIcon}
+					alt="arrow icon"
+				/>
 			</div>
 			<SimpleBar style={{ maxHeight: "100%" }}>
 				<div className="works-area__container" ref={containerRef}>
@@ -62,6 +71,7 @@ function WorksArea() {
 							key={workData.id}
 							workId={workData.id}
 							title={workData.title}
+							sub={workData.sub}
 							techTools={workData.techTools}
 							description={workData.description}
 							externalLinks={workData.externalLinks}

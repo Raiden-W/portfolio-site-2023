@@ -4,11 +4,13 @@ import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
 import ReactMarkdown from "react-markdown";
 import appStateManager from "../utils/appStateManager";
+import arrowIcon from "../assets/arrow.svg";
 
 const mediaOffsetMargin = 32;
 
 function Work({
 	title = "Unknown Title",
+	sub = "*",
 	workId,
 	mediaSet = [],
 	techTools = "Boring tech stuff",
@@ -21,7 +23,6 @@ function Work({
 	const borderLeftRef = useRef(-300);
 	const mediaOffsetXRef = useRef(0);
 
-	// const [unfoldSt, setUnfold] = useState("fold");
 	const workRef = useRef();
 
 	const mediaContainerWidth = useMemo(
@@ -54,7 +55,7 @@ function Work({
 	}, [mediaContainerWidth, windowWidth]);
 
 	const bind = useDrag(
-		({ offset: [ox, _] }) => {
+		({ offset: [ox] }) => {
 			smoothTo(ox);
 			mediaOffsetXRef.current = ox;
 		},
@@ -87,9 +88,17 @@ function Work({
 				appStateManager.send("enter one work", { workId });
 			}}
 		>
-			<h2 className="work__title" onClick={handleDropDown}>
-				{title}
-			</h2>
+			<header className="work__header" onClick={handleDropDown}>
+				<div className="work__header-flexbox">
+					<h2 className="work__header-title">{title}</h2>
+					<img
+						className="work__header-arrow"
+						src={arrowIcon}
+						alt="arrow icon"
+					/>
+				</div>
+				<p className="work__header-sub">{sub}</p>
+			</header>
 			<div className="work__foldable">
 				<div className="work__media-set" {...bind()}>
 					<div className="work__media-set-container" ref={mediaContainerRef}>

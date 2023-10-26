@@ -21,18 +21,56 @@ $padding-side: 1.5rem;
 		overflow-y: clip;
 	}
 
-	&__title {
-		text-transform: uppercase;
+	&__header {
 		padding: 1rem $padding-side 1.2rem $padding-side;
-		font-family: "Oswald", sans-serif;
-		font-size: 3rem;
-		font-weight: 500;
 		background-color: rgb(255, 255, 255);
 		color: rgb(12, 12, 12);
 		position: relative;
+
+		&-flexbox {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		&-sub {
+			line-height: 100%;
+			font-size: 0.95rem;
+			color: rgb(60, 60, 60);
+			padding: 0.1rem 0 1.2rem 0;
+			// margin-bottom: 0.8rem;
+		}
+
+		&-title {
+			text-transform: uppercase;
+			font-family: "Oswald", sans-serif;
+			font-size: 3rem;
+			font-weight: 500;
+		}
+
+		&-arrow {
+			height: 1rem;
+			opacity: 0;
+		}
+
+		&:hover &-arrow {
+			opacity: 1;
+			transition: 300ms 100ms;
+		}
 	}
 
-	&.fold &__title::after {
+	&.fold &__header {
+		&-arrow {
+			transform: translateY(1rem) translateX(-1rem) rotate(0deg);
+		}
+	}
+	&.unfold &__header {
+		&-arrow {
+			transform: translateY(1rem) translateX(-1rem) rotate(180deg);
+		}
+	}
+
+	&.fold &__header::after {
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -43,12 +81,12 @@ $padding-side: 1.5rem;
 		transition: background-color 300ms;
 	}
 
-	&.fold &__title:hover::after {
+	&.fold &__header:hover::after {
 		background-color: rgb(238, 235, 229);
 		transition: background-color 300ms;
 	}
 
-	&.unfold &__title:after {
+	&.unfold &__header:after {
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -70,20 +108,21 @@ $padding-side: 1.5rem;
 
 	&__description {
 		padding: 0 $padding-side;
-		font-size: 1rem;
+		font-size: 0.95rem;
 		font-weight: 400;
+		color: rgb(60, 60, 60);
 	}
 
 	&__links-container {
-		padding: 2rem $padding-side 3rem $padding-side;
+		padding: 1.5rem $padding-side 3rem $padding-side;
 		display: flex;
 		justify-content: space-between;
 		a {
 			text-decoration: none;
-			color: rgb(0, 0, 0);
+			color: rgb(60, 60, 60);
 			font-size: 0.85rem;
 			font-style: italic;
-			font-weight: 400;
+			font-weight: 600;
 
 			span {
 				display: inline-block;
@@ -134,8 +173,9 @@ $padding-side: 1.5rem;
 		position: absolute;
 		bottom: 0;
 		left: 0;
+		right: 0;
 		width: 100%;
-		height: 0.5px;
+		height: 1px;
 		background-color: rgb(208, 208, 208);
 	}
 }
