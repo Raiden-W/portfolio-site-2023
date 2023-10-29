@@ -19,6 +19,8 @@
 		justify-content: space-between;
 		gap: 0.8rem;
 		box-shadow: 1px 0px 10px 1px rgba(149, 149, 149, 0.24);
+		z-index: 1;
+		cursor: pointer;
 
 		span {
 			font-size: 0.8rem;
@@ -29,15 +31,23 @@
 		}
 
 		&-arrow {
-			transform: rotate(90deg);
 			margin-bottom: 3rem;
-			height: 0.5rem;
-			opacity: 0.8;
+			transform: rotate(90deg);
 			transition: transform 500ms;
+			position: relative;
 
 			&.unfold {
 				transform: rotate(-90deg);
 				transition: transform 500ms 500ms;
+			}
+
+			img {
+				height: 0.4rem;
+			}
+
+			img:nth-child(1) {
+				position: absolute;
+				top: 5px;
 			}
 		}
 	}
@@ -148,6 +158,7 @@
 					flex-direction: column;
 					justify-content: center;
 					align-items: center;
+					cursor: grab;
 
 					.circle-pat {
 						display: inline-block;

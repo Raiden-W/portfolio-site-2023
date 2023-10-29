@@ -5,13 +5,17 @@ import appStateManager from "../utils/appStateManager";
 
 export default function Opening() {
 	const openingRef = useRef();
-	const text2Ref = useRef();
-	const text4Ref = useRef();
+
+	const grabableNodes = () => {
+		const nodeList = openingRef.current.querySelectorAll(".grabable");
+		return Array.from(nodeList);
+	};
 
 	useEffect(() => {
-		text2Ref.current.addEventListener("mousedown", getScreenShot, true);
-		text4Ref.current.addEventListener("mousedown", getScreenShot, true);
-		openingRef.current.addEventListener("mouseup", handleMouseUp, true);
+		grabableNodes().forEach((node) => {
+			node.addEventListener("mousedown", getScreenShot, true);
+			node.addEventListener("mouseup", handleMouseUp, true);
+		});
 		appStateManager.send("init some context", {
 			openningDom: openingRef.current,
 		});
@@ -28,14 +32,18 @@ export default function Opening() {
 			cloneOpeningDom,
 		});
 
-		text2Ref.current.removeEventListener("mousedown", getScreenShot, true);
-		text4Ref.current.removeEventListener("mousedown", getScreenShot, true);
+		grabableNodes().forEach((node) => {
+			node.removeEventListener("mousedown", getScreenShot, true);
+			node.removeEventListener("mousedown", getScreenShot, true);
+		});
 	}, []);
 
-	const handleMouseUp = useCallback((e) => {
+	const handleMouseUp = useCallback(() => {
 		appStateManager.send("mouse up opening");
-
-		openingRef.current.removeEventListener("mouseup", handleMouseUp, true);
+		grabableNodes().forEach((node) => {
+			node.removeEventListener("mouseup", handleMouseUp, true);
+			node.removeEventListener("mouseup", handleMouseUp, true);
+		});
 	}, []);
 
 	const cloneOpeningDom = async () => {
@@ -67,14 +75,20 @@ export default function Opening() {
 		}
 	};
 
+	const textNum = 5;
+
 	return (
 		<>
-			<div className="opening scroll" ref={openingRef}>
+			<div
+				className="opening scroll"
+				ref={openingRef}
+				style={{ fontSize: `${(100 / textNum) * 0.9}vh` }}
+			>
 				<div className="opening__text">
 					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
 					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
 				</div>
-				<div className="opening__text" ref={text2Ref}>
+				<div className="opening__text grabable">
 					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
 					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
 				</div>
@@ -82,7 +96,7 @@ export default function Opening() {
 					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
 					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
 				</div>
-				<div className="opening__text" ref={text4Ref}>
+				<div className="opening__text grabable">
 					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
 					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
 				</div>

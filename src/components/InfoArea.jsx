@@ -87,15 +87,16 @@ function InfoArea() {
 				}}
 			>
 				<span>about</span>
-				<img
+				<div
 					className={
 						infoAreaWidthSt > 0
 							? "info-area__bar-arrow unfold"
 							: "info-area__bar-arrow"
 					}
-					src={arrowIcon}
-					alt="arrow icon"
-				/>
+				>
+					<img src={arrowIcon} alt="arrow icon" />
+					<img src={arrowIcon} alt="arrow icon" />
+				</div>
 			</div>
 			<SimpleBar style={{ maxHeight: "100%" }}>
 				<div className="info-area__container" ref={containerRef}>

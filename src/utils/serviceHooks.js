@@ -131,11 +131,17 @@ const useGetWorks = () => {
 						const title = mediaData.attributes.title;
 						const alternativeText =
 							mediaData.attributes.media.data.attributes.alternativeText;
-						const url =
-							type === "video"
-								? mediaData.attributes.media.data.attributes.url
-								: mediaData.attributes.media.data.attributes.formats.medium.url;
-
+						let url;
+						if (type === "video") {
+							url = mediaData.attributes.media.data.attributes.url;
+						} else if (type === "image") {
+							if (mediaData.attributes.media.data.attributes.formats.medium) {
+								url =
+									mediaData.attributes.media.data.attributes.formats.medium.url;
+							} else {
+								url = mediaData.attributes.media.data.attributes.url;
+							}
+						}
 						return { id, type, title, alternativeText, url };
 					}
 				);

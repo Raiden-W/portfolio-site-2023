@@ -3,25 +3,28 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+	align-items: center;
+
 	position: absolute;
 	left: 0;
 	top: 0;
-	width: 100%;
-	height: 100%;
+	width: 100vw;
+	height: 100vh;
 	overflow: hidden;
 	font-family: "Koulen", sans-serif;
 
 	&__text {
+		margin: auto 0;
+		padding: auto 0;
 		display: flex;
 		flex-grow: 1;
 		justify-content: left;
 		align-items: center;
 		width: 100%;
-		// height: 19.8%;
 		position: relative;
 		color: white;
 		background-color: #acacac;
-		// font-weight: 600;
+		cursor: default;
 
 		&:not(:last-child)::after {
 			content: "";
@@ -32,23 +35,14 @@
 			background-color: #9c9c9c;
 		}
 
-		// &:nth-child(odd) {
-		// 	color: black;
-		// 	background-color: yellow;
-		// 	font-weight: 600;
-		// }
-		// &:nth-child(even) {
-		// 	color: yellow;
-		// 	background-color: black;
-		// 	font-weight: 500;
-		// }
+		&.grabable {
+			cursor: pointer;
+		}
 	}
 
 	p {
-		margin: 0;
-		padding: 0;
-		font-size: 18vh;
 		line-height: 100%;
+		overflow-y: clip;
 		white-space: nowrap;
 		text-transform: uppercase;
 	}

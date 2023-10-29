@@ -53,15 +53,16 @@ function WorksArea() {
 				}}
 			>
 				<span>works</span>
-				<img
+				<div
 					className={
 						worksAreaWidthSt > 0
 							? "works-area__bar-arrow unfold"
 							: "works-area__bar-arrow"
 					}
-					src={arrowIcon}
-					alt="arrow icon"
-				/>
+				>
+					<img src={arrowIcon} alt="arrow icon" />
+					<img src={arrowIcon} alt="arrow icon" />
+				</div>
 			</div>
 			<SimpleBar style={{ maxHeight: "100%" }}>
 				<div className="works-area__container" ref={containerRef}>
