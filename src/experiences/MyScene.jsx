@@ -5,7 +5,7 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import PaperPlane from "./PaperPlane";
 import appStateManager from "../utils/appStateManager";
 import CanvasControl from "./CanvasControl";
-import Tunnel from "../components/Tunnel";
+import Tunnel from "./Tunnel";
 import SquareDisplay from "./SquareDisplay";
 
 export default function MyScene(props) {

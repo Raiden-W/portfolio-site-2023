@@ -2,8 +2,8 @@ import { Lathe, shaderMaterial } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { extend, useFrame } from "@react-three/fiber";
-import tunnelFrag from "../experiences/shaders/tunnel.frag";
-import tunnelVert from "../experiences/shaders/tunnel.Vert";
+import tunnelFrag from "./shaders/tunnel.frag";
+import tunnelVert from "./shaders/tunnel.vert";
 import appStateManager from "../utils/appStateManager";
 
 const TunnelMat = shaderMaterial(
