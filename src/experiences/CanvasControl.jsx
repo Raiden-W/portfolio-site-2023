@@ -107,8 +107,8 @@ export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
 		});
 
 		const pauseSmoothProfile = () => {
-			smoothProfileX.tween.pause(0);
-			smoothProfileY.tween.pause(0);
+			smoothProfileX.tween.pause();
+			smoothProfileY.tween.pause();
 		};
 
 		const resumeSmoothProfile = () => {
