@@ -9,7 +9,6 @@ import Tunnel from "./Tunnel";
 import SquareDisplay from "./SquareDisplay";
 
 export default function MyScene(props) {
-	const cloudAniValRef = useRef(0);
 	const squareMeshRef = useRef();
 	const colorRef = useRef();
 
@@ -44,13 +43,12 @@ export default function MyScene(props) {
 						setGeo={setGeo}
 						setMat={setMat}
 						squareMeshRef={squareMeshRef}
-						cloudAniValRef={cloudAniValRef}
 						envMap={texture}
 					/>
 				)}
 			</CubeCamera>
 			<SquareDisplay />
-			<CanvasControl {...props} />
+			<CanvasControl {...props} squareMeshRef={squareMeshRef} />
 			{/* <OrbitControls /> */}
 			<ambientLight color="white" intensity={0.5} />
 			<directionalLight intensity={0.6} color="white" position={[0, 2.5, 3]} />

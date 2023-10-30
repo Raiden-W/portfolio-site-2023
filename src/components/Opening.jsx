@@ -14,7 +14,9 @@ export default function Opening() {
 	useEffect(() => {
 		grabableNodes().forEach((node) => {
 			node.addEventListener("mousedown", getScreenShot, true);
+			node.addEventListener("touchstart", getScreenShot, true);
 			node.addEventListener("mouseup", handleMouseUp, true);
+			node.addEventListener("touchend", handleMouseUp, true);
 		});
 		appStateManager.send("init some context", {
 			openningDom: openingRef.current,
@@ -22,9 +24,23 @@ export default function Opening() {
 	}, []);
 
 	const getScreenShot = useCallback((e) => {
+		e.preventDefault();
+
+		let clientX = 0;
+		let clientY = 0;
+
+		if (e.changedTouches) {
+			const touch = e.changedTouches[0];
+			clientX = touch.clientX;
+			clientY = touch.clientY;
+		} else {
+			clientX = e.clientX;
+			clientY = e.clientY;
+		}
+
 		const pointPos = {
-			x: e.clientX / window.innerWidth,
-			y: 1 - e.clientY / window.innerHeight,
+			x: clientX / window.innerWidth,
+			y: 1 - clientY / window.innerHeight,
 		};
 
 		appStateManager.send("mouse down opening", {
@@ -34,7 +50,7 @@ export default function Opening() {
 
 		grabableNodes().forEach((node) => {
 			node.removeEventListener("mousedown", getScreenShot, true);
-			node.removeEventListener("mousedown", getScreenShot, true);
+			node.removeEventListener("touchstart", getScreenShot, true);
 		});
 	}, []);
 
@@ -42,7 +58,7 @@ export default function Opening() {
 		appStateManager.send("mouse up opening");
 		grabableNodes().forEach((node) => {
 			node.removeEventListener("mouseup", handleMouseUp, true);
-			node.removeEventListener("mouseup", handleMouseUp, true);
+			node.removeEventListener("touchend", handleMouseUp, true);
 		});
 	}, []);
 

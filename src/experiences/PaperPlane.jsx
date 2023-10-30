@@ -12,13 +12,7 @@ import quickNoise from "quick-perlin-noise-js";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
 
-export default function PaperPlane({
-	setGeo,
-	setMat,
-	squareMeshRef,
-	// cloudAniValRef,
-	envMap,
-}) {
+export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
 	const camera = useThree((s) => s.camera);
 
@@ -82,6 +76,7 @@ export default function PaperPlane({
 		});
 		gsap.to(squareMeshRef.current.rotation, {
 			x: -Math.PI / 2,
+			y: 0,
 			z: Math.PI / 4,
 			duration: 0.5,
 			ease: "power1.out",
@@ -91,7 +86,6 @@ export default function PaperPlane({
 			duration: 1,
 			onUpdate: () => {
 				setTemValue(temValueRef.current);
-				// cloudAniValRef.current = temValueRef.current;
 			},
 			onComplete: () => {
 				onCompleteFunction();
@@ -112,6 +106,7 @@ export default function PaperPlane({
 		});
 		gsap.to(squareMeshRef.current.rotation, {
 			x: 0,
+			y: 0,
 			z: 0,
 			duration: 0.5,
 		});
@@ -120,7 +115,6 @@ export default function PaperPlane({
 			duration: 1,
 			onUpdate: () => {
 				setTemValue(temValueRef.current);
-				// cloudAniValRef.current = temValueRef.current;
 			},
 			onComplete: () => {
 				onCompleteFunction();

@@ -43,7 +43,7 @@ export default function Tunnel() {
 	}, []);
 
 	return (
-		<Lathe args={[points, 90, 0, Math.PI * 2]} rotation-x={-Math.PI / 2}>
+		<Lathe args={[points, 45, 0, Math.PI * 2]} rotation-x={-Math.PI / 2}>
 			<tunnelMat
 				key={TunnelMat.key}
 				ref={matRef}

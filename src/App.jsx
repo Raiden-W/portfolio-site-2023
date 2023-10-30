@@ -7,12 +7,13 @@ import { Perf } from "r3f-perf";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 import appStateManager from "./utils/appStateManager";
+import Div100vh from "react-div-100vh";
 
 function App() {
 	const canvasContainerRef = useRef();
 
 	return (
-		<>
+		<Div100vh>
 			<WorksArea />
 			<InfoArea />
 			<div
@@ -39,7 +40,7 @@ function App() {
 				</Canvas>
 			</div>
 			<Opening />
-		</>
+		</Div100vh>
 	);
 }
 

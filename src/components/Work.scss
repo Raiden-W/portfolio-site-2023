@@ -135,7 +135,7 @@ $padding-side: 1.5rem;
 	&__media-set {
 		position: relative;
 		padding: 1rem $padding-side;
-		touch-action: pan-y;
+		touch-action: none;
 		cursor: grab;
 
 		&-container {

@@ -182,6 +182,7 @@ export const machine = createMachine(
 			},
 			"Square Idle/ Info Areas Opened": {
 				entry: "set info sqaure",
+				exit: "freeze profile",
 				on: {
 					"canvas click": {
 						target: "Square To Jet/ Info Area closing",
@@ -193,7 +194,7 @@ export const machine = createMachine(
 						target: "Work Areas Opening",
 					},
 					"joystick moves": {
-						actions: "update camera",
+						actions: "move profile",
 					},
 				},
 			},
@@ -344,18 +345,16 @@ export const machine = createMachine(
 				gsap.to(squareInfoMat.emissive, { r: 0, g: 0, b: 0, duration: 0.3 });
 			},
 
-			"update camera": (ctx, event) => {
-				const { camera } = ctx.initContext;
+			"move profile": (ctx, event) => {
+				const { smoothProfileX, smoothProfileY } = ctx.initContext;
 				const { x, y } = event;
-				gsap.to(camera.position, {
-					x: -x * 0.05,
-					y: y * 0.05,
-					duration: 1.5,
-					ease: "power3.out",
-					onUpdate: () => {
-						camera.lookAt(0, 0, 0);
-					},
-				});
+
+				smoothProfileX(y * 0.012);
+				smoothProfileY(x * 0.012);
+			},
+
+			"freeze profile": (ctx) => {
+				ctx.initContext.pauseSmoothProfile();
 			},
 
 			"set next image to square mat": (ctx, event) => {

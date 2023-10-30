@@ -4,15 +4,17 @@ import { useSelector } from "@xstate/react";
 import { useCallback, useEffect } from "react";
 import gsap from "gsap";
 
-export default function CanvasControl({ canvasContainerRef }) {
+export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
 	const setSize = useThree((s) => s.setSize);
+	const viewport = useThree((s) => s.viewport);
 	const camera = useThree((s) => s.camera);
 
-	const { canvasWidthSt, worksAreaWidthSt } = useSelector(
+	const { canvasWidthSt, worksAreaWidthSt, infoAreaWidthSt } = useSelector(
 		appStateManager,
 		(s) => ({
 			canvasWidthSt: s.context.canvasWidth,
 			worksAreaWidthSt: s.context.worksAreaWidth,
+			infoAreaWidthSt: s.context.infoAreaWidth,
 		})
 	);
 
@@ -35,7 +37,7 @@ export default function CanvasControl({ canvasContainerRef }) {
 		smoothCameraY.tween.invalidate();
 	};
 
-	const moveCamera = useCallback((e) => {
+	const mouseMoveCamera = useCallback((e) => {
 		const canvasW = canvasContainerRef.current.clientWidth;
 		const canvasH = canvasContainerRef.current.clientHeight;
 		const factor = 0.005;
@@ -45,33 +47,95 @@ export default function CanvasControl({ canvasContainerRef }) {
 		smoothCameraY(unitY * canvasH * factor + 3);
 	}, []);
 
+	const touchMoveCamera = useCallback((e) => {
+		e.preventDefault();
+		const touch = e.changedTouches[0];
+		const canvasW = canvasContainerRef.current.clientWidth;
+		const canvasH = canvasContainerRef.current.clientHeight;
+		const factor = 0.005;
+		const unitX = touch.clientX / canvasW - 0.5;
+		const unitY = 1 - touch.clientY / canvasH - 0.5;
+		smoothCameraX(unitX * canvasW * factor);
+		smoothCameraY(unitY * canvasH * factor + 3);
+	}, []);
+
 	const addMoveCamera = () => {
-		canvasContainerRef.current.addEventListener("mousemove", moveCamera, true);
+		canvasContainerRef.current.addEventListener(
+			"mousemove",
+			mouseMoveCamera,
+			true
+		);
+		canvasContainerRef.current.addEventListener(
+			"touchstart",
+			touchMoveCamera,
+			true
+		);
+		canvasContainerRef.current.addEventListener(
+			"touchmove",
+			touchMoveCamera,
+			true
+		);
 	};
 
 	const removeMoveCamera = () => {
 		canvasContainerRef.current.removeEventListener(
 			"mousemove",
-			moveCamera,
+			mouseMoveCamera,
+			true
+		);
+		canvasContainerRef.current.removeEventListener(
+			"touchstart",
+			touchMoveCamera,
+			true
+		);
+		canvasContainerRef.current.removeEventListener(
+			"touchmove",
+			touchMoveCamera,
 			true
 		);
 	};
 
 	useEffect(() => {
+		const smoothProfileX = gsap.quickTo(squareMeshRef.current.rotation, "x", {
+			duration: 1.5,
+			ease: "power3.out",
+		});
+
+		const smoothProfileY = gsap.quickTo(squareMeshRef.current.rotation, "y", {
+			duration: 1.5,
+			ease: "power3.out",
+		});
+
+		const pauseSmoothProfile = () => {
+			smoothProfileX.tween.pause();
+			smoothProfileY.tween.pause();
+		};
+
 		appStateManager.send("init some context", {
 			addMoveCamera,
 			removeMoveCamera,
 			pauseSmoothCamera,
 			resumeSmoothCamera,
-			camera,
+			smoothProfileX,
+			smoothProfileY,
+			pauseSmoothProfile,
 		});
 	}, []);
-	// console.log(smoothCameraY.tween.parent._onUpdate);
+
 	useEffect(() => {
-		setSize(canvasWidthSt * 0.01 * window.innerWidth, window.innerHeight, true);
-		canvasContainerRef.current.style.width = `${canvasWidthSt}%`;
-		canvasContainerRef.current.style.left = `${worksAreaWidthSt}%`;
-	}, [canvasWidthSt]);
+		//# expensive solution deals with canvas and div size
+		// setSize(canvasWidthSt * 0.01 * window.innerWidth, window.innerHeight);
+		// canvasContainerRef.current.style.width = `${canvasWidthSt}%`;
+		// canvasContainerRef.current.style.left = `${worksAreaWidthSt}%`;
+
+		//# cheap solution deals with mesh pos
+		const newPosX =
+			viewport.getCurrentViewport().width *
+			(worksAreaWidthSt - infoAreaWidthSt) *
+			0.01 *
+			0.5;
+		squareMeshRef.current.position.x = newPosX;
+	}, [worksAreaWidthSt, infoAreaWidthSt, viewport]);
 
 	return <></>;
 }
