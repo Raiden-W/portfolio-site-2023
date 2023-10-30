@@ -28,8 +28,8 @@ export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
 	});
 
 	const pauseSmoothCamera = () => {
-		smoothCameraX.tween.pause();
-		smoothCameraY.tween.pause();
+		smoothCameraX.tween.pause(0);
+		smoothCameraY.tween.pause(0);
 	};
 
 	const resumeSmoothCamera = () => {
@@ -107,8 +107,13 @@ export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
 		});
 
 		const pauseSmoothProfile = () => {
-			smoothProfileX.tween.pause();
-			smoothProfileY.tween.pause();
+			smoothProfileX.tween.pause(0);
+			smoothProfileY.tween.pause(0);
+		};
+
+		const resumeSmoothProfile = () => {
+			smoothProfileX.tween.invalidate();
+			smoothProfileY.tween.invalidate();
 		};
 
 		appStateManager.send("init some context", {
@@ -119,6 +124,7 @@ export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
 			smoothProfileX,
 			smoothProfileY,
 			pauseSmoothProfile,
+			resumeSmoothProfile,
 		});
 	}, []);
 

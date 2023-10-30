@@ -341,6 +341,7 @@ export const machine = createMachine(
 				//set square geo and mat
 				setGeo(infoGeo);
 				setMat(squareInfoMat);
+
 				squareInfoMat.emissive.set(0xffffff);
 				gsap.to(squareInfoMat.emissive, { r: 0, g: 0, b: 0, duration: 0.3 });
 			},
@@ -355,6 +356,7 @@ export const machine = createMachine(
 
 			"freeze profile": (ctx) => {
 				ctx.initContext.pauseSmoothProfile();
+				ctx.initContext.resumeSmoothProfile();
 			},
 
 			"set next image to square mat": (ctx, event) => {
@@ -469,6 +471,7 @@ const openArea = (areaToOpen, ctx, callback) => {
 		params.finalWorksAreaW = 60;
 		params.finalInfoAreaW = 0;
 		params.duration = 0.8;
+		params.delay = -0.2;
 	}
 	if (areaToOpen === "info area") {
 		params.domToOpen = infoDom;
@@ -476,6 +479,7 @@ const openArea = (areaToOpen, ctx, callback) => {
 		params.finalWorksAreaW = 0;
 		params.finalInfoAreaW = 40;
 		params.duration = 0.6;
+		params.delay = -0.1;
 	}
 
 	const psudoValues = {
@@ -518,7 +522,7 @@ const openArea = (areaToOpen, ctx, callback) => {
 	}).to(params.domToOpen, {
 		opacity: 1,
 		visibility: "visible",
-		delay: -0.2,
+		delay: params.delay,
 		duration: 0.2,
 		ease: "none",
 		onComplete: () => {

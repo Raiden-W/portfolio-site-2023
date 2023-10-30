@@ -98,8 +98,8 @@ function InfoArea() {
 					<img src={arrowIcon} alt="arrow icon" />
 				</div>
 			</div>
-			<SimpleBar style={{ maxHeight: "100%" }}>
-				<div className="info-area__container" ref={containerRef}>
+			<div className="info-area__container" ref={containerRef}>
+				<SimpleBar style={{ maxHeight: "100%" }}>
 					{infoDataSt && (
 						<div className="info">
 							<h2 className="info__header">{infoDataSt.title}</h2>
@@ -154,8 +154,8 @@ function InfoArea() {
 							<p className="info__footer">{infoDataSt.foot}</p>
 						</div>
 					)}
-				</div>
-			</SimpleBar>
+				</SimpleBar>
+			</div>
 		</div>
 	);
 }
