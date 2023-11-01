@@ -101,24 +101,44 @@ export default function Opening() {
 				style={{ fontSize: `${(100 / textNum) * 0.9}vh` }}
 			>
 				<div className="opening__text">
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
+					<span>
+						why stay in a 2D plane while you can throw it into 3D&nbsp;
+					</span>
+					<span>
+						why stay in a 2D plane while you can throw it into 3D&nbsp;
+					</span>
 				</div>
 				<div className="opening__text grabable">
-					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
-					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
+					<span>
+						tear off the flat plane and see the the other dimension&nbsp;
+					</span>
+					<span>
+						tear off the flat plane and see the the other dimension&nbsp;
+					</span>
 				</div>
 				<div className="opening__text">
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
+					<span>
+						why stay in a 2D plane while you can throw it into 3D&nbsp;
+					</span>
+					<span>
+						why stay in a 2D plane while you can throw it into 3D&nbsp;
+					</span>
 				</div>
 				<div className="opening__text grabable">
-					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
-					<p>tear off the flat plane and see the the other dimension&nbsp;</p>
+					<span>
+						tear off the flat plane and see the the other dimension&nbsp;
+					</span>
+					<span>
+						tear off the flat plane and see the the other dimension&nbsp;
+					</span>
 				</div>
 				<div className="opening__text">
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
+					<span>
+						why stay in a 2D plane while you can throw it into 3D&nbsp;
+					</span>
+					<span>
+						why stay in a 2D plane while you can throw it into 3D&nbsp;
+					</span>
 				</div>
 			</div>
 		</>

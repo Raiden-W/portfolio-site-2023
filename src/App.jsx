@@ -2,18 +2,36 @@ import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import MyScene from "./experiences/MyScene";
 import Opening from "./components/Opening";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Perf } from "r3f-perf";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 import appStateManager from "./utils/appStateManager";
-import Div100vh from "react-div-100vh";
 
 function App() {
 	const canvasContainerRef = useRef();
+	const wrapperRef = useRef();
+
+	useEffect(() => {
+		const updateHeight = () => {
+			wrapperRef.current.style.height = `${window.innerHeight}px`;
+		};
+		const disablePinch = (e) => {
+			if (e.touches.length > 1) {
+				e.preventDefault();
+			}
+		};
+		window.addEventListener("resize", updateHeight, true);
+		wrapperRef.current.addEventListener("touchstart", disablePinch, true);
+		wrapperRef.current.addEventListener("touchmove", disablePinch, true);
+
+		return () => {
+			window.removeEventListener("resize", updateHeight, true);
+		};
+	}, []);
 
 	return (
-		<Div100vh>
+		<div ref={wrapperRef}>
 			<WorksArea />
 			<InfoArea />
 			<div
@@ -40,7 +58,7 @@ function App() {
 				</Canvas>
 			</div>
 			<Opening />
-		</Div100vh>
+		</div>
 	);
 }
 

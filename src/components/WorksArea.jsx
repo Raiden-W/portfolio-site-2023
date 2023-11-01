@@ -12,6 +12,7 @@ function WorksArea() {
 	const containerRef = useRef();
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
+	const [allVideosSt, setAllVideosSt] = useState();
 
 	const { worksDataSt } = useGetWorks();
 
@@ -36,11 +37,24 @@ function WorksArea() {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (worksDataSt.length > 0) {
+			const allVideos = containerRef.current.querySelectorAll("video");
+			setAllVideosSt(allVideos);
+		}
+	}, [worksDataSt]);
+
 	const foldOtherWorks = () => {
 		Array.from(containerRef.current.children).forEach((e) => {
 			if (e.classList.contains("unfold")) {
 				e.classList.replace("unfold", "fold");
 			}
+		});
+	};
+
+	const stopAllVideos = () => {
+		allVideosSt.forEach((video) => {
+			video.pause();
 		});
 	};
 
@@ -69,6 +83,7 @@ function WorksArea() {
 					{worksDataSt.map((workData) => (
 						<Work
 							windowWidth={windowWidthSt}
+							worksAreaWidth={worksAreaWidthSt}
 							key={workData.id}
 							workId={workData.id}
 							title={workData.title}
@@ -78,6 +93,7 @@ function WorksArea() {
 							externalLinks={workData.externalLinks}
 							mediaSet={workData.mediaSet}
 							foldOtherWorks={foldOtherWorks}
+							stopAllVideos={stopAllVideos}
 						/>
 					))}
 				</div>

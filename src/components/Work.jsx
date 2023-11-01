@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import "./Work.scss";
 import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
@@ -17,23 +17,45 @@ function Work({
 	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
 	externalLinks = [],
 	windowWidth,
+	worksAreaWidth,
 	foldOtherWorks,
+	stopAllVideos,
 }) {
 	const mediaContainerRef = useRef();
 	const borderLeftRef = useRef(-300);
+	const borderRightRef = useRef(0);
 	const mediaOffsetXRef = useRef(0);
+	const mediaContainerWidthRef = useRef(0);
 
 	const workRef = useRef();
+	const videosRef = useRef();
 
-	const mediaContainerWidth = useMemo(
-		() =>
-			mediaContainerRef.current
-				? Number(
-						getComputedStyle(mediaContainerRef.current).width.replace("px", "")
-				  )
-				: 300,
-		[mediaContainerRef.current]
-	);
+	useEffect(() => {
+		videosRef.current = mediaContainerRef.current.querySelectorAll("video");
+	}, []);
+
+	useEffect(() => {
+		if (worksAreaWidth > 50) {
+			const mediaContainerWidth = Number(
+				getComputedStyle(mediaContainerRef.current).width.replace("px", "")
+			);
+			mediaContainerWidthRef.current = mediaContainerWidth;
+		}
+	}, [windowWidth, worksAreaWidth]);
+
+	useEffect(() => {
+		const diff = mediaContainerWidthRef.current - 60 * 0.01 * windowWidth;
+		if (diff >= -mediaOffsetMargin * 2) {
+			borderLeftRef.current = -diff - mediaOffsetMargin;
+			borderRightRef.current = 0;
+		} else {
+			borderLeftRef.current = 0;
+			borderRightRef.current = -diff - mediaOffsetMargin;
+		}
+		if (mediaOffsetXRef.current < borderLeftRef.current) {
+			smoothTo(borderLeftRef.current);
+		}
+	}, [windowWidth, mediaContainerWidthRef.current]);
 
 	const smoothTo = useMemo(() => {
 		if (mediaContainerRef.current) {
@@ -44,16 +66,6 @@ function Work({
 		} else return () => {};
 	}, [mediaContainerRef.current]);
 
-	useEffect(() => {
-		borderLeftRef.current = -(
-			mediaContainerWidth -
-			60 * 0.01 * window.innerWidth
-		);
-		if (mediaOffsetXRef.current < borderLeftRef.current - mediaOffsetMargin) {
-			smoothTo(borderLeftRef.current - mediaOffsetMargin);
-		}
-	}, [mediaContainerWidth, windowWidth]);
-
 	const bind = useDrag(
 		({ offset: [ox] }) => {
 			smoothTo(ox);
@@ -62,8 +74,8 @@ function Work({
 		{
 			bounds: () => {
 				return {
-					left: borderLeftRef.current - mediaOffsetMargin,
-					right: 0,
+					left: borderLeftRef.current,
+					right: borderRightRef.current,
 				};
 			},
 			rubberband: 0.2,
@@ -72,11 +84,21 @@ function Work({
 
 	const handleDropDown = () => {
 		const classList = workRef.current.classList;
+		//open this work
 		if (classList.contains("fold")) {
+			//close other works and stop all videos
 			foldOtherWorks();
+			stopAllVideos();
+
 			classList.replace("fold", "unfold");
+			videosRef.current.forEach((video) => {
+				video.play();
+			});
 		} else {
 			classList.replace("unfold", "fold");
+			videosRef.current.forEach((video) => {
+				video.pause();
+			});
 		}
 	};
 
@@ -105,7 +127,7 @@ function Work({
 						{mediaSet.map((media) => (
 							<div key={media.id} className="work__media-set-container-item">
 								{media.type === "video" ? (
-									<video muted autoPlay loop src={media.url} />
+									<video muted loop src={media.url} />
 								) : (
 									<img
 										draggable="false"
