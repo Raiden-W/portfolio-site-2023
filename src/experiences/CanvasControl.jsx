@@ -28,8 +28,8 @@ export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
 	});
 
 	const pauseSmoothCamera = () => {
-		smoothCameraX.tween.pause(0);
-		smoothCameraY.tween.pause(0);
+		smoothCameraX.tween.pause();
+		smoothCameraY.tween.pause();
 	};
 
 	const resumeSmoothCamera = () => {
