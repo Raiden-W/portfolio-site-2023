@@ -9,6 +9,7 @@ import { useSelector } from "@xstate/react";
 
 export default function Cloth({ setGeo, setMat }) {
 	const viewport = useThree((state) => state.viewport);
+	const camera = useThree((state) => state.camera);
 
 	const initParticlePos = useRef([]);
 
@@ -27,7 +28,7 @@ export default function Cloth({ setGeo, setMat }) {
 
 	const clothPhysics = useMemo(() => {
 		const world = new CANNON.World();
-		world.gravity.set(0, 0, -2);
+		world.gravity.set(0, -2, 0);
 		//defualt iteration number is 10
 		world.solver.iterations = 8;
 		world.allowSleep = true;
@@ -128,7 +129,7 @@ export default function Cloth({ setGeo, setMat }) {
 
 	const clothMat = useMemo(() => {
 		return new THREE.MeshPhongMaterial({
-			specular: "#6c6c6c",
+			specular: "#808080",
 			shininess: 18,
 			side: THREE.DoubleSide,
 			emissive: "#000000",
@@ -217,6 +218,16 @@ export default function Cloth({ setGeo, setMat }) {
 				});
 			}
 		}
+		gsap.to(camera.position, {
+			y: 2,
+			duration: 0.5,
+			delay: 0.3,
+		});
+		gsap.to(camera.rotation, {
+			x: -Math.PI / 10,
+			duration: 0.5,
+			delay: 0.3,
+		});
 		gsap.to(clothMat.emissive, {
 			r: 1,
 			b: 1,
@@ -242,11 +253,11 @@ export default function Cloth({ setGeo, setMat }) {
 
 			if (currState === "Cloth Falling") {
 				if (
-					staticParticle.position.z < -1 ||
+					// staticParticle.position.z < -1 ||
 					staticParticle.position.x > viewport.width * 0.6 ||
 					staticParticle.position.x < viewport.width * -0.6 ||
-					staticParticle.position.y > viewport.height * 0.7 ||
-					staticParticle.position.y < viewport.height * -0.7
+					staticParticle.position.y > viewport.height * 0.5 ||
+					staticParticle.position.y < viewport.height * -0.5
 				) {
 					clothToSquareGeoTrans();
 					appStateManager.send("cloth nearly out");

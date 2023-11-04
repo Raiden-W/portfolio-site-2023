@@ -64,9 +64,11 @@ export default function Opening() {
 			const style = window.getComputedStyle(ele);
 			const matrix = new WebKitCSSMatrix(style.transform);
 			const translateX = matrix.m41;
-			const translateY = matrix.m42;
-			const transform = `translateX(${translateX}px) translateY(${translateY}px)`;
-			pEleClonedList[i].style.transform = transform;
+			// const translateY = matrix.m42;
+			const caculatedTransform = `translateX(${translateX}px)`;
+			pEleClonedList[i].style.transform = caculatedTransform;
+			pEleClonedList[i].style.color = style.color;
+			pEleClonedList[i].style.top = "0";
 		});
 
 		let canvas = null;
@@ -86,7 +88,7 @@ export default function Opening() {
 		const textLinesNum = openingRef.current.children.length;
 		const totalHeight = Math.max(400, window.innerHeight);
 		openingRef.current.style.fontSize = `${
-			(totalHeight / textLinesNum) * 0.9
+			(totalHeight / textLinesNum) * 0.8
 		}px`;
 	}, []);
 
@@ -99,7 +101,7 @@ export default function Opening() {
 		});
 
 		// handleHeightChange();
-		// window.addEventListener("resize", handleHeightChange, true);
+		window.addEventListener("resize", handleHeightChange, true);
 
 		appStateManager.send("init some context", {
 			openningDom: openingRef.current,
@@ -111,7 +113,7 @@ export default function Opening() {
 			<div
 				className="opening scroll"
 				ref={openingRef}
-				style={{ fontSize: `${(window.innerHeight / 5) * 0.9}px` }}
+				style={{ fontSize: `${(window.innerHeight / 7) * 0.8}px` }}
 			>
 				<div className="opening__text">
 					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
@@ -133,32 +135,32 @@ export default function Opening() {
 				</div>
 				<div className="opening__text grabable">
 					<p>
-						tear - off - grab - <span>click</span> - tear - off - grab -{" "}
-						<span>click</span> -&nbsp;
+						grab - click - <span>tear - off</span> - grab - click -{" "}
+						<span>tear - off</span> -&nbsp;
 					</p>
 					<p>
-						tear - off - grab - <span>click</span> - tear - off - grab -{" "}
-						<span>click</span> -&nbsp;
+						grab - click - <span>tear - off</span> - grab - click -{" "}
+						<span>tear - off</span> -&nbsp;
 					</p>
 				</div>
 				<div className="opening__text">
 					<p>throw it into 3D why stay in a 2D plane while you can&nbsp;</p>
 					<p>throw it into 3D why stay in a 2D plane while you can&nbsp;</p>
 				</div>
-				{/* <div className="opening__text grabable">
+				<div className="opening__text grabable">
 					<p>
-						<span>click</span> - tear - off - grab - <span>click</span> - tear -
-						off - grab -&nbsp;
+						<span>grab</span> - click - tear - off - <span>grab</span> - click -
+						tear - off -&nbsp;
 					</p>
 					<p>
-						<span>click</span> - tear - off - grab - <span>click</span> - tear -
-						off - grab -&nbsp;
+						<span>grab</span> - click - tear - off - <span>grab</span> - click -
+						tear - off -&nbsp;
 					</p>
 				</div>
 				<div className="opening__text">
 					<p>in a 2D plane while you can throw it into 3D why stay&nbsp;</p>
 					<p>in a 2D plane while you can throw it into 3D why stay&nbsp;</p>
-				</div> */}
+				</div>
 			</div>
 		</>
 	);
