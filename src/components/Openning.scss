@@ -5,7 +5,6 @@
 	justify-content: space-between;
 	align-items: center;
 
-	// font-size: 18vh;
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -15,14 +14,14 @@
 	font-family: "Koulen", sans-serif;
 
 	&__text {
-		display: flex;
 		flex-grow: 1;
-		justify-content: left;
-		align-items: center;
 		width: 100%;
+		// height: 100%;
 		position: relative;
 		color: white;
 		background-color: #acacac;
+		padding-top: auto;
+		padding-bottom: auto;
 		cursor: default;
 
 		&:not(:last-child)::after {
@@ -30,7 +29,7 @@
 			position: absolute;
 			bottom: 0;
 			width: 100%;
-			height: 0.3vh;
+			min-height: 1.5px;
 			background-color: #9c9c9c;
 		}
 
@@ -44,55 +43,56 @@
 		}
 	}
 
-	span {
+	p {
 		line-height: 100%;
 		overflow-y: clip;
 		white-space: nowrap;
-		text-transform: uppercase;
+		position: absolute;
+		top: 50%;
+
+		span {
+			color: rgb(238, 238, 0);
+		}
 	}
 
 	&.scroll &__text {
 		&:nth-child(odd) {
-			span:nth-child(1) {
-				animation: loop-scroll-1 60s linear infinite;
-				animation-delay: -60s;
-				animation-direction: normal;
+			p:nth-child(1) {
+				animation: loop-scroll-1 30s linear infinite;
+				animation-delay: 0;
 			}
-			span:nth-child(2) {
-				animation: loop-scroll-2 60s linear infinite;
-				animation-delay: -30s;
-				animation-direction: normal;
+			p:nth-child(2) {
+				animation: loop-scroll-2 30s linear infinite;
+				animation-delay: 0;
 			}
 		}
-
 		&:nth-child(even) {
-			span:nth-child(1) {
-				animation: loop-scroll-1 80s linear infinite;
-				animation-delay: -80s;
+			p:nth-child(1) {
+				animation: loop-scroll-1 40s linear infinite;
 				animation-direction: reverse;
 			}
-			span:nth-child(2) {
-				animation: loop-scroll-2 80s linear infinite;
-				animation-delay: -40s;
+			p:nth-child(2) {
+				animation: loop-scroll-2 40s linear infinite;
 				animation-direction: reverse;
 			}
 		}
 	}
-}
 
-@keyframes loop-scroll-1 {
-	0% {
-		transform: translateX(100%);
+	@keyframes loop-scroll-1 {
+		0% {
+			transform: translateX(0%) translateY(-50%);
+		}
+		100% {
+			transform: translateX(-100%) translateY(-50%);
+		}
 	}
-	100% {
-		transform: translateX(-100%);
-	}
-}
-@keyframes loop-scroll-2 {
-	0% {
-		transform: translateX(0);
-	}
-	100% {
-		transform: translateX(-200%);
+
+	@keyframes loop-scroll-2 {
+		0% {
+			transform: translateX(100%) translateY(-50%);
+		}
+		100% {
+			transform: translateX(0%) translateY(-50%);
+		}
 	}
 }

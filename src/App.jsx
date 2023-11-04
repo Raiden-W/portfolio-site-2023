@@ -3,7 +3,7 @@ import * as THREE from "three";
 import MyScene from "./experiences/MyScene";
 import Opening from "./components/Opening";
 import { useEffect, useRef } from "react";
-import { Perf } from "r3f-perf";
+// import { Perf } from "r3f-perf";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 import appStateManager from "./utils/appStateManager";
@@ -18,6 +18,7 @@ function App() {
 		};
 		const disablePinch = (e) => {
 			if (e.touches.length > 1) {
+				e.stopPropagation();
 				e.preventDefault();
 			}
 		};

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import "./Work.scss";
 import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
