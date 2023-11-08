@@ -52,6 +52,15 @@ video {
 	background-color: darkgray;
 	opacity: 1;
 	visibility: visible;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	p {
+		color: rgb(227, 227, 227);
+		font-size: 0.9rem;
+		font-weight: 800;
+	}
 }
 
 .loading-page.loaded {

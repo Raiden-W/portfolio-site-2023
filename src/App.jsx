@@ -8,6 +8,7 @@ import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 import LoadingPage from "./components/LoadingPage";
 import appStateManager from "./utils/appStateManager";
+import { useGetTest } from "./utils/serviceHooks";
 
 const fontFace = new FontFace("Koulen", "url(/font/Koulen/Koulen-Regular.ttf)");
 document.fonts.add(fontFace);
@@ -16,6 +17,7 @@ function App() {
 	const canvasContainerRef = useRef();
 	const wrapperRef = useRef();
 
+	const { testSt } = useGetTest();
 	const [fontLoadedSt, setFontLoaded] = useState(false);
 
 	const loadFont = async () => {
@@ -46,33 +48,37 @@ function App() {
 
 	return (
 		<div ref={wrapperRef}>
-			<WorksArea />
-			<InfoArea />
-			<div
-				className="canvas-container"
-				ref={canvasContainerRef}
-				onClick={() => {
-					appStateManager.send("canvas click");
-				}}
-			>
-				<Canvas
-					camera={{
-						fov: 50,
-						near: 0.1,
-						far: 500,
-						position: [0, 0, 4.5],
-					}}
-					gl={{
-						outputColorSpace: "srgb-linear",
-						toneMapping: THREE.LinearToneMapping,
-					}}
-				>
-					{/* <Perf position="top-left" /> */}
-					<MyScene canvasContainerRef={canvasContainerRef} />
-				</Canvas>
-			</div>
+			{testSt && (
+				<>
+					<WorksArea />
+					<InfoArea />
+					<div
+						className="canvas-container"
+						ref={canvasContainerRef}
+						onClick={() => {
+							appStateManager.send("canvas click");
+						}}
+					>
+						<Canvas
+							camera={{
+								fov: 50,
+								near: 0.1,
+								far: 500,
+								position: [0, 0, 4.5],
+							}}
+							gl={{
+								outputColorSpace: "srgb-linear",
+								toneMapping: THREE.LinearToneMapping,
+							}}
+						>
+							{/* <Perf position="top-left" /> */}
+							<MyScene canvasContainerRef={canvasContainerRef} />
+						</Canvas>
+					</div>
+				</>
+			)}
 			{fontLoadedSt && <Opening />}
-			<LoadingPage fontLoadedSt={fontLoadedSt} />
+			<LoadingPage fontLoadedSt={fontLoadedSt} testSt={testSt} />
 		</div>
 	);
 }

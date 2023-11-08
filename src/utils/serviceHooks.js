@@ -28,6 +28,22 @@ const useFetch = (url) => {
 	return { dataSt, errorSt, loadingSt };
 };
 
+const useGetTest = () => {
+	const [testSt, setTest] = useState();
+
+	const { dataSt, errorSt, loadingSt } = useFetch(
+		`${import.meta.env.VITE_BASE_API_URL}/api/test`
+	);
+
+	useEffect(() => {
+		if (dataSt) {
+			setTest(true);
+		}
+	}, [dataSt]);
+
+	return { testSt, errorSt, loadingSt };
+};
+
 const getHeroImagesQuery = stringify({
 	populate: {
 		works: {
@@ -211,4 +227,4 @@ const useGetInfo = () => {
 	return { infoDataSt, errorSt, loadingSt };
 };
 
-export { useGetWorks, useGetHeroImages, useGetInfo };
+export { useGetWorks, useGetHeroImages, useGetInfo, useGetTest };
