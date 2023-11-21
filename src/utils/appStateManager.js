@@ -333,10 +333,10 @@ export const machine = createMachine(
 				workAreaActive: () => false,
 			}),
 			"assign info area active": assign({
-				workInfoActive: () => true,
+				infoAreaActive: () => true,
 			}),
 			"assign info area inactive": assign({
-				workInfoActive: () => false,
+				infoAreaActive: () => false,
 			}),
 
 			"add point track": (ctx) => {
