@@ -45,6 +45,7 @@ $padding-side: 1.5rem;
 			font-family: "Oswald", sans-serif;
 			font-size: 3rem;
 			font-weight: 500;
+			max-width: 85%;
 		}
 
 		&-arrow {
@@ -55,6 +56,13 @@ $padding-side: 1.5rem;
 		&:hover &-arrow {
 			opacity: 1;
 			transition: 300ms 100ms;
+		}
+
+		@include respond(phone) {
+			padding: 0.8rem $padding-side 1rem $padding-side;
+			&-title {
+				font-size: 2rem;
+			}
 		}
 	}
 
@@ -134,7 +142,7 @@ $padding-side: 1.5rem;
 
 	&__media-set {
 		position: relative;
-		padding: 1rem $padding-side;
+		padding: 0 $padding-side 0.8rem $padding-side;
 		touch-action: none;
 		cursor: grab;
 

@@ -147,7 +147,7 @@ export default function CanvasControl({
 				0.5;
 			squareMeshRef.current.position.y = -newPosY;
 			squareMeshRef.current.position.x = 0;
-			squareMeshRef.current.scale.setScalar(0.7);
+			squareMeshRef.current.scale.setScalar(0.65);
 		} else {
 			const newPosX =
 				viewport.getCurrentViewport().width *

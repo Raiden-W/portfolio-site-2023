@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./WorksArea.scss";
 import { useGetWorks } from "../utils/serviceHooks";
 import SimpleBar from "simplebar-react";
@@ -7,6 +7,7 @@ import Work from "./Work";
 import arrowIcon from "../assets/arrow.svg";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
+import gsap from "gsap";
 
 function WorksArea(props) {
 	const containerRef = useRef();
@@ -14,6 +15,7 @@ function WorksArea(props) {
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
 	const [allVideosSt, setAllVideosSt] = useState();
+	const [ifAnyUnfoldSt, setIfAnyUnfold] = useState(false);
 
 	const { worksDataSt } = useGetWorks();
 
@@ -39,6 +41,13 @@ function WorksArea(props) {
 	}, []);
 
 	useEffect(() => {
+		if (!workAreaActiveSt) {
+			foldOtherWorks();
+			setIfAnyUnfold(false);
+		}
+	}, [workAreaActiveSt]);
+
+	useEffect(() => {
 		if (worksDataSt.length > 0) {
 			const allVideos = containerRef.current.querySelectorAll("video");
 			setAllVideosSt(allVideos);
@@ -61,7 +70,7 @@ function WorksArea(props) {
 
 	return (
 		<div className="works-area" ref={areaRef}>
-			<Resize areaRef={areaRef} {...props} />
+			<Resize areaRef={areaRef} ifAnyUnfold={ifAnyUnfoldSt} {...props} />
 			<div
 				className="works-area__bar"
 				onClick={() => {
@@ -80,8 +89,9 @@ function WorksArea(props) {
 					<img src={arrowIcon} alt="arrow icon" />
 				</div>
 			</div>
-			<div className="works-area__container" ref={containerRef}>
-				<SimpleBar style={{ maxHeight: "100%" }}>
+
+			<SimpleBar style={{ height: "100%" }}>
+				<div className="works-area__container" ref={containerRef}>
 					{worksDataSt.map((workData) => (
 						<Work
 							windowWidth={windowWidthSt}
@@ -95,19 +105,20 @@ function WorksArea(props) {
 							externalLinks={workData.externalLinks}
 							mediaSet={workData.mediaSet}
 							foldOtherWorks={foldOtherWorks}
+							setIfAnyUnfold={setIfAnyUnfold}
 							stopAllVideos={stopAllVideos}
 							{...props}
 						/>
 					))}
-				</SimpleBar>
-			</div>
+				</div>
+			</SimpleBar>
 		</div>
 	);
 }
 
 export default WorksArea;
 
-const Resize = ({ areaRef, ifVertical }) => {
+const Resize = ({ areaRef, ifVertical, ifAnyUnfold }) => {
 	const worksAreaWidthSt = useSelector(
 		appStateManager,
 		(s) => s.context.worksAreaWidth
@@ -118,10 +129,22 @@ const Resize = ({ areaRef, ifVertical }) => {
 			areaRef.current.style.width = `${worksAreaWidthSt}%`;
 			areaRef.current.style.height = "100%";
 		} else {
-			areaRef.current.style.height = `${worksAreaWidthSt}%`;
+			if (ifAnyUnfold) {
+				gsap.to(areaRef.current.style, {
+					height: `${worksAreaWidthSt / 0.6}%`,
+					duration: 0.3,
+					delay: 1.2,
+					ease: "power4.in",
+				});
+			} else {
+				gsap.to(areaRef.current.style, {
+					height: `${worksAreaWidthSt}%`,
+					duration: 0.3,
+				});
+			}
 			areaRef.current.style.width = "100%";
 		}
-	}, [worksAreaWidthSt, ifVertical]);
+	}, [worksAreaWidthSt, ifVertical, ifAnyUnfold]);
 
 	return null;
 };

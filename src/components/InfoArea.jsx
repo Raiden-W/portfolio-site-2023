@@ -101,7 +101,7 @@ function InfoArea(props) {
 				</div>
 			</div>
 			<div className="info-area__container" ref={containerRef}>
-				<SimpleBar style={{ maxHeight: "100%" }}>
+				<SimpleBar style={{ height: "100%" }}>
 					{infoDataSt && (
 						<div className="info">
 							<h2 className="info__header">{infoDataSt.title}</h2>

@@ -20,6 +20,7 @@ function Work({
 	ifVertical,
 	workAreaActive,
 	foldOtherWorks,
+	setIfAnyUnfold,
 	stopAllVideos,
 }) {
 	const mediaContainerRef = useRef();
@@ -90,14 +91,17 @@ function Work({
 		if (classList.contains("fold")) {
 			//close other works and stop all videos
 			foldOtherWorks();
+			setIfAnyUnfold(true);
 			stopAllVideos();
 
 			classList.replace("fold", "unfold");
 			videosRef.current.forEach((video) => {
 				video.play();
 			});
+			//close this work
 		} else {
 			classList.replace("unfold", "fold");
+			setIfAnyUnfold(false);
 			videosRef.current.forEach((video) => {
 				video.pause();
 			});
