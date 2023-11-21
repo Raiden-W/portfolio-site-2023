@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import "./InfoArea.scss";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
@@ -13,15 +13,16 @@ const controlRadius = 100;
 const joystickRadius = controlRadius * 0.65;
 const restrictDist = controlRadius - joystickRadius;
 
-function InfoArea() {
+function InfoArea(props) {
 	const containerRef = useRef();
 	const joystickRef = useRef();
+	const areaRef = useRef();
 
 	const { infoDataSt } = useGetInfo();
 
-	const infoAreaWidthSt = useSelector(
+	const infoAreaActiveSt = useSelector(
 		appStateManager,
-		(s) => s.context.infoAreaWidth
+		(s) => s.context.infoAreaActive
 	);
 
 	useEffect(() => {
@@ -79,7 +80,8 @@ function InfoArea() {
 	});
 
 	return (
-		<div className="info-area" style={{ width: `${infoAreaWidthSt}%` }}>
+		<div className="info-area" ref={areaRef}>
+			<Resize areaRef={areaRef} {...props} />
 			<div
 				className="info-area__bar"
 				onClick={() => {
@@ -89,7 +91,7 @@ function InfoArea() {
 				<span>about</span>
 				<div
 					className={
-						infoAreaWidthSt > 0
+						infoAreaActiveSt
 							? "info-area__bar-arrow unfold"
 							: "info-area__bar-arrow"
 					}
@@ -161,3 +163,22 @@ function InfoArea() {
 }
 
 export default InfoArea;
+
+const Resize = ({ areaRef, ifVertical }) => {
+	const infoAreaWidthSt = useSelector(
+		appStateManager,
+		(s) => s.context.infoAreaWidth
+	);
+
+	useEffect(() => {
+		if (!ifVertical) {
+			areaRef.current.style.width = `${infoAreaWidthSt}%`;
+			areaRef.current.style.height = "100%";
+		} else {
+			areaRef.current.style.height = `${infoAreaWidthSt * 1.5}%`;
+			areaRef.current.style.width = "100%";
+		}
+	}, [infoAreaWidthSt, ifVertical]);
+
+	return null;
+};

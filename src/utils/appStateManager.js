@@ -11,6 +11,8 @@ export const machine = createMachine(
 			worksAreaWidth: 0,
 			canvasWidth: 100,
 			infoAreaWidth: 0,
+			workAreaActive: false,
+			infoAreaActive: false,
 			animTasks: { canvasDone: false, areaDone: false },
 			imageTransition: { done: true, latestWorkId: 1 },
 		},
@@ -101,7 +103,11 @@ export const machine = createMachine(
 				},
 			},
 			"Jet Idle/ Aeras Closed": {
-				entry: "add point track",
+				entry: [
+					"add point track",
+					"assign work area inactive",
+					"assign info area inactive",
+				],
 				on: {
 					"works bar click": {
 						target: "Jet To Square/ Work Areas Opening",
@@ -164,7 +170,11 @@ export const machine = createMachine(
 				},
 			},
 			"Square Idle/ Work Areas Opened": {
-				entry: "set work square",
+				entry: [
+					"set work square",
+					"assign work area active",
+					"assign info area inactive",
+				],
 				on: {
 					"info bar click": {
 						target: "Info Areas Opening",
@@ -181,7 +191,11 @@ export const machine = createMachine(
 				},
 			},
 			"Square Idle/ Info Areas Opened": {
-				entry: "set info sqaure",
+				entry: [
+					"set info sqaure",
+					"assign info area active",
+					"assign work area inactive",
+				],
 				exit: "freeze profile",
 				on: {
 					"canvas click": {
@@ -310,6 +324,19 @@ export const machine = createMachine(
 				worksAreaWidth: (_, event) => event.worksAreaWidth,
 				canvasWidth: (_, event) => event.canvasWidth,
 				infoAreaWidth: (_, event) => event.infoAreaWidth,
+			}),
+
+			"assign work area active": assign({
+				workAreaActive: () => true,
+			}),
+			"assign work area inactive": assign({
+				workAreaActive: () => false,
+			}),
+			"assign info area active": assign({
+				workInfoActive: () => true,
+			}),
+			"assign info area inactive": assign({
+				workInfoActive: () => false,
 			}),
 
 			"add point track": (ctx) => {

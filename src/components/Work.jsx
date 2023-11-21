@@ -17,7 +17,8 @@ function Work({
 	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
 	externalLinks = [],
 	windowWidth,
-	worksAreaWidth,
+	ifVertical,
+	workAreaActive,
 	foldOtherWorks,
 	stopAllVideos,
 }) {
@@ -35,16 +36,17 @@ function Work({
 	}, []);
 
 	useEffect(() => {
-		if (worksAreaWidth > 50) {
-			const mediaContainerWidth = Number(
-				getComputedStyle(mediaContainerRef.current).width.replace("px", "")
-			);
-			mediaContainerWidthRef.current = mediaContainerWidth;
-		}
-	}, [windowWidth, worksAreaWidth]);
+		const mediaContainerWidth = Number(
+			getComputedStyle(mediaContainerRef.current).width.replace("px", "")
+		);
+		mediaContainerWidthRef.current = mediaContainerWidth;
+	}, [windowWidth, workAreaActive, ifVertical]);
 
 	useEffect(() => {
-		const diff = mediaContainerWidthRef.current - 60 * 0.01 * windowWidth;
+		const diff = ifVertical
+			? mediaContainerWidthRef.current - windowWidth
+			: mediaContainerWidthRef.current - 60 * 0.01 * windowWidth;
+
 		if (diff >= -mediaOffsetMargin * 2) {
 			borderLeftRef.current = -diff - mediaOffsetMargin;
 			borderRightRef.current = 0;
@@ -55,7 +57,7 @@ function Work({
 		if (mediaOffsetXRef.current < borderLeftRef.current) {
 			smoothTo(borderLeftRef.current);
 		}
-	}, [windowWidth, mediaContainerWidthRef.current]);
+	}, [windowWidth, mediaContainerWidthRef.current, workAreaActive, ifVertical]);
 
 	const smoothTo = useMemo(() => {
 		if (mediaContainerRef.current) {
@@ -64,7 +66,7 @@ function Work({
 				ease: "circ",
 			});
 		} else return () => {};
-	}, [mediaContainerRef.current]);
+	}, [mediaContainerRef.current, workAreaActive, ifVertical]);
 
 	const bind = useDrag(
 		({ offset: [ox] }) => {

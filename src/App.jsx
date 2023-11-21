@@ -9,9 +9,12 @@ import InfoArea from "./components/InfoArea";
 import LoadingPage from "./components/LoadingPage";
 import appStateManager from "./utils/appStateManager";
 import { useGetTest } from "./utils/serviceHooks";
+import "./App.scss";
 
 const fontFace = new FontFace("Koulen", "url(/font/Koulen/Koulen-Regular.ttf)");
 document.fonts.add(fontFace);
+
+const breakWidth = 50; //unit - em
 
 function App() {
 	const canvasContainerRef = useRef();
@@ -19,6 +22,7 @@ function App() {
 
 	const { testSt } = useGetTest();
 	const [fontLoadedSt, setFontLoaded] = useState(false);
+	const [ifVerticalSt, setIfVertical] = useState(false);
 
 	const loadFont = async () => {
 		await fontFace.load();
@@ -28,30 +32,38 @@ function App() {
 	useEffect(() => {
 		loadFont();
 
-		const updateHeight = () => {
+		const handleResize = () => {
 			wrapperRef.current.style.height = `${window.innerHeight}px`;
+
+			const portrait = window.matchMedia("(orientation: portrait)").matches;
+			if (portrait || window.innerWidth <= breakWidth * 16) {
+				setIfVertical(true);
+			} else {
+				setIfVertical(false);
+			}
 		};
+
 		const disablePinch = (e) => {
 			if (e.touches.length > 1) {
 				e.stopPropagation();
 				e.preventDefault();
 			}
 		};
-		window.addEventListener("resize", updateHeight, true);
+		window.addEventListener("resize", handleResize, true);
 		wrapperRef.current.addEventListener("touchstart", disablePinch, true);
 		wrapperRef.current.addEventListener("touchmove", disablePinch, true);
 
 		return () => {
-			window.removeEventListener("resize", updateHeight, true);
+			window.removeEventListener("resize", handleResize, true);
 		};
 	}, []);
 
 	return (
-		<div ref={wrapperRef}>
+		<div ref={wrapperRef} className="app-wrapper">
 			{testSt && (
 				<>
-					<WorksArea />
-					<InfoArea />
+					<WorksArea ifVertical={ifVerticalSt} />
+					<InfoArea ifVertical={ifVerticalSt} />
 					<div
 						className="canvas-container"
 						ref={canvasContainerRef}
@@ -72,7 +84,10 @@ function App() {
 							}}
 						>
 							{/* <Perf position="top-left" /> */}
-							<MyScene canvasContainerRef={canvasContainerRef} />
+							<MyScene
+								canvasContainerRef={canvasContainerRef}
+								ifVertical={ifVerticalSt}
+							/>
 						</Canvas>
 					</div>
 				</>

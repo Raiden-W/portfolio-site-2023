@@ -121,12 +121,12 @@ export default function Opening() {
 				</div>
 				<div className="opening__text grabable">
 					<p>
-						grab - <span>click</span> - tear - off - grab - <span>click</span> -
-						tear - off -&nbsp;
+						<span>click</span> - tear - off - grab - <span>click</span> - tear -
+						off - grab - &nbsp;
 					</p>
 					<p>
-						grab - <span>click</span> - tear - off - grab - <span>click</span> -
-						tear - off -&nbsp;
+						<span>click</span> - tear - off - grab - <span>click</span> - tear -
+						off - grab - &nbsp;
 					</p>
 				</div>
 				<div className="opening__text">
@@ -149,12 +149,12 @@ export default function Opening() {
 				</div>
 				<div className="opening__text grabable">
 					<p>
-						<span>grab</span> - click - tear - off - <span>grab</span> - click -
-						tear - off -&nbsp;
+						off - <span>grab</span> - click - tear - off - <span>grab</span> -
+						click - tear -&nbsp;
 					</p>
 					<p>
-						<span>grab</span> - click - tear - off - <span>grab</span> - click -
-						tear - off -&nbsp;
+						off - <span>grab</span> - click - tear - off - <span>grab</span> -
+						click - tear -&nbsp;
 					</p>
 				</div>
 				<div className="opening__text">

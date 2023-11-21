@@ -4,7 +4,11 @@ import { useSelector } from "@xstate/react";
 import { useCallback, useEffect } from "react";
 import gsap from "gsap";
 
-export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
+export default function CanvasControl({
+	canvasContainerRef,
+	squareMeshRef,
+	ifVertical,
+}) {
 	const setSize = useThree((s) => s.setSize);
 	const viewport = useThree((s) => s.viewport);
 	const camera = useThree((s) => s.camera);
@@ -135,13 +139,26 @@ export default function CanvasControl({ canvasContainerRef, squareMeshRef }) {
 		// canvasContainerRef.current.style.left = `${worksAreaWidthSt}%`;
 
 		//# cheap solution deals with mesh pos
-		const newPosX =
-			viewport.getCurrentViewport().width *
-			(worksAreaWidthSt - infoAreaWidthSt) *
-			0.01 *
-			0.5;
-		squareMeshRef.current.position.x = newPosX;
-	}, [worksAreaWidthSt, infoAreaWidthSt, viewport]);
+		if (ifVertical) {
+			const newPosY =
+				viewport.getCurrentViewport().height *
+				(worksAreaWidthSt - infoAreaWidthSt * 1.5) *
+				0.01 *
+				0.5;
+			squareMeshRef.current.position.y = -newPosY;
+			squareMeshRef.current.position.x = 0;
+			squareMeshRef.current.scale.setScalar(0.7);
+		} else {
+			const newPosX =
+				viewport.getCurrentViewport().width *
+				(worksAreaWidthSt - infoAreaWidthSt) *
+				0.01 *
+				0.5;
+			squareMeshRef.current.position.x = newPosX;
+			squareMeshRef.current.position.y = 0;
+			squareMeshRef.current.scale.setScalar(1);
+		}
+	}, [worksAreaWidthSt, infoAreaWidthSt, viewport, ifVertical]);
 
 	return <></>;
 }

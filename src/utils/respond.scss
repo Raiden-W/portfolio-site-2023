@@ -1,0 +1,34 @@
+/* 
+Media Query Manager - 
+0 - 600px : Phone
+600px - 1200px : Tablet
+1200px + : Desktop (NORMAL)
+
+0 - 800px : Vertical
+800px + : Horizontal (NORMAL)
+
+$breakpoint arguments:
+- phone
+- tablet
+- verti
+*/
+@mixin respond($breakpoint) {
+	@if $breakpoint == phone {
+		@media (max-width: 37.5em) {
+			//600px
+			@content;
+		}
+	}
+	@if $breakpoint == tablet {
+		@media (max-width: 75em) {
+			//1200px
+			@content;
+		}
+	}
+	@if $breakpoint == verti {
+		@media (max-width: 50em), (orientation: portrait) {
+			//800px
+			@content;
+		}
+	}
+}

@@ -6,6 +6,13 @@
 	position: relative;
 	z-index: 1;
 
+	@include respond(verti) {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		height: 60%;
+	}
+
 	&__bar {
 		position: absolute;
 		background-color: white;
@@ -22,12 +29,28 @@
 		z-index: 1;
 		cursor: pointer;
 
+		@include respond(verti) {
+			width: 100%;
+			height: 1.5rem;
+			bottom: 100%;
+			right: 0;
+			flex-direction: row;
+			border-radius: 1.2rem 1.2rem 0 0;
+		}
+
 		span {
 			font-size: 0.8rem;
 			font-weight: 600;
 			color: rgb(25, 25, 25);
 			writing-mode: vertical-rl;
 			margin-top: 2.5rem;
+
+			@include respond(verti) {
+				writing-mode: horizontal-tb;
+				transform: rotate(0);
+				margin: 0;
+				margin-left: 2.5rem;
+			}
 		}
 
 		&-arrow {
@@ -49,6 +72,16 @@
 				position: absolute;
 				top: 5px;
 			}
+
+			@include respond(verti) {
+				transform: rotate(180deg);
+				margin: 0;
+				margin-right: 3rem;
+
+				&.unfold {
+					transform: rotate(0);
+				}
+			}
 		}
 	}
 
@@ -62,6 +95,7 @@
 
 .info {
 	padding: 0 1.5rem;
+	container-type: inline-size;
 
 	&__header {
 		padding: 2rem 0 1.5rem 0;
@@ -76,7 +110,7 @@
 
 		.info-description {
 			width: 60%;
-			font-size: 0.9rem;
+			font-size: 0.85rem;
 			font-weight: 400;
 			color: rgb(61, 61, 61);
 		}
@@ -103,6 +137,27 @@
 					display: inline-block;
 					transform: translateY(3px) translateX(1px) rotate(-45deg);
 					font-size: 0.5rem;
+				}
+			}
+		}
+	}
+
+	@container (max-width: 30rem) {
+		//480px
+		&__body {
+			flex-direction: column;
+
+			.info-description {
+				width: 100%;
+			}
+
+			.info-contact-links {
+				text-align: right;
+				width: 100%;
+				margin: 2rem 0 1rem 0;
+
+				li {
+					margin-bottom: 0.2rem;
 				}
 			}
 		}

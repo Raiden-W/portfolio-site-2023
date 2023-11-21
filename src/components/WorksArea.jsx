@@ -8,17 +8,18 @@ import arrowIcon from "../assets/arrow.svg";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 
-function WorksArea() {
+function WorksArea(props) {
 	const containerRef = useRef();
+	const areaRef = useRef();
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
 	const [allVideosSt, setAllVideosSt] = useState();
 
 	const { worksDataSt } = useGetWorks();
 
-	const worksAreaWidthSt = useSelector(
+	const workAreaActiveSt = useSelector(
 		appStateManager,
-		(s) => s.context.worksAreaWidth
+		(s) => s.context.workAreaActive
 	);
 
 	useEffect(() => {
@@ -59,7 +60,8 @@ function WorksArea() {
 	};
 
 	return (
-		<div className="works-area" style={{ width: `${worksAreaWidthSt}%` }}>
+		<div className="works-area" ref={areaRef}>
+			<Resize areaRef={areaRef} {...props} />
 			<div
 				className="works-area__bar"
 				onClick={() => {
@@ -69,7 +71,7 @@ function WorksArea() {
 				<span>works</span>
 				<div
 					className={
-						worksAreaWidthSt > 0
+						workAreaActiveSt
 							? "works-area__bar-arrow unfold"
 							: "works-area__bar-arrow"
 					}
@@ -78,12 +80,12 @@ function WorksArea() {
 					<img src={arrowIcon} alt="arrow icon" />
 				</div>
 			</div>
-			<SimpleBar style={{ maxHeight: "100%" }}>
-				<div className="works-area__container" ref={containerRef}>
+			<div className="works-area__container" ref={containerRef}>
+				<SimpleBar style={{ maxHeight: "100%" }}>
 					{worksDataSt.map((workData) => (
 						<Work
 							windowWidth={windowWidthSt}
-							worksAreaWidth={worksAreaWidthSt}
+							workAreaActive={workAreaActiveSt}
 							key={workData.id}
 							workId={workData.id}
 							title={workData.title}
@@ -94,12 +96,32 @@ function WorksArea() {
 							mediaSet={workData.mediaSet}
 							foldOtherWorks={foldOtherWorks}
 							stopAllVideos={stopAllVideos}
+							{...props}
 						/>
 					))}
-				</div>
-			</SimpleBar>
+				</SimpleBar>
+			</div>
 		</div>
 	);
 }
 
 export default WorksArea;
+
+const Resize = ({ areaRef, ifVertical }) => {
+	const worksAreaWidthSt = useSelector(
+		appStateManager,
+		(s) => s.context.worksAreaWidth
+	);
+
+	useEffect(() => {
+		if (!ifVertical) {
+			areaRef.current.style.width = `${worksAreaWidthSt}%`;
+			areaRef.current.style.height = "100%";
+		} else {
+			areaRef.current.style.height = `${worksAreaWidthSt}%`;
+			areaRef.current.style.width = "100%";
+		}
+	}, [worksAreaWidthSt, ifVertical]);
+
+	return null;
+};
