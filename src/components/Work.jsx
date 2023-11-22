@@ -133,7 +133,14 @@ function Work({
 						{mediaSet.map((media) => (
 							<div key={media.id} className="work__media-set-container-item">
 								{media.type === "video" ? (
-									<video muted loop src={media.url} />
+									<video
+										muted
+										loop
+										src={media.url}
+										playsInline
+										preload="metadata"
+										controls={false}
+									/>
 								) : (
 									<img
 										draggable="false"
