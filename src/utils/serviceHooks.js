@@ -1,28 +1,85 @@
 import { useEffect, useState } from "react";
 import { stringify } from "qs";
 
+const apiBaseUrl = import.meta.env.VITE_BASE_API_URL?.replace(/\/$/, "");
+
+const getApiUrl = (path, query) => {
+	if (!apiBaseUrl) {
+		return "";
+	}
+
+	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+	return `${apiBaseUrl}${normalizedPath}${query ? `?${query}` : ""}`;
+};
+
+const looksLikeExternalMediaUrl = (url) =>
+	/^[^/\s]+\.[^/\s]+\/.+/.test(url);
+
+const getMediaUrl = (url) => {
+	if (!url || /^https?:\/\//i.test(url)) {
+		return url;
+	}
+
+	if (url.startsWith("//")) {
+		return `https:${url}`;
+	}
+
+	if (looksLikeExternalMediaUrl(url)) {
+		return `https://${url}`;
+	}
+
+	if (!apiBaseUrl) {
+		return url;
+	}
+
+	return `${apiBaseUrl}${url.startsWith("/") ? url : `/${url}`}`;
+};
+
 const useFetch = (url) => {
 	const [dataSt, setData] = useState(null);
 	const [errorSt, setError] = useState(null);
 	const [loadingSt, setLoading] = useState(false);
 
 	useEffect(() => {
+		const controller = new AbortController();
+		let active = true;
+
 		const fetchData = async () => {
 			setLoading(true);
+			setError(null);
 
 			try {
-				const res = await fetch(url);
+				const res = await fetch(url, { signal: controller.signal });
+				if (!res.ok) {
+					throw new Error(`Request failed (${res.status}) for ${url}`);
+				}
+
 				const data = await res.json();
-				console.log("fetch!");
-				setData(data);
-				setLoading(false);
+				if (active) {
+					setData(data);
+				}
 			} catch (error) {
-				setError(error);
-				setLoading(false);
+				if (active && error.name !== "AbortError") {
+					setError(error);
+					setData(null);
+				}
+			} finally {
+				if (active) {
+					setLoading(false);
+				}
 			}
 		};
 
-		fetchData();
+		if (url) {
+			fetchData();
+		} else {
+			setError(new Error("Missing VITE_BASE_API_URL."));
+		}
+
+		return () => {
+			active = false;
+			controller.abort();
+		};
 	}, [url]);
 
 	return { dataSt, errorSt, loadingSt };
@@ -32,14 +89,16 @@ const useGetTest = () => {
 	const [testSt, setTest] = useState();
 
 	const { dataSt, errorSt, loadingSt } = useFetch(
-		`${import.meta.env.VITE_BASE_API_URL}/api/test`
+		getApiUrl("/api/test")
 	);
 
 	useEffect(() => {
 		if (dataSt) {
 			setTest(true);
+		} else if (errorSt) {
+			setTest(false);
 		}
-	}, [dataSt]);
+	}, [dataSt, errorSt]);
 
 	return { testSt, errorSt, loadingSt };
 };
@@ -61,40 +120,41 @@ const useGetHeroImages = () => {
 	const [heroImagesDataSt, setHeroImagesData] = useState([]);
 
 	const { dataSt, errorSt, loadingSt } = useFetch(
-		`${import.meta.env.VITE_BASE_API_URL}/api/works-area?${getHeroImagesQuery}`
+		getApiUrl("/api/works-area", getHeroImagesQuery)
 	);
 
 	useEffect(() => {
 		if (dataSt) {
-			const heroImagesData = dataSt.data.attributes.works.data.map(
-				(workData) => {
+			const heroImagesData = dataSt.data.attributes.works.data
+				.map((workData) => {
 					const workId = workData.id;
+					const heroImage = workData.attributes.hero_image.data?.attributes;
+					if (!heroImage) {
+						return null;
+					}
+
+					const mediumFormat = heroImage.formats?.medium;
 					let url;
 					let width;
 					let height;
-					if (workData.attributes.hero_image.data.attributes.formats.medium) {
-						url =
-							workData.attributes.hero_image.data.attributes.formats.medium.url;
-						width =
-							workData.attributes.hero_image.data.attributes.formats.medium
-								.width;
-						height =
-							workData.attributes.hero_image.data.attributes.formats.medium
-								.height;
+					if (mediumFormat) {
+						url = mediumFormat.url;
+						width = mediumFormat.width;
+						height = mediumFormat.height;
 					} else {
-						url = workData.attributes.hero_image.data.attributes.url;
-						width = workData.attributes.hero_image.data.attributes.width;
-						height = workData.attributes.hero_image.data.attributes.height;
+						url = heroImage.url;
+						width = heroImage.width;
+						height = heroImage.height;
 					}
 
 					return {
 						workId,
-						url,
+						url: getMediaUrl(url),
 						width,
 						height,
 					};
-				}
-			);
+				})
+				.filter(Boolean);
 
 			setHeroImagesData(heroImagesData);
 		}
@@ -122,7 +182,7 @@ const useGetWorks = () => {
 	const [worksDataSt, setWorksData] = useState([]);
 
 	const { dataSt, errorSt, loadingSt } = useFetch(
-		`${import.meta.env.VITE_BASE_API_URL}/api/works-area?${getWorksQuery}`
+		getApiUrl("/api/works-area", getWorksQuery)
 	);
 
 	useEffect(() => {
@@ -145,22 +205,25 @@ const useGetWorks = () => {
 						const id = mediaData.id;
 						const type = mediaData.attributes.type;
 						const title = mediaData.attributes.title;
-						const alternativeText =
-							mediaData.attributes.media.data.attributes.alternativeText;
+						const media = mediaData.attributes.media.data?.attributes;
+						if (!media) {
+							return null;
+						}
+
+						const alternativeText = media.alternativeText;
 						let url;
 						if (type === "video") {
-							url = mediaData.attributes.media.data.attributes.url;
+							url = media.url;
 						} else if (type === "image") {
-							if (mediaData.attributes.media.data.attributes.formats.medium) {
-								url =
-									mediaData.attributes.media.data.attributes.formats.medium.url;
+							if (media.formats?.medium) {
+								url = media.formats.medium.url;
 							} else {
-								url = mediaData.attributes.media.data.attributes.url;
+								url = media.url;
 							}
 						}
-						return { id, type, title, alternativeText, url };
+						return { id, type, title, alternativeText, url: getMediaUrl(url) };
 					}
-				);
+				).filter(Boolean);
 
 				return {
 					id,
@@ -192,7 +255,7 @@ const useGetInfo = () => {
 	const [infoDataSt, setInfoData] = useState(null);
 
 	const { dataSt, errorSt, loadingSt } = useFetch(
-		`${import.meta.env.VITE_BASE_API_URL}/api/info-area?${getInfoQuery}`
+		getApiUrl("/api/info-area", getInfoQuery)
 	);
 
 	useEffect(() => {

@@ -62,7 +62,7 @@ export default function Opening() {
 
 		pEleOrigList.forEach((ele, i) => {
 			const style = window.getComputedStyle(ele);
-			const matrix = new WebKitCSSMatrix(style.transform);
+			const matrix = new window.WebKitCSSMatrix(style.transform);
 			const translateX = matrix.m41;
 			// const translateY = matrix.m42;
 			const caculatedTransform = `translateX(${translateX}px)`;

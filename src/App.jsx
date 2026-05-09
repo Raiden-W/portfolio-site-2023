@@ -1,16 +1,12 @@
-import { Canvas } from "@react-three/fiber";
-import * as THREE from "three";
-import MyScene from "./experiences/MyScene";
 import Opening from "./components/Opening";
-import { useEffect, useRef, useState } from "react";
-// import { Perf } from "r3f-perf";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 import LoadingPage from "./components/LoadingPage";
-import appStateManager from "./utils/appStateManager";
 import { useGetTest } from "./utils/serviceHooks";
 import "./App.scss";
 
+const ExperienceCanvas = lazy(() => import("./experiences/ExperienceCanvas"));
 const fontFace = new FontFace("Koulen", "url(/font/Koulen/Koulen-Regular.ttf)");
 document.fonts.add(fontFace);
 
@@ -20,7 +16,7 @@ function App() {
 	const canvasContainerRef = useRef();
 	const wrapperRef = useRef();
 
-	const { testSt } = useGetTest();
+	const { testSt, errorSt: apiErrorSt } = useGetTest();
 	const [fontLoadedSt, setFontLoaded] = useState(false);
 	const [ifVerticalSt, setIfVertical] = useState(false);
 
@@ -64,36 +60,20 @@ function App() {
 				<>
 					<WorksArea ifVertical={ifVerticalSt} />
 					<InfoArea ifVertical={ifVerticalSt} />
-					<div
-						className="canvas-container"
-						ref={canvasContainerRef}
-						onClick={() => {
-							appStateManager.send("canvas click");
-						}}
-					>
-						<Canvas
-							camera={{
-								fov: 50,
-								near: 0.1,
-								far: 500,
-								position: [0, 0, 4.5],
-							}}
-							gl={{
-								outputColorSpace: "srgb-linear",
-								toneMapping: THREE.LinearToneMapping,
-							}}
-						>
-							{/* <Perf position="top-left" /> */}
-							<MyScene
-								canvasContainerRef={canvasContainerRef}
-								ifVertical={ifVerticalSt}
-							/>
-						</Canvas>
-					</div>
+					<Suspense fallback={null}>
+						<ExperienceCanvas
+							canvasContainerRef={canvasContainerRef}
+							ifVertical={ifVerticalSt}
+						/>
+					</Suspense>
 				</>
 			)}
 			{fontLoadedSt && <Opening />}
-			<LoadingPage fontLoadedSt={fontLoadedSt} testSt={testSt} />
+			<LoadingPage
+				fontLoadedSt={fontLoadedSt}
+				testSt={testSt}
+				apiErrorSt={apiErrorSt}
+			/>
 		</div>
 	);
 }

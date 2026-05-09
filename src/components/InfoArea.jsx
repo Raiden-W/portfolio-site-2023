@@ -116,7 +116,7 @@ function InfoArea(props) {
 												{comp.type === "text" ? (
 													<p>{comp.displayedText}</p>
 												) : comp.type === "link" ? (
-													<a target="_blank" href={comp.url}>
+													<a target="_blank" rel="noreferrer" href={comp.url}>
 														{comp.displayedText}
 														<span>&#8594;</span>
 													</a>
