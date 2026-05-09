@@ -158,7 +158,7 @@ function Work({
 				</ReactMarkdown>
 				<div className="work__links-container">
 					{externalLinks.map((link) => (
-						<a target="_blank" href={link.url} key={link.id}>
+						<a target="_blank" rel="noreferrer" href={link.url} key={link.id}>
 							{link.displayedText} <span>&#8594;</span>
 						</a>
 					))}
