@@ -317,7 +317,7 @@ export const machine = createMachine(
 
 			"remove opening dom": (ctx) => {
 				//remove the original opening dom
-				ctx.initContext.openningDom.remove();
+				ctx.initContext.openningDom?.remove();
 			},
 
 			"assign width": assign({

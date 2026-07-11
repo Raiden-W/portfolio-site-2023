@@ -1,167 +1,102 @@
-import "./Openning.scss";
 import html2canvas from "html2canvas";
 import { useCallback, useEffect, useRef } from "react";
+import LandingPage from "./landing/LandingPage";
 import appStateManager from "../utils/appStateManager";
 
-export default function Opening() {
-	const openingRef = useRef();
+function eventPoint(event, triggerElement) {
+	if (event?.changedTouches?.length) {
+		const touch = event.changedTouches[0];
+		return { clientX: touch.clientX, clientY: touch.clientY };
+	}
 
-	const grabableNodes = () => {
-		const nodeList = openingRef.current.querySelectorAll(".grabable");
-		return Array.from(nodeList);
+	if (typeof event?.clientX === "number" && typeof event?.clientY === "number") {
+		return { clientX: event.clientX, clientY: event.clientY };
+	}
+
+	if (triggerElement) {
+		const rect = triggerElement.getBoundingClientRect();
+		return {
+			clientX: rect.left + rect.width / 2,
+			clientY: rect.top + rect.height / 2,
+		};
+	}
+
+	return {
+		clientX: window.innerWidth / 2,
+		clientY: window.innerHeight / 2,
 	};
+}
 
-	const getScreenShot = useCallback((e) => {
-		e.preventDefault();
+export default function Opening() {
+	const openingRef = useRef(null);
+	const hasEnteredRef = useRef(false);
 
-		let clientX = 0;
-		let clientY = 0;
+	const cloneOpeningDom = useCallback(async () => {
+		const openingDom = openingRef.current;
 
-		if (e.changedTouches) {
-			const touch = e.changedTouches[0];
-			clientX = touch.clientX;
-			clientY = touch.clientY;
-		} else {
-			clientX = e.clientX;
-			clientY = e.clientY;
+		if (!openingDom) {
+			return;
 		}
 
-		const pointPos = {
-			x: clientX / window.innerWidth,
-			y: 1 - clientY / window.innerHeight,
-		};
-
-		appStateManager.send("mouse down opening", {
-			pointPos,
-			cloneOpeningDom,
-		});
-
-		grabableNodes().forEach((node) => {
-			node.removeEventListener("mousedown", getScreenShot, true);
-			node.removeEventListener("touchstart", getScreenShot, true);
-		});
-		window.removeEventListener("resize", handleHeightChange, true);
-	}, []);
-
-	const handleMouseUp = useCallback(() => {
-		appStateManager.send("mouse up opening");
-		grabableNodes().forEach((node) => {
-			node.removeEventListener("mouseup", handleMouseUp, true);
-			node.removeEventListener("touchend", handleMouseUp, true);
-		});
-	}, []);
-
-	const cloneOpeningDom = async () => {
-		const openningDom = openingRef.current;
-		const pEleOrigList = openningDom.querySelectorAll("p");
-
-		const clonedOpeningDom = openningDom.cloneNode(true);
-		const pEleClonedList = clonedOpeningDom.querySelectorAll("p");
-
-		clonedOpeningDom.classList.remove("scroll");
-
-		pEleOrigList.forEach((ele, i) => {
-			const style = window.getComputedStyle(ele);
-			const matrix = new window.WebKitCSSMatrix(style.transform);
-			const translateX = matrix.m41;
-			// const translateY = matrix.m42;
-			const caculatedTransform = `translateX(${translateX}px)`;
-			pEleClonedList[i].style.transform = caculatedTransform;
-			pEleClonedList[i].style.color = style.color;
-			pEleClonedList[i].style.top = "0";
-		});
-
-		let canvas = null;
-		document.body.appendChild(clonedOpeningDom);
+		const clonedOpeningDom = openingDom.cloneNode(true);
+		clonedOpeningDom.style.position = "fixed";
+		clonedOpeningDom.style.left = "0";
+		clonedOpeningDom.style.top = "0";
+		clonedOpeningDom.style.width = `${window.innerWidth}px`;
+		clonedOpeningDom.style.height = `${window.innerHeight}px`;
 		clonedOpeningDom.style.zIndex = "-1";
+		clonedOpeningDom.style.pointerEvents = "none";
+
+		document.body.appendChild(clonedOpeningDom);
 
 		try {
-			canvas = await html2canvas(clonedOpeningDom, { logging: false });
-			clonedOpeningDom.remove();
+			const canvas = await html2canvas(clonedOpeningDom, {
+				logging: false,
+				width: window.innerWidth,
+				height: window.innerHeight,
+				windowWidth: window.innerWidth,
+				windowHeight: window.innerHeight,
+			});
 			appStateManager.send("clone finished", { clonedCanvas: canvas });
 		} catch (error) {
 			console.log(error);
+		} finally {
+			clonedOpeningDom.remove();
 		}
-	};
-
-	const handleHeightChange = useCallback(() => {
-		const textLinesNum = openingRef.current.children.length;
-		const totalHeight = Math.max(400, window.innerHeight);
-		openingRef.current.style.fontSize = `${
-			(totalHeight / textLinesNum) * 0.8
-		}px`;
 	}, []);
 
+	const enter3D = useCallback(
+		({ event, triggerElement } = {}) => {
+			if (hasEnteredRef.current) {
+				return;
+			}
+
+			hasEnteredRef.current = true;
+
+			const { clientX, clientY } = eventPoint(event, triggerElement);
+			const pointPos = {
+				x: clientX / window.innerWidth,
+				y: 1 - clientY / window.innerHeight,
+			};
+
+			appStateManager.send("mouse down opening", {
+				pointPos,
+				cloneOpeningDom,
+			});
+			appStateManager.send("mouse up opening");
+		},
+		[cloneOpeningDom]
+	);
+
 	useEffect(() => {
-		grabableNodes().forEach((node) => {
-			node.addEventListener("mousedown", getScreenShot, true);
-			node.addEventListener("touchstart", getScreenShot, true);
-			node.addEventListener("mouseup", handleMouseUp, true);
-			node.addEventListener("touchend", handleMouseUp, true);
-		});
-
-		// handleHeightChange();
-		window.addEventListener("resize", handleHeightChange, true);
-
 		appStateManager.send("init some context", {
 			openningDom: openingRef.current,
 		});
 	}, []);
 
 	return (
-		<>
-			<div
-				className="opening scroll"
-				ref={openingRef}
-				style={{ fontSize: `${(window.innerHeight / 7) * 0.8}px` }}
-			>
-				<div className="opening__text">
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
-					<p>why stay in a 2D plane while you can throw it into 3D&nbsp;</p>
-				</div>
-				<div className="opening__text grabable">
-					<p>
-						<span>click</span> - tear - off - grab - <span>click</span> - tear -
-						off - grab - &nbsp;
-					</p>
-					<p>
-						<span>click</span> - tear - off - grab - <span>click</span> - tear -
-						off - grab - &nbsp;
-					</p>
-				</div>
-				<div className="opening__text">
-					<p>while you can throw it into 3D why stay in a 2D plane&nbsp;</p>
-					<p>while you can throw it into 3D why stay in a 2D plane&nbsp;</p>
-				</div>
-				<div className="opening__text grabable">
-					<p>
-						grab - click - <span>tear - off</span> - grab - click -{" "}
-						<span>tear - off</span> -&nbsp;
-					</p>
-					<p>
-						grab - click - <span>tear - off</span> - grab - click -{" "}
-						<span>tear - off</span> -&nbsp;
-					</p>
-				</div>
-				<div className="opening__text">
-					<p>throw it into 3D why stay in a 2D plane while you can&nbsp;</p>
-					<p>throw it into 3D why stay in a 2D plane while you can&nbsp;</p>
-				</div>
-				<div className="opening__text grabable">
-					<p>
-						off - <span>grab</span> - click - tear - off - <span>grab</span> -
-						click - tear -&nbsp;
-					</p>
-					<p>
-						off - <span>grab</span> - click - tear - off - <span>grab</span> -
-						click - tear -&nbsp;
-					</p>
-				</div>
-				<div className="opening__text">
-					<p>in a 2D plane while you can throw it into 3D why stay&nbsp;</p>
-					<p>in a 2D plane while you can throw it into 3D why stay&nbsp;</p>
-				</div>
-			</div>
-		</>
+		<div ref={openingRef}>
+			<LandingPage onEnter3D={enter3D} />
+		</div>
 	);
 }

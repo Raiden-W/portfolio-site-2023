@@ -68,7 +68,7 @@ function App() {
 					</Suspense>
 				</>
 			)}
-			{fontLoadedSt && <Opening />}
+			{fontLoadedSt && testSt && <Opening />}
 			<LoadingPage
 				fontLoadedSt={fontLoadedSt}
 				testSt={testSt}
