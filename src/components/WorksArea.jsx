@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./WorksArea.scss";
-import { useGetWorks } from "../utils/serviceHooks";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import Work from "./Work";
@@ -8,6 +7,7 @@ import arrowIcon from "../assets/arrow.svg";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 import gsap from "gsap";
+import languageStateManager from "../utils/languageStateManager";
 
 function WorksArea(props) {
 	const containerRef = useRef();
@@ -17,7 +17,15 @@ function WorksArea(props) {
 	const [allVideosSt, setAllVideosSt] = useState();
 	const [ifAnyUnfoldSt, setIfAnyUnfold] = useState(false);
 
-	const { worksDataSt } = useGetWorks();
+	const worksDataSt = useSelector(
+		languageStateManager,
+		(state) => state.context.worksData
+	);
+	const languagePhaseSt = useSelector(languageStateManager, (state) => {
+		if (state.matches("fadingOut")) return "fading-out";
+		if (state.matches("fadingIn")) return "fading-in";
+		return "idle";
+	});
 
 	const workAreaActiveSt = useSelector(
 		appStateManager,
@@ -69,7 +77,11 @@ function WorksArea(props) {
 	};
 
 	return (
-		<div className="works-area" ref={areaRef}>
+		<div
+			className="works-area"
+			data-language-phase={languagePhaseSt}
+			ref={areaRef}
+		>
 			<Resize areaRef={areaRef} ifAnyUnfold={ifAnyUnfoldSt} {...props} />
 			<div
 				className="works-area__bar"

@@ -12,6 +12,19 @@ const getApiUrl = (path, query) => {
 	return `${apiBaseUrl}${normalizedPath}${query ? `?${query}` : ""}`;
 };
 
+const fetchJson = async (url, options = {}) => {
+	if (!url) {
+		throw new Error("Missing VITE_BASE_API_URL.");
+	}
+
+	const res = await fetch(url, options);
+	if (!res.ok) {
+		throw new Error(`Request failed (${res.status}) for ${url}`);
+	}
+
+	return res.json();
+};
+
 const looksLikeExternalMediaUrl = (url) =>
 	/^[^/\s]+\.[^/\s]+\/.+/.test(url);
 
@@ -49,12 +62,7 @@ const useFetch = (url) => {
 			setError(null);
 
 			try {
-				const res = await fetch(url, { signal: controller.signal });
-				if (!res.ok) {
-					throw new Error(`Request failed (${res.status}) for ${url}`);
-				}
-
-				const data = await res.json();
+				const data = await fetchJson(url, { signal: controller.signal });
 				if (active) {
 					setData(data);
 				}
@@ -177,121 +185,142 @@ const getWorksQuery = stringify({
 				links: {
 					populate: "*",
 				},
+				localizations: {
+					populate: {
+						links: {
+							populate: "*",
+						},
+					},
+				},
 			},
 		},
 	},
 });
 
-const useGetWorks = () => {
-	const [worksDataSt, setWorksData] = useState([]);
+const mapExternalLinks = (links = []) =>
+	links
+		.map((linkData) => ({
+			displayedText: linkData.displayed_text,
+			url: linkData.url,
+			id: linkData.id,
+		}))
+		.filter((link) => link.displayedText || link.url);
 
-	const { dataSt, errorSt, loadingSt } = useFetch(
-		getApiUrl("/api/works-area", getWorksQuery)
-	);
+const mapWorksData = (response, locale) =>
+	response.data.attributes.works.data.map((baseWork) => {
+		const baseAttributes = baseWork.attributes;
+		const localizedWork = [
+			baseWork,
+			...(baseAttributes.localizations?.data ?? []),
+		].find((work) => work.attributes.locale === locale);
 
-	useEffect(() => {
-		if (dataSt) {
-			const worksData = dataSt.data.attributes.works.data.map((workData) => {
-				const id = workData.id;
-				const title = workData.attributes.title;
-				const sub = workData.attributes.sub;
-				const description = workData.attributes.description;
-				const techTools = workData.attributes.tech_tools;
-				const externalLinks = workData.attributes.links.map((linkData) => {
-					const displayedText = linkData.displayed_text;
-					const url = linkData.url;
-					const id = linkData.id;
+		if (!localizedWork) {
+			throw new Error(`Missing ${locale} localization for work ${baseWork.id}.`);
+		}
 
-					return { displayedText, url, id };
-				});
-				const mediaSet = (workData.attributes.work_gellary?.work_media ?? []).map(
-					(mediaData) => {
-						const id = mediaData.id;
-						const type = mediaData.type;
-						const title = mediaData.title;
-						const media = mediaData.media?.data?.attributes;
-						if (!media) {
-							return null;
-						}
+		const localizedAttributes = localizedWork.attributes;
+		const mediaSet = (baseAttributes.work_gellary?.work_media ?? [])
+			.map((mediaData) => {
+				const media = mediaData.media?.data?.attributes;
+				if (!media) {
+					return null;
+				}
 
-						const alternativeText = media.alternativeText;
-						let url;
-						if (type === "video") {
-							url = media.url;
-						} else if (type === "image") {
-							if (media.formats?.medium) {
-								url = media.formats.medium.url;
-							} else {
-								url = media.url;
-							}
-						}
-						return { id, type, title, alternativeText, url: getMediaUrl(url) };
-					}
-				).filter(Boolean);
+				let url;
+				if (mediaData.type === "video") {
+					url = media.url;
+				} else if (mediaData.type === "image") {
+					url = media.formats?.medium?.url ?? media.url;
+				}
 
 				return {
-					id,
-					title,
-					sub,
-					description,
-					techTools,
-					externalLinks,
-					mediaSet,
+					id: mediaData.id,
+					type: mediaData.type,
+					title: mediaData.title,
+					alternativeText: media.alternativeText,
+					url: getMediaUrl(url),
 				};
-			});
+			})
+			.filter(Boolean);
 
-			setWorksData(worksData);
-		}
-	}, [dataSt]);
+		return {
+			id: baseWork.id,
+			title: localizedAttributes.title,
+			sub: localizedAttributes.sub,
+			description: localizedAttributes.description,
+			techTools: baseAttributes.tech_tools,
+			externalLinks: mapExternalLinks(localizedAttributes.links),
+			mediaSet,
+		};
+	});
 
-	return { worksDataSt, errorSt, loadingSt };
-};
-
-const getInfoQuery = stringify({
-	populate: {
-		contact_links: {
-			populate: "*",
-		},
-	},
-});
-
-const useGetInfo = () => {
-	const [infoDataSt, setInfoData] = useState(null);
-
-	const { dataSt, errorSt, loadingSt } = useFetch(
-		getApiUrl("/api/info-area", getInfoQuery)
-	);
-
-	useEffect(() => {
-		if (dataSt) {
-			const infoData = {};
-			infoData.title = dataSt.data.attributes.title;
-			infoData.description = dataSt.data.attributes.description;
-			infoData.foot = dataSt.data.attributes.foot;
-			infoData.contactLinks = dataSt.data.attributes.contact_links.map(
-				(comp) => {
-					if (comp.__component === "dy-component.list-item") {
-						return {
-							type: "text",
-							displayedText: comp.displayed_text,
-							id: comp.id,
-						};
-					} else if (comp.__component === "dy-component.link") {
-						return {
-							type: "link",
-							url: comp.url,
-							displayedText: comp.displayed_text,
-							id: comp.id,
-						};
-					}
+const mapInfoData = (response) => {
+	const attributes = response.data.attributes;
+	return {
+		title: attributes.title,
+		description: attributes.description,
+		foot: attributes.foot,
+		contactLinks: attributes.contact_links
+			.map((comp) => {
+				if (comp.__component === "dy-component.list-item") {
+					return {
+						type: "text",
+						displayedText: comp.displayed_text,
+						id: comp.id,
+					};
 				}
-			);
 
-			setInfoData(infoData);
-		}
-	}, [dataSt]);
+				if (comp.__component === "dy-component.link") {
+					return {
+						type: "link",
+						url: comp.url,
+						displayedText: comp.displayed_text,
+						id: comp.id,
+					};
+				}
 
-	return { infoDataSt, errorSt, loadingSt };
+				return null;
+			})
+			.filter(Boolean),
+	};
 };
 
-export { useGetWorks, useGetHeroImages, useGetInfo, useGetTest };
+const fetchLocales = async () =>
+	fetchJson(getApiUrl("/api/i18n/locales"));
+
+const fetchWorksSource = async () =>
+	fetchJson(getApiUrl("/api/works-area", getWorksQuery));
+
+const fetchInfoData = async (locale) => {
+	const query = stringify({
+		locale,
+		populate: {
+			contact_links: {
+				populate: "*",
+			},
+		},
+	});
+	return mapInfoData(await fetchJson(getApiUrl("/api/info-area", query)));
+};
+
+const fetchInitialLanguageContent = async (locale) => {
+	const [worksSource, infoData] = await Promise.all([
+		fetchWorksSource(),
+		fetchInfoData(locale),
+	]);
+
+	return {
+		worksSource,
+		worksData: mapWorksData(worksSource, locale),
+		infoData,
+	};
+};
+
+export {
+	fetchInfoData,
+	fetchInitialLanguageContent,
+	fetchLocales,
+	mapWorksData,
+	useGetHeroImages,
+	useGetTest,
+};

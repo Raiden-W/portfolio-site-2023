@@ -118,14 +118,14 @@ function Work({
 		>
 			<header className="work__header" onClick={handleDropDown}>
 				<div className="work__header-flexbox">
-					<h2 className="work__header-title">{title}</h2>
+					<h2 className="work__header-title cms-copy">{title}</h2>
 					<img
 						className="work__header-arrow"
 						src={arrowIcon}
 						alt="arrow icon"
 					/>
 				</div>
-				<p className="work__header-sub">{sub}</p>
+				<p className="work__header-sub cms-copy">{sub}</p>
 			</header>
 			<div className="work__foldable">
 				<div className="work__media-set" {...bind()}>
@@ -153,10 +153,10 @@ function Work({
 					</div>
 				</div>
 				<p className="work__tech-tools">{techTools}</p>
-				<ReactMarkdown className="work__description">
+				<ReactMarkdown className="work__description cms-copy">
 					{description}
 				</ReactMarkdown>
-				<div className="work__links-container">
+				<div className="work__links-container cms-copy">
 					{externalLinks.map((link) => (
 						<a target="_blank" rel="noreferrer" href={link.url} key={link.id}>
 							{link.displayedText} <span>&#8594;</span>

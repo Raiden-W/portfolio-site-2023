@@ -4,10 +4,10 @@ import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 import SimpleBar from "simplebar-react";
 import ReactMarkdown from "react-markdown";
-import { useGetInfo } from "../utils/serviceHooks";
 import { useDrag } from "@use-gesture/react";
 import arrowIcon from "../assets/arrow.svg";
 import gsap from "gsap";
+import languageStateManager from "../utils/languageStateManager";
 
 const controlRadius = 100;
 const joystickRadius = controlRadius * 0.65;
@@ -18,7 +18,29 @@ function InfoArea(props) {
 	const joystickRef = useRef();
 	const areaRef = useRef();
 
-	const { infoDataSt } = useGetInfo();
+	const infoDataSt = useSelector(
+		languageStateManager,
+		(state) => state.context.infoData
+	);
+	const selectedLocaleSt = useSelector(
+		languageStateManager,
+		(state) =>
+			state.context.requestedLocale ??
+			state.context.currentLocale ??
+			state.context.defaultLocale
+	);
+	const availableLocaleCodesSt = useSelector(languageStateManager, (state) =>
+		state.context.locales.map((locale) => locale.code)
+	);
+	const languageBusySt = useSelector(
+		languageStateManager,
+		(state) => !state.matches("idle")
+	);
+	const languagePhaseSt = useSelector(languageStateManager, (state) => {
+		if (state.matches("fadingOut")) return "fading-out";
+		if (state.matches("fadingIn")) return "fading-in";
+		return "idle";
+	});
 
 	const infoAreaActiveSt = useSelector(
 		appStateManager,
@@ -80,7 +102,11 @@ function InfoArea(props) {
 	});
 
 	return (
-		<div className="info-area" ref={areaRef}>
+		<div
+			className="info-area"
+			data-language-phase={languagePhaseSt}
+			ref={areaRef}
+		>
 			<Resize areaRef={areaRef} {...props} />
 			<div
 				className="info-area__bar"
@@ -88,7 +114,46 @@ function InfoArea(props) {
 					appStateManager.send("info bar click");
 				}}
 			>
-				<span>about</span>
+				<span className="about text">about</span>
+				<div
+					className={languageBusySt ? "lang-switch is-loading" : "lang-switch"}
+					data-locale={selectedLocaleSt}
+					aria-label="Content language"
+					aria-busy={languageBusySt}
+					onClick={(event) => event.stopPropagation()}
+				>
+					<span className="lang-switch__indicator" aria-hidden="true" />
+					<button
+						type="button"
+						className="lang-switch__option"
+						aria-label="Switch content language to English"
+						aria-pressed={selectedLocaleSt === "en"}
+						disabled={languageBusySt || !availableLocaleCodesSt.includes("en")}
+						onClick={(event) => {
+							event.stopPropagation();
+							languageStateManager.send("SELECT_LOCALE", { locale: "en" });
+						}}
+					>
+						EN
+					</button>
+					<button
+						type="button"
+						className="lang-switch__option"
+						aria-label="Switch content language to Chinese"
+						aria-pressed={selectedLocaleSt === "zh-CN"}
+						disabled={
+							languageBusySt || !availableLocaleCodesSt.includes("zh-CN")
+						}
+						onClick={(event) => {
+							event.stopPropagation();
+							languageStateManager.send("SELECT_LOCALE", {
+								locale: "zh-CN",
+							});
+						}}
+					>
+						中
+					</button>
+				</div>
 				<div
 					className={
 						infoAreaActiveSt
@@ -104,12 +169,12 @@ function InfoArea(props) {
 				<SimpleBar style={{ height: "100%" }}>
 					{infoDataSt && (
 						<div className="info">
-							<h2 className="info__header">{infoDataSt.title}</h2>
+							<h2 className="info__header cms-copy">{infoDataSt.title}</h2>
 							<div className="info__body">
-								<ReactMarkdown className="info-description">
+								<ReactMarkdown className="info-description cms-copy">
 									{infoDataSt.description}
 								</ReactMarkdown>
-								<ul className="info-contact-links">
+								<ul className="info-contact-links cms-copy">
 									{infoDataSt.contactLinks.map((comp) => {
 										return (
 											<li key={comp.id}>
@@ -153,7 +218,7 @@ function InfoArea(props) {
 									</div>
 								</div>
 							</div>
-							<p className="info__footer">{infoDataSt.foot}</p>
+							<p className="info__footer cms-copy">{infoDataSt.foot}</p>
 						</div>
 					)}
 				</SimpleBar>
