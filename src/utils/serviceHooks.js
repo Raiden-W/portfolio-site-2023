@@ -167,8 +167,12 @@ const getWorksQuery = stringify({
 	populate: {
 		works: {
 			populate: {
-				work_medias: {
-					populate: ["media"],
+				work_gellary: {
+					populate: {
+						work_media: {
+							populate: ["media"],
+						},
+					},
 				},
 				links: {
 					populate: "*",
@@ -200,12 +204,12 @@ const useGetWorks = () => {
 
 					return { displayedText, url, id };
 				});
-				const mediaSet = workData.attributes.work_medias.data.map(
+				const mediaSet = (workData.attributes.work_gellary?.work_media ?? []).map(
 					(mediaData) => {
 						const id = mediaData.id;
-						const type = mediaData.attributes.type;
-						const title = mediaData.attributes.title;
-						const media = mediaData.attributes.media.data?.attributes;
+						const type = mediaData.type;
+						const title = mediaData.title;
+						const media = mediaData.media?.data?.attributes;
 						if (!media) {
 							return null;
 						}
