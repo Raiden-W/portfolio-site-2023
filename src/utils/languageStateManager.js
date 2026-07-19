@@ -69,6 +69,7 @@ export const languageMachine = createMachine(
 			requestedLocale: null,
 			worksSource: null,
 			worksData: [],
+			workCategories: [],
 			infoData: null,
 			pendingWorksData: null,
 			pendingInfoData: null,
@@ -166,6 +167,7 @@ export const languageMachine = createMachine(
 			setInitialContent: assign({
 				worksSource: (_, event) => event.data.worksSource,
 				worksData: (_, event) => event.data.worksData,
+				workCategories: (_, event) => event.data.workCategories,
 				infoData: (_, event) => event.data.infoData,
 				currentLocale: (context) => context.requestedLocale,
 				error: () => null,

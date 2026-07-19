@@ -194,6 +194,13 @@ const getWorksQuery = stringify({
 				},
 			},
 		},
+		worksCategory: {
+			populate: {
+				works: {
+					fields: ["id"],
+				},
+			},
+		},
 	},
 });
 
@@ -254,6 +261,28 @@ const mapWorksData = (response, locale) =>
 		};
 	});
 
+const categoryKeyByApiValue = {
+	Comercial: "commercial",
+	Exploration: "exploration",
+	Sandbox: "sandbox",
+};
+
+const mapWorkCategories = (response) =>
+	(response.data.attributes.worksCategory ?? [])
+		.map((categoryData) => {
+			const key = categoryKeyByApiValue[categoryData.category];
+			if (!key) {
+				return null;
+			}
+
+			return {
+				id: categoryData.id,
+				key,
+				workIds: (categoryData.works?.data ?? []).map((work) => work.id),
+			};
+		})
+		.filter(Boolean);
+
 const mapInfoData = (response) => {
 	const attributes = response.data.attributes;
 	return {
@@ -312,6 +341,7 @@ const fetchInitialLanguageContent = async (locale) => {
 	return {
 		worksSource,
 		worksData: mapWorksData(worksSource, locale),
+		workCategories: mapWorkCategories(worksSource),
 		infoData,
 	};
 };

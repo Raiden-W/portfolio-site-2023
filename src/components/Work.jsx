@@ -21,6 +21,7 @@ function Work({
 	workAreaActive,
 	foldOtherWorks,
 	setIfAnyUnfold,
+	setExpandedWorkId,
 	stopAllVideos,
 }) {
 	const mediaContainerRef = useRef();
@@ -92,6 +93,7 @@ function Work({
 			//close other works and stop all videos
 			foldOtherWorks();
 			setIfAnyUnfold(true);
+			setExpandedWorkId(workId);
 			stopAllVideos();
 
 			classList.replace("fold", "unfold");
@@ -102,6 +104,7 @@ function Work({
 		} else {
 			classList.replace("unfold", "fold");
 			setIfAnyUnfold(false);
+			setExpandedWorkId(null);
 			videosRef.current.forEach((video) => {
 				video.pause();
 			});
