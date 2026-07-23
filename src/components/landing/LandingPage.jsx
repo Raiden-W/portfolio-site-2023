@@ -93,21 +93,6 @@ function useResponsiveGrid() {
 	};
 }
 
-function useCursorPosition() {
-	const [cursorPosition, setCursorPosition] = useState(null);
-
-	useEffect(() => {
-		const onPointerMove = (event) => {
-			setCursorPosition({ x: event.clientX, y: event.clientY });
-		};
-
-		window.addEventListener("pointermove", onPointerMove);
-		return () => window.removeEventListener("pointermove", onPointerMove);
-	}, []);
-
-	return cursorPosition;
-}
-
 function mulberry32(seed) {
 	return () => {
 		let t = (seed += 0x6d2b79f5);
@@ -246,7 +231,6 @@ function generateLandingLayout({ columns, rows, seed }) {
 function MotionBlock({
 	size,
 	variant,
-	cursorPosition,
 	onEnter3D,
 	onRegenerateLayout,
 }) {
@@ -261,7 +245,6 @@ function MotionBlock({
 			<BlockContent
 				size={size}
 				variant={variant}
-				cursorPosition={cursorPosition}
 				onEnter3D={onEnter3D}
 				onRegenerateLayout={onRegenerateLayout}
 			/>
@@ -272,7 +255,6 @@ function MotionBlock({
 function BlockContent({
 	size,
 	variant,
-	cursorPosition,
 	onEnter3D,
 	onRegenerateLayout,
 }) {
@@ -293,7 +275,7 @@ function BlockContent({
 				/>
 			);
 		case "cursorArrow":
-			return <CursorArrow cursorPosition={cursorPosition} />;
+			return <CursorArrow />;
 		case "worldTime":
 			return <WorldTime />;
 		case "typewriter":
@@ -439,30 +421,55 @@ function Countdown({ onEnter3D, onRegenerateLayout }) {
 	);
 }
 
-function CursorArrow({ cursorPosition }) {
+function CursorArrow() {
 	const ref = useRef(null);
-	const [angle, setAngle] = useState(0);
 
 	useEffect(() => {
-		if (!cursorPosition || !ref.current) {
-			return;
-		}
+		let frameId = null;
+		let pointerX = 0;
+		let pointerY = 0;
 
-		const rect = ref.current.getBoundingClientRect();
-		const centerX = rect.left + rect.width / 2;
-		const centerY = rect.top + rect.height / 2;
-		const radians = Math.atan2(
-			cursorPosition.y - centerY,
-			cursorPosition.x - centerX
-		);
-		setAngle((radians * 180) / Math.PI);
-	}, [cursorPosition]);
+		const updateArrow = () => {
+			frameId = null;
+			const arrow = ref.current;
+
+			if (!arrow) {
+				return;
+			}
+
+			const rect = arrow.getBoundingClientRect();
+			const centerX = rect.left + rect.width / 2;
+			const centerY = rect.top + rect.height / 2;
+			const radians = Math.atan2(pointerY - centerY, pointerX - centerX);
+			const angle = (radians * 180) / Math.PI;
+
+			arrow.style.setProperty("--arrow-angle", `${angle}deg`);
+			arrow.classList.remove("no-cursor");
+			arrow.classList.add("has-cursor");
+		};
+
+		const onPointerMove = (event) => {
+			pointerX = event.clientX;
+			pointerY = event.clientY;
+
+			if (frameId === null) {
+				frameId = window.requestAnimationFrame(updateArrow);
+			}
+		};
+
+		window.addEventListener("pointermove", onPointerMove);
+		return () => {
+			window.removeEventListener("pointermove", onPointerMove);
+			if (frameId !== null) {
+				window.cancelAnimationFrame(frameId);
+			}
+		};
+	}, []);
 
 	return (
 		<div
 			ref={ref}
-			className={`cursor-arrow ${cursorPosition ? "has-cursor" : "no-cursor"}`}
-			style={{ "--arrow-angle": `${angle}deg` }}
+			className="cursor-arrow no-cursor"
 			aria-hidden="true"
 		>
 			<svg viewBox="0 0 120 120">
@@ -630,7 +637,6 @@ function GridBackdrop({ grid }) {
 }
 
 export default function LandingPage({ onEnter3D }) {
-	const cursorPosition = useCursorPosition();
 	const grid = useResponsiveGrid();
 	const createLayoutState = useCallback((sourceGrid) => {
 		const seed = Math.floor(Math.random() * 1000000000);
@@ -690,7 +696,6 @@ export default function LandingPage({ onEnter3D }) {
 						<MotionBlock
 							size={block.size}
 							variant={block.variant}
-							cursorPosition={cursorPosition}
 							onEnter3D={onEnter3D}
 							onRegenerateLayout={regenerateLayout}
 						/>
