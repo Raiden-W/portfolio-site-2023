@@ -7,10 +7,14 @@ import appStateManager from "../utils/appStateManager";
 import CanvasControl from "./CanvasControl";
 import Tunnel from "./Tunnel";
 import SquareDisplay from "./SquareDisplay";
+import PerformanceProbe from "./PerformanceProbe";
 
 export default function MyScene(props) {
 	const squareMeshRef = useRef();
 	const colorRef = useRef();
+	const performanceProbeEnabled = new URLSearchParams(
+		window.location.search
+	).has("perf");
 
 	const [geoSt, setGeo] = useState({});
 	const [matSt, setMat] = useState({});
@@ -31,6 +35,7 @@ export default function MyScene(props) {
 	return (
 		<>
 			<color ref={colorRef} args={[0x1f1f1f]} attach="background" />
+			{performanceProbeEnabled && <PerformanceProbe />}
 			<Tunnel />
 			<mesh ref={squareMeshRef}>
 				<primitive object={geoSt} />
