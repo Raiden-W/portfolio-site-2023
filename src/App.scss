@@ -1,10 +1,12 @@
 .app-wrapper {
-	.cms-copy {
+	.cms-copy,
+	.locale-copy {
 		opacity: 1;
 		transition: opacity 260ms ease;
 	}
 
-	[data-language-phase="fading-out"] .cms-copy {
+	[data-language-phase="fading-out"] .cms-copy,
+	[data-language-phase="fading-out"] .locale-copy {
 		opacity: 0;
 		transition-duration: 180ms;
 	}
@@ -46,7 +48,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.app-wrapper .cms-copy {
+	.app-wrapper .cms-copy,
+	.app-wrapper .locale-copy {
 		transition-duration: 1ms;
 	}
 }

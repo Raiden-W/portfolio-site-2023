@@ -16,7 +16,7 @@
 	&__bar {
 		position: absolute;
 		background-color: white;
-		width: 1.6rem;
+		width: 1.5rem;
 		height: 100%;
 		right: 100%;
 		border-radius: 1.2rem 0 0 1.2rem;
@@ -29,7 +29,7 @@
 
 		@include respond(verti) {
 			width: 100%;
-			height: 1.6rem;
+			height: var(--sidebar-mobile-bar-height);
 			bottom: 100%;
 			right: 0;
 			flex-direction: row;
@@ -47,13 +47,17 @@
 		}
 
 		.about {
-			font-size: 0.9rem;
-			font-weight: 400;
-			margin-top: 2.5rem;
-			margin-bottom: 1.3rem;
+			font-family: var(--font-ui);
+			font-size: var(--about-label-size);
+			font-weight: var(--about-label-weight);
+			line-height: var(--about-label-line-height);
+			letter-spacing: var(--about-label-letter-spacing, normal);
+			margin-top: 3rem;
+			margin-bottom: 2.8rem;
 
 			@include respond(verti) {
-				margin: 0 1.5rem 0.15rem 2.5rem;
+				margin: 0 var(--sidebar-mobile-title-end-margin) 0.15rem
+					var(--sidebar-mobile-title-start-margin);
 			}
 		}
 
@@ -66,6 +70,9 @@
 			margin-bottom: auto;
 			display: flex;
 			flex-direction: column;
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			user-select: none;
 			border: 1px solid rgba(25, 25, 25, 0.16);
 			border-radius: 999px;
 			background: rgba(245, 245, 245, 0.82);
@@ -83,10 +90,6 @@
 				transform: scale(0.97);
 			}
 
-			&.is-loading {
-				opacity: 0.68;
-			}
-
 			&__indicator {
 				position: absolute;
 				top: 0.08rem;
@@ -95,10 +98,11 @@
 				width: calc(100% - 0.16rem);
 				height: calc(50% - 0.08rem);
 				border-radius: 999px;
-				background: white;
+				background: rgb(25, 25, 25);
 				box-shadow: 0 1px 4px rgba(25, 25, 25, 0.17),
 					0 0 0 1px rgba(25, 25, 25, 0.035);
-				transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+				will-change: transform;
+				transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 			}
 
 			&[data-locale="zh-CN"] .lang-switch__indicator {
@@ -114,16 +118,22 @@
 				border-radius: 999px;
 				background: transparent;
 				color: rgb(145, 145, 145);
-				font-family: inherit;
-				font-size: 0.6rem;
-				font-weight: 500;
-				line-height: 1;
+				font-family: var(--font-language-option);
+				--lang-switch-label-size: var(--language-option-size);
+				font-size: 0;
+				font-weight: var(--language-option-weight);
+				line-height: var(--language-option-line-height);
 				cursor: pointer;
-				transition: color 180ms ease, font-weight 180ms ease;
+				transition: color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+					font-weight 260ms cubic-bezier(0.22, 1, 0.36, 1);
+
+				.lang-switch__label {
+					font-size: var(--lang-switch-label-size);
+				}
 
 				&[aria-pressed="true"] {
-					color: rgb(25, 25, 25);
-					font-weight: 700;
+					color: rgb(255, 255, 255);
+					font-weight: var(--language-option-active-weight);
 				}
 
 				&:focus-visible {
@@ -137,15 +147,14 @@
 			}
 
 			@include respond(verti) {
-				width: 4rem;
-				height: 1.3rem;
+				width: var(--sidebar-mobile-language-switch-width);
+				height: var(--sidebar-mobile-control-height);
 				margin: 0;
 				margin-right: auto;
 				flex-direction: row;
 
 				&__option {
-					font-size: 0.65rem;
-					transform: scaleY(1.1);
+					--lang-switch-label-size: var(--language-option-size);
 				}
 
 				.lang-switch__indicator {
@@ -183,7 +192,7 @@
 			@include respond(verti) {
 				transform: rotate(180deg);
 				margin: 0;
-				margin-right: 3rem;
+				margin-right: var(--sidebar-mobile-arrow-margin);
 
 				&.unfold {
 					transform: rotate(0);
@@ -214,10 +223,11 @@
 
 	&__header {
 		padding: 2rem 0 1.5rem 0;
-		line-height: 100%;
-		font-family: "Koulen", sans-serif;
-		font-size: 3.5rem;
-		font-weight: 400;
+		line-height: var(--info-title-line-height);
+		font-family: var(--font-info-title);
+		font-size: var(--info-title-size);
+		font-weight: var(--info-title-weight);
+		letter-spacing: var(--info-title-letter-spacing, normal);
 	}
 
 	&__body {
@@ -225,15 +235,21 @@
 
 		.info-description {
 			width: 60%;
-			font-size: 0.85rem;
-			font-weight: 400;
+			font-family: var(--font-body);
+			font-size: var(--info-description-size);
+			font-weight: var(--info-description-weight);
+			line-height: var(--info-description-line-height);
+			letter-spacing: var(--info-description-letter-spacing, normal);
 			color: rgb(61, 61, 61);
 		}
 
 		.info-contact-links {
 			list-style: none;
-			font-size: 0.75rem;
-			font-weight: 400;
+			font-family: var(--font-body);
+			font-size: var(--info-contact-size);
+			font-weight: var(--info-contact-weight);
+			line-height: var(--info-contact-line-height);
+			letter-spacing: var(--info-contact-letter-spacing, normal);
 			text-align: right;
 			color: grey;
 			width: 40%;
@@ -349,9 +365,10 @@
 							align-items: center;
 
 							span {
-								font-family: "Oswald", sans-serif;
-								font-size: 10px;
-								font-weight: 400;
+								font-family: var(--font-control-label);
+								font-size: var(--control-label-size);
+								font-weight: var(--control-label-weight);
+								line-height: var(--control-label-line-height);
 								color: rgb(180, 180, 180);
 							}
 						}
@@ -373,8 +390,11 @@
 	}
 
 	&__footer {
-		font-size: 0.75rem;
-		font-weight: 400;
+		font-family: var(--font-body);
+		font-size: var(--info-footer-size);
+		font-weight: var(--info-footer-weight);
+		line-height: var(--info-footer-line-height);
+		letter-spacing: var(--info-footer-letter-spacing, normal);
 		text-align: right;
 		color: grey;
 		padding-bottom: 2rem;

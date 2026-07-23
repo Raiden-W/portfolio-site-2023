@@ -30,7 +30,7 @@ export default defineConfig({
 	css: {
 		preprocessorOptions: {
 			scss: {
-				additionalData: '@import "./src/utils/respond.scss";',
+				additionalData: '@use "./src/utils/respond.scss" as *;\n',
 			},
 		},
 	},

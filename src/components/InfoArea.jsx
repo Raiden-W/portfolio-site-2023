@@ -22,11 +22,18 @@ function InfoArea(props) {
 		languageStateManager,
 		(state) => state.context.infoData
 	);
-	const selectedLocaleSt = useSelector(
+	const requestedLocaleSt = useSelector(
 		languageStateManager,
 		(state) =>
 			state.context.requestedLocale ??
 			state.context.currentLocale ??
+			state.context.defaultLocale
+	);
+	const contentLocaleSt = useSelector(
+		languageStateManager,
+		(state) =>
+			state.context.currentLocale ??
+			state.context.requestedLocale ??
 			state.context.defaultLocale
 	);
 	const availableLocaleCodesSt = useSelector(languageStateManager, (state) =>
@@ -41,6 +48,10 @@ function InfoArea(props) {
 		if (state.matches("fadingIn")) return "fading-in";
 		return "idle";
 	});
+	const isChineseSt = contentLocaleSt === "zh-CN";
+	const canToggleLanguageSt =
+		availableLocaleCodesSt.includes("en") &&
+		availableLocaleCodesSt.includes("zh-CN");
 
 	const infoAreaActiveSt = useSelector(
 		appStateManager,
@@ -101,6 +112,16 @@ function InfoArea(props) {
 		}
 	});
 
+	const toggleLanguage = () => {
+		if (languageBusySt || !canToggleLanguageSt) {
+			return;
+		}
+
+		languageStateManager.send("SELECT_LOCALE", {
+			locale: isChineseSt ? "en" : "zh-CN",
+		});
+	};
+
 	return (
 		<div
 			className="info-area"
@@ -114,44 +135,45 @@ function InfoArea(props) {
 					appStateManager.send("info bar click");
 				}}
 			>
-				<span className="about text">about</span>
+				<span className="about text locale-copy">
+					{isChineseSt ? "关于我" : "about"}
+				</span>
 				<div
 					className={languageBusySt ? "lang-switch is-loading" : "lang-switch"}
-					data-locale={selectedLocaleSt}
+					data-locale={requestedLocaleSt}
 					aria-label="Content language"
 					aria-busy={languageBusySt}
-					onClick={(event) => event.stopPropagation()}
+					onClick={(event) => {
+						event.stopPropagation();
+						toggleLanguage();
+					}}
 				>
 					<span className="lang-switch__indicator" aria-hidden="true" />
 					<button
 						type="button"
 						className="lang-switch__option"
-						aria-label="Switch content language to English"
-						aria-pressed={selectedLocaleSt === "en"}
-						disabled={languageBusySt || !availableLocaleCodesSt.includes("en")}
+						aria-label="Toggle content language"
+						aria-pressed={requestedLocaleSt === "en"}
+						disabled={languageBusySt || !canToggleLanguageSt}
 						onClick={(event) => {
 							event.stopPropagation();
-							languageStateManager.send("SELECT_LOCALE", { locale: "en" });
+							toggleLanguage();
 						}}
 					>
-						EN
+						<span className="lang-switch__label">EN</span>
 					</button>
 					<button
 						type="button"
 						className="lang-switch__option"
-						aria-label="Switch content language to Chinese"
-						aria-pressed={selectedLocaleSt === "zh-CN"}
-						disabled={
-							languageBusySt || !availableLocaleCodesSt.includes("zh-CN")
-						}
+						aria-label="Toggle content language"
+						aria-pressed={requestedLocaleSt === "zh-CN"}
+						disabled={languageBusySt || !canToggleLanguageSt}
 						onClick={(event) => {
 							event.stopPropagation();
-							languageStateManager.send("SELECT_LOCALE", {
-								locale: "zh-CN",
-							});
+							toggleLanguage();
 						}}
 					>
-						中
+						<span className="lang-switch__label">{"\u4e2d"}</span>
 					</button>
 				</div>
 				<div

@@ -1,4 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Mulish:wght@300;400;500;600;700&display=swap");
+@use "./styles/typography";
+
+@font-face {
+	font-family: "Mulish";
+	src: url("/fonts/mulish/Mulish-roman-v1.woff2") format("woff2");
+	font-weight: 400 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Oswald";
+	src: url("/fonts/oswald/Oswald-roman-v1.woff2") format("woff2");
+	font-weight: 400 500;
+	font-style: normal;
+	font-display: swap;
+}
 
 *,
 *::before,
@@ -10,14 +26,14 @@
 
 html {
 	font-size: 100%;
-	font-family: "Mulish", sans-serif;
+	font-family: "Mulish", Arial, sans-serif;
 
 	@include respond(tablet) {
-		font-size: 95%;
+		font-size: 90%;
 	}
 
 	@include respond(phone) {
-		font-size: 90%;
+		font-size: 85%;
 	}
 }
 

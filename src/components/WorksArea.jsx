@@ -63,6 +63,14 @@ function WorksArea(props) {
 		if (state.matches("fadingIn")) return "fading-in";
 		return "idle";
 	});
+	const contentLocaleSt = useSelector(
+		languageStateManager,
+		(state) =>
+			state.context.currentLocale ??
+			state.context.requestedLocale ??
+			state.context.defaultLocale
+	);
+	const isChineseSt = contentLocaleSt === "zh-CN";
 
 	const workAreaActiveSt = useSelector(
 		appStateManager,
@@ -96,8 +104,7 @@ function WorksArea(props) {
 				return;
 			}
 
-			const indicatorContainerRect =
-				indicatorContainer.getBoundingClientRect();
+			const indicatorContainerRect = indicatorContainer.getBoundingClientRect();
 			const selectedRect = selectedButton.getBoundingClientRect();
 			const indicatorContainerStyle =
 				window.getComputedStyle(indicatorContainer);
@@ -325,6 +332,10 @@ function WorksArea(props) {
 	};
 
 	const handleCategorySelect = (category) => {
+		if (!workAreaActiveSt) {
+			appStateManager.send("works bar click");
+		}
+
 		if (category === activeCategorySt || categoryTransitioningSt) {
 			return;
 		}
@@ -360,7 +371,7 @@ function WorksArea(props) {
 
 	return (
 		<div
-			className="works-area"
+			className={isChineseSt ? "works-area is-chinese" : "works-area"}
 			data-language-phase={languagePhaseSt}
 			ref={areaRef}
 		>
@@ -371,7 +382,9 @@ function WorksArea(props) {
 					appStateManager.send("works bar click");
 				}}
 			>
-				<span className="works-area__bar-title">works</span>
+				<span className="works-area__bar-title locale-copy">
+					{isChineseSt ? "项目集" : "works"}
+				</span>
 				<nav
 					className={`works-area__bar-categories${
 						categoryTransitioningSt ? " is-loading" : ""
@@ -392,7 +405,7 @@ function WorksArea(props) {
 									"--category-indicator-y": `${categoryIndicatorSt.y}px`,
 									"--category-indicator-width": `${categoryIndicatorSt.width}px`,
 									"--category-indicator-height": `${categoryIndicatorSt.height}px`,
-							}
+								}
 							: undefined
 					}
 				>
@@ -415,7 +428,9 @@ function WorksArea(props) {
 							disabled={categoryTransitioningSt}
 							onClick={() => handleCategorySelect("all")}
 						>
-							<span>All</span>
+							<span className="locale-copy">
+								{isChineseSt ? "所有项目" : "All"}
+							</span>
 						</button>
 						<button
 							type="button"
@@ -428,7 +443,9 @@ function WorksArea(props) {
 							disabled={categoryTransitioningSt}
 							onClick={() => handleCategorySelect("commercial")}
 						>
-							<span>Commercial</span>
+							<span className="locale-copy">
+								{isChineseSt ? "商业项目" : "Commercial"}
+							</span>
 						</button>
 						<button
 							type="button"
@@ -441,7 +458,9 @@ function WorksArea(props) {
 							disabled={categoryTransitioningSt}
 							onClick={() => handleCategorySelect("exploration")}
 						>
-							<span>Exploration</span>
+							<span className="locale-copy">
+								{isChineseSt ? "个人探索" : "Exploration"}
+							</span>
 						</button>
 						<button
 							type="button"
@@ -454,7 +473,9 @@ function WorksArea(props) {
 							disabled={categoryTransitioningSt}
 							onClick={() => handleCategorySelect("sandbox")}
 						>
-							<span>Sandbox</span>
+							<span className="locale-copy">
+								{isChineseSt ? "沙盒实验" : "Sandbox"}
+							</span>
 						</button>
 					</div>
 				</nav>

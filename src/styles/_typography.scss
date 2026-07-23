@@ -1,0 +1,205 @@
+@use "../utils/respond" as *;
+
+// Edit this file to tune English and Chinese typography independently.
+// Components consume these semantic variables instead of locale-specific rules.
+
+.app-wrapper {
+	// These controls always remain English and do not change with the CMS locale.
+	--font-control-label: "Oswald", "Arial Narrow", Arial, sans-serif;
+	--control-label-size: 12px;
+	--control-label-weight: 400;
+	--control-label-line-height: normal;
+	--font-language-option: "Mulish", Arial, sans-serif;
+	--language-option-size: 0.65rem;
+	--language-option-weight: 400;
+	--language-option-active-weight: 600;
+	--language-option-line-height: 1;
+
+	// Technology labels remain English in both content locales.
+	--font-work-tech: "Mulish", Arial, sans-serif;
+	--work-tech-size: 0.85rem;
+	--work-tech-weight: 400;
+	--work-tech-line-height: normal;
+	--work-tech-letter-spacing: normal;
+
+	// The vertical sidebar layout is also used by portrait tablets.
+	// Phone-only overrides below make the touch targets larger on small screens.
+	--sidebar-mobile-bar-height: 1.6rem;
+	--sidebar-mobile-control-height: 1.3rem;
+	--sidebar-mobile-language-switch-width: 4rem;
+	--sidebar-mobile-title-start-margin: 2.5rem;
+	--sidebar-mobile-title-end-margin: 1.5rem;
+	--sidebar-mobile-arrow-margin: 3rem;
+	--sidebar-mobile-category-inline-padding: 0.65rem;
+}
+
+.app-wrapper[data-locale="en"] {
+	--font-ui: "Mulish", Arial, sans-serif;
+	--font-body: "Mulish", Arial, sans-serif;
+	--font-work-title: "Oswald", "Arial Narrow", Arial, sans-serif;
+	--font-info-title: "Koulen", sans-serif;
+
+	--works-bar-title-size: 0.85rem;
+	--works-bar-title-weight: 400;
+	--works-bar-title-line-height: 1;
+
+	--category-size: 0.78rem;
+	--category-weight: 500;
+	--category-active-weight: 500;
+	--category-line-height: 1;
+
+	--about-label-size: 0.85rem;
+	--about-label-weight: 400;
+	--about-label-line-height: normal;
+
+	--info-title-size: 4.5rem;
+	--info-title-weight: 400;
+	--info-title-line-height: 1;
+
+	--info-description-size: 0.85rem;
+	--info-description-weight: 400;
+	--info-description-line-height: normal;
+
+	--info-contact-size: 0.8rem;
+	--info-contact-weight: 400;
+	--info-contact-line-height: normal;
+
+	--info-footer-size: 0.8rem;
+	--info-footer-weight: 400;
+	--info-footer-line-height: normal;
+
+	--work-title-size: 3.2rem;
+	--work-title-weight: 500;
+	--work-title-line-height: normal;
+
+	--work-sub-size: 0.95rem;
+	--work-sub-weight: 400;
+	--work-sub-line-height: 1;
+
+	--work-description-size: 0.95rem;
+	--work-description-weight: 400;
+	--work-description-line-height: normal;
+
+	--work-link-size: 0.85rem;
+	--work-link-weight: 600;
+	--work-link-line-height: normal;
+}
+
+.app-wrapper[data-locale="zh-CN"] {
+	--font-ui: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC",
+		"Source Han Sans SC", sans-serif;
+	--font-body: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC",
+		"Source Han Sans SC", sans-serif;
+	--font-work-title: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC",
+		"Source Han Sans SC", sans-serif;
+	--font-info-title: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC",
+		"Source Han Sans SC", sans-serif;
+
+	// Works sidebar label
+	--works-bar-title-size: 0.78rem;
+	--works-bar-title-weight: 300;
+	--works-bar-title-line-height: 1;
+	--works-bar-title-letter-spacing: 0.12em;
+
+	// Info sidebar label
+	--about-label-size: 0.78rem;
+	--about-label-weight: 300;
+	--about-label-line-height: 1;
+	--about-label-letter-spacing: 0.12em;
+
+	// Works sidebar categories
+	--category-size: clamp(0.6rem, 1.6vw, 0.75rem);
+	--category-weight: 300;
+	--category-active-weight: 400;
+	--category-line-height: 1;
+	--category-letter-spacing: 0.1em;
+
+	// About content
+	--info-title-size: 4rem;
+	--info-title-weight: 500;
+	--info-title-line-height: 1.2;
+	--info-title-letter-spacing: 0.1em;
+
+	--info-description-size: 0.9rem;
+	--info-description-weight: 300;
+	--info-description-line-height: 1.5;
+	--info-description-letter-spacing: 0.05em;
+
+	--info-contact-size: 0.8rem;
+	--info-contact-weight: 400;
+	--info-contact-line-height: normal;
+	// --info-contact-letter-spacing: 0.03em;
+
+	--info-footer-size: 0.8rem;
+	--info-footer-weight: 400;
+	--info-footer-line-height: normal;
+	// --info-footer-letter-spacing: 0.05em;
+
+	// Work content
+	--work-title-size: 3.3rem;
+	--work-title-weight: 500;
+	--work-title-line-height: 1.5;
+	--work-title-letter-spacing: 0.05em;
+
+	--work-sub-size: 0.95rem;
+	--work-sub-weight: 300;
+	--work-sub-line-height: 1.5;
+	--work-sub-letter-spacing: 0.05em;
+
+	--work-description-size: 0.95rem;
+	--work-description-weight: 400;
+	--work-description-line-height: 1.5;
+	--work-description-letter-spacing: 0.05em;
+
+	--work-link-size: 0.85rem;
+	--work-link-weight: 600;
+	--work-link-line-height: normal;
+	--work-link-letter-spacing: 0.03em;
+}
+
+.app-wrapper[data-locale] {
+	font-family: var(--font-ui);
+}
+
+@include respond(phone) {
+	.app-wrapper {
+		--sidebar-mobile-bar-height: 2rem;
+		--sidebar-mobile-control-height: 1.75rem;
+		--sidebar-mobile-language-switch-width: 4.5rem;
+		--sidebar-mobile-title-start-margin: 2rem;
+		--sidebar-mobile-title-end-margin: 1.5rem;
+		--sidebar-mobile-arrow-margin: 2rem;
+
+		--language-option-size: clamp(0.75rem, 3vw, 0.85rem);
+	}
+
+	.app-wrapper[data-locale="en"] {
+		--info-title-size: 4.2rem;
+
+		--works-bar-title-size: 0.95rem;
+		--about-label-size: 0.95rem;
+
+		--work-title-size: 2.2rem;
+		--category-size: clamp(0.8rem, 3vw, 0.85rem);
+		--sidebar-mobile-category-inline-padding: 0.9rem;
+	}
+
+	.app-wrapper[data-locale="zh-CN"] {
+		--info-title-size: 4.5rem;
+		--info-title-weight: 400;
+		--info-title-line-height: 1.2;
+		--info-title-letter-spacing: 0.1em;
+
+		--works-bar-title-size: 0.8rem;
+		--about-label-size: 0.8rem;
+
+		--work-title-size: 2.2rem;
+
+		--work-sub-size: 0.9rem;
+		--work-sub-line-height: 1.8;
+		--work-sub-letter-spacing: 0.05em;
+
+		--category-size: clamp(0.75rem, 3vw, 0.85rem);
+		--sidebar-mobile-category-inline-padding: 1.1rem;
+	}
+}

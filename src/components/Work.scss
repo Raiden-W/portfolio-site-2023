@@ -34,17 +34,22 @@ $padding-side: 1.5rem;
 		}
 
 		&-sub {
-			line-height: 100%;
-			font-size: 0.85rem;
+			line-height: var(--work-sub-line-height);
+			font-family: var(--font-body);
+			font-size: var(--work-sub-size);
+			font-weight: var(--work-sub-weight);
+			letter-spacing: var(--work-sub-letter-spacing, normal);
 			color: rgb(60, 60, 60);
 			padding: 0 0 1rem 0;
 		}
 
 		&-title {
 			text-transform: uppercase;
-			font-family: "Oswald", sans-serif;
-			font-size: 3rem;
-			font-weight: 500;
+			font-family: var(--font-work-title);
+			font-size: var(--work-title-size);
+			font-weight: var(--work-title-weight);
+			line-height: var(--work-title-line-height);
+			letter-spacing: var(--work-title-letter-spacing, normal);
 			max-width: 85%;
 		}
 
@@ -61,7 +66,7 @@ $padding-side: 1.5rem;
 		@include respond(phone) {
 			padding: 0.8rem $padding-side 1rem $padding-side;
 			&-title {
-				font-size: 2rem;
+				font-size: var(--work-title-size);
 			}
 		}
 	}
@@ -107,16 +112,22 @@ $padding-side: 1.5rem;
 
 	&__tech-tools {
 		padding: 1.8rem $padding-side 0.5rem $padding-side;
-		font-size: 0.85rem;
+		font-family: var(--font-work-tech);
+		font-size: var(--work-tech-size);
 		font-style: italic;
-		font-weight: 400;
+		font-weight: var(--work-tech-weight);
+		line-height: var(--work-tech-line-height);
+		letter-spacing: var(--work-tech-letter-spacing, normal);
 		color: grey;
 	}
 
 	&__description {
 		padding: 0 $padding-side;
-		font-size: 0.95rem;
-		font-weight: 400;
+		font-family: var(--font-body);
+		font-size: var(--work-description-size);
+		font-weight: var(--work-description-weight);
+		line-height: var(--work-description-line-height);
+		letter-spacing: var(--work-description-letter-spacing, normal);
 		color: rgb(60, 60, 60);
 	}
 
@@ -127,9 +138,12 @@ $padding-side: 1.5rem;
 		a {
 			text-decoration: none;
 			color: rgb(60, 60, 60);
-			font-size: 0.85rem;
+			font-family: var(--font-body);
+			font-size: var(--work-link-size);
 			font-style: italic;
-			font-weight: 600;
+			font-weight: var(--work-link-weight);
+			line-height: var(--work-link-line-height);
+			letter-spacing: var(--work-link-letter-spacing, normal);
 
 			span {
 				display: inline-block;

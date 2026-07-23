@@ -1,9 +1,11 @@
 import Opening from "./components/Opening";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { useSelector } from "@xstate/react";
 import WorksArea from "./components/WorksArea";
 import InfoArea from "./components/InfoArea";
 import LoadingPage from "./components/LoadingPage";
 import { useGetTest } from "./utils/serviceHooks";
+import languageStateManager from "./utils/languageStateManager";
 import "./App.scss";
 
 const ExperienceCanvas = lazy(() => import("./experiences/ExperienceCanvas"));
@@ -17,6 +19,13 @@ function App() {
 	const wrapperRef = useRef();
 
 	const { testSt, errorSt: apiErrorSt } = useGetTest();
+	const contentLocaleSt = useSelector(
+		languageStateManager,
+		(state) =>
+			state.context.currentLocale ??
+			state.context.requestedLocale ??
+			state.context.defaultLocale
+	);
 	const [fontLoadedSt, setFontLoaded] = useState(false);
 	const [ifVerticalSt, setIfVertical] = useState(false);
 
@@ -54,8 +63,16 @@ function App() {
 		};
 	}, []);
 
+	useEffect(() => {
+		document.documentElement.lang = contentLocaleSt;
+	}, [contentLocaleSt]);
+
 	return (
-		<div ref={wrapperRef} className="app-wrapper">
+		<div
+			ref={wrapperRef}
+			className="app-wrapper"
+			data-locale={contentLocaleSt}
+		>
 			{testSt && (
 				<>
 					<WorksArea ifVertical={ifVerticalSt} />
