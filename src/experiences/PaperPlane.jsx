@@ -54,72 +54,154 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 	const rotateLevel3 = Math.PI * 0.85;
 
 	const [temValueSt, setTemValue] = useState(0);
-	const temValueRef = useRef();
+	const temValueRef = useRef(0);
+	const transitionTimelineRef = useRef(null);
 
 	const squareToJet = (onCompleteFunction) => {
+		transitionTimelineRef.current?.kill();
+		gsap.killTweensOf([
+			camera.position,
+			camera.rotation,
+			planeMat.emissive,
+			squareMeshRef.current.rotation,
+			temValueRef,
+		]);
+
+		planeMat.emissive.setRGB(1, 1, 1);
 		setGeo(jetGeo);
 		setMat(planeMat);
-		gsap.to(camera.position, { x: 0, y: 4, z: 6, duration: 0.5, delay: 0.3 });
-		gsap.to(camera.rotation, {
-			x: -Math.PI / 8,
-			y: 0,
-			z: 0,
-			duration: 0.5,
-			delay: 0.3,
-		});
-		gsap.to(planeMat.emissive, {
-			r: 0,
-			g: 0,
-			b: 0,
-			duration: 0.3,
-			ease: "power3",
-		});
-		gsap.to(squareMeshRef.current.rotation, {
-			x: -Math.PI / 2,
-			y: 0,
-			z: Math.PI / 4,
-			duration: 0.5,
-			ease: "power1.out",
-		});
-		gsap.to(temValueRef, {
-			current: 1,
-			duration: 1,
-			onUpdate: () => {
-				setTemValue(temValueRef.current);
-			},
+
+		const timeline = gsap.timeline({
 			onComplete: () => {
+				planeMat.emissive.setRGB(0, 0, 0);
 				onCompleteFunction();
 			},
 		});
+
+		timeline
+			.to(
+				camera.position,
+				{ x: 0, y: 4, z: 6, duration: 0.5, overwrite: "auto" },
+				0.3
+			)
+			.to(
+				camera.rotation,
+				{
+					x: -Math.PI / 8,
+					y: 0,
+					z: 0,
+					duration: 0.5,
+					overwrite: "auto",
+				},
+				0.3
+			)
+			.to(
+				planeMat.emissive,
+				{
+					r: 0,
+					g: 0,
+					b: 0,
+					duration: 0.3,
+					ease: "power3",
+					overwrite: "auto",
+				},
+				0
+			)
+			.to(
+				squareMeshRef.current.rotation,
+				{
+					x: -Math.PI / 2,
+					y: 0,
+					z: Math.PI / 4,
+					duration: 0.5,
+					ease: "power1.out",
+					overwrite: "auto",
+				},
+				0
+			)
+			.to(
+				temValueRef,
+				{
+					current: 1,
+					duration: 1,
+					overwrite: "auto",
+					onUpdate: () => {
+						setTemValue(temValueRef.current);
+					},
+				},
+				0
+			);
+
+		transitionTimelineRef.current = timeline;
 	};
 
 	const jetToSquare = (onCompleteFunction) => {
-		gsap.to(camera.position, { x: 0, y: 0, z: 4.5, duration: 0.5 });
-		gsap.to(camera.rotation, { x: 0, duration: 0.5 });
-		gsap.to(planeMat.emissive, {
-			r: 1,
-			g: 1,
-			b: 1,
-			duration: 0.3,
-			delay: 0.7,
-			ease: "power3.in",
-		});
-		gsap.to(squareMeshRef.current.rotation, {
-			x: 0,
-			y: 0,
-			z: 0,
-			duration: 0.5,
-		});
-		gsap.to(temValueRef, {
-			current: 0,
-			duration: 1,
-			onUpdate: () => {
-				setTemValue(temValueRef.current);
-			},
+		transitionTimelineRef.current?.kill();
+		gsap.killTweensOf([
+			camera.position,
+			camera.rotation,
+			planeMat.emissive,
+			squareMeshRef.current.rotation,
+			temValueRef,
+		]);
+
+		planeMat.emissive.setRGB(0, 0, 0);
+
+		const timeline = gsap.timeline({
 			onComplete: () => {
+				planeMat.emissive.setRGB(1, 1, 1);
 				onCompleteFunction();
 			},
 		});
+
+		timeline
+			.to(
+				camera.position,
+				{ x: 0, y: 0, z: 4.5, duration: 0.5, overwrite: "auto" },
+				0
+			)
+			.to(
+				camera.rotation,
+				{ x: 0, duration: 0.5, overwrite: "auto" },
+				0
+			)
+			.to(
+				planeMat.emissive,
+				{
+					r: 1,
+					g: 1,
+					b: 1,
+					duration: 0.3,
+					ease: "power3.in",
+					overwrite: "auto",
+				},
+				0.7
+			)
+			.to(
+				squareMeshRef.current.rotation,
+				{
+					x: 0,
+					y: 0,
+					z: 0,
+					duration: 0.5,
+					overwrite: "auto",
+				},
+				0
+			)
+			.to(
+				temValueRef,
+				{
+					current: 0,
+					duration: 1,
+					overwrite: "auto",
+					onUpdate: () => {
+						setTemValue(temValueRef.current);
+					},
+				},
+				0
+			);
+
+		transitionTimelineRef.current = timeline;
 	};
 
 	useEffect(() => {
@@ -127,6 +209,9 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			squareToJet,
 			jetToSquare,
 		});
+		return () => {
+			transitionTimelineRef.current?.kill();
+		};
 	}, []);
 
 	const {
