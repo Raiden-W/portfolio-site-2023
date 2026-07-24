@@ -552,6 +552,13 @@ function HandRipple({ onEnter3D }) {
 	const triggerRef = useRef(null);
 
 	const enter = (event) => {
+		if (
+			event.type === "pointerdown" &&
+			(!event.isPrimary || event.button !== 0)
+		) {
+			return;
+		}
+
 		onEnter3D?.({
 			event,
 			triggerElement: triggerRef.current,
@@ -566,7 +573,7 @@ function HandRipple({ onEnter3D }) {
 			className="hand-ripple"
 			role="button"
 			tabIndex={0}
-			onClick={enter}
+			onPointerDown={enter}
 			onKeyDown={(event) => {
 				if (event.key === "Enter" || event.key === " ") {
 					event.preventDefault();
