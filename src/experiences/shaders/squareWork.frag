@@ -76,5 +76,9 @@ void main() {
 
     vec4 color = colorCurr * (1.0 - uTransition) + colorNext * uTransition;
     color *= 0.9;
-    gl_FragColor = color + uEmissive;
+
+    float highlight = clamp(uEmissive, 0.0, 1.0);
+    vec3 highlightedColor = mix(color.rgb, vec3(1.0), highlight);
+    float highlightedAlpha = mix(color.a, 1.0, highlight);
+    gl_FragColor = vec4(highlightedColor, highlightedAlpha);
 }
