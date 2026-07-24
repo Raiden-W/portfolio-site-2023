@@ -247,6 +247,7 @@ function WorksArea(props) {
 	useEffect(() => {
 		if (!workAreaActiveSt) {
 			foldOtherWorks();
+			stopAllVideos();
 			setIfAnyUnfold(false);
 			setExpandedWorkId(null);
 		}
