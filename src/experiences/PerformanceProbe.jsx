@@ -1,36 +1,45 @@
-import { useEffect, useRef } from "react";
-import { PerfHeadless, usePerf } from "r3f-perf";
-import appStateManager from "../utils/appStateManager";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Perf, setCustomData } from "r3f-perf";
 
-export default function PerformanceProbe() {
-	const sampleRef = useRef(0);
-	const log = usePerf((state) => state.log);
-	const getReport = usePerf((state) => state.getReport);
+const FRAME_SAMPLE_LIMIT = 180;
+const REPORT_INTERVAL = 0.5;
 
-	useEffect(() => {
-		if (!log) {
+function FrameTimeP95() {
+	const frameTimesRef = useRef([]);
+	const reportElapsedRef = useRef(0);
+
+	useFrame((_, delta) => {
+		const frameTimes = frameTimesRef.current;
+		frameTimes.push(delta * 1000);
+		if (frameTimes.length > FRAME_SAMPLE_LIMIT) {
+			frameTimes.shift();
+		}
+
+		reportElapsedRef.current += delta;
+		if (reportElapsedRef.current < REPORT_INTERVAL) {
 			return;
 		}
 
-		sampleRef.current += 1;
-		const appState =
-			appStateManager.getSnapshot?.().value ?? appStateManager.state.value;
+		reportElapsedRef.current = 0;
+		const sortedFrameTimes = [...frameTimes].sort((a, b) => a - b);
+		const percentileIndex = Math.ceil(sortedFrameTimes.length * 0.95) - 1;
+		setCustomData(sortedFrameTimes[percentileIndex] ?? 0);
+	});
 
-		console.info(
-			"__PERF_SAMPLE__",
-			JSON.stringify({
-				sample: sampleRef.current,
-				appState,
-				log: {
-					fps: log.fps,
-					cpu: log.cpu,
-					gpu: log.gpu,
-					mem: log.mem,
-				},
-				report: getReport(),
-			})
-		);
-	}, [getReport, log]);
+	return null;
+}
 
-	return <PerfHeadless logsPerSecond={1} />;
+export default function PerformanceProbe() {
+	return (
+		<>
+			<FrameTimeP95 />
+			<Perf
+				position="bottom-right"
+				logsPerSecond={2}
+				showGraph
+				customData={{ name: "P95", info: "ms", value: 0, round: 1 }}
+			/>
+		</>
+	);
 }
