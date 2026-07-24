@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useRef, useMemo, useEffect, useState } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import paperPlaneVert from "./shaders/paperPlane.vert";
 import paperPlanFrag from "./shaders/paperPlane.frag";
@@ -53,8 +53,7 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 	const rotateLevel2 = Math.PI / 1.8;
 	const rotateLevel3 = Math.PI * 0.85;
 
-	const [temValueSt, setTemValue] = useState(0);
-	const temValueRef = useRef();
+	const temValueRef = useRef(0);
 
 	const squareToJet = (onCompleteFunction) => {
 		setGeo(jetGeo);
@@ -85,7 +84,7 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			current: 1,
 			duration: 1,
 			onUpdate: () => {
-				setTemValue(temValueRef.current);
+				updateFoldProgress(temValueRef.current);
 			},
 			onComplete: () => {
 				onCompleteFunction();
@@ -114,7 +113,7 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			current: 0,
 			duration: 1,
 			onUpdate: () => {
-				setTemValue(temValueRef.current);
+				updateFoldProgress(temValueRef.current);
 			},
 			onComplete: () => {
 				onCompleteFunction();
@@ -182,6 +181,16 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 		axisL3TransRight.invert();
 	};
 
+	const updateFoldProgress = (progress) => {
+		const rL1 = gsap.utils.interpolate(0, rotateLevel1, progress);
+		const rL2 = gsap.utils.interpolate(0, rotateLevel2, progress);
+		const rL3 = gsap.utils.interpolate(0, rotateLevel3, progress);
+
+		connerCreaseFold(-rL3, rL3);
+		sideCreaseFold(-rL2, rL2);
+		middleCreaseFold(rL1);
+	};
+
 	const isFlying = useSelector(appStateManager, (s) =>
 		s.matches("Jet Idle/ Aeras Closed")
 	);
@@ -201,20 +210,6 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			sideCreaseFold(oscL2Left, oscL2Right);
 		}
 	});
-
-	useEffect(() => {
-		const rL1 = gsap.utils.interpolate(0, rotateLevel1, temValueSt);
-		const rL2 = gsap.utils.interpolate(0, rotateLevel2, temValueSt);
-		const rL3 = gsap.utils.interpolate(0, rotateLevel3, temValueSt);
-		//conner creases
-		connerCreaseFold(-rL3, rL3);
-
-		//side creases
-		sideCreaseFold(-rL2, rL2);
-
-		// //middle crease
-		middleCreaseFold(rL1);
-	}, [temValueSt]);
 
 	return <></>;
 }
