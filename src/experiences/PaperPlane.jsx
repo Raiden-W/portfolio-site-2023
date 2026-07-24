@@ -10,8 +10,35 @@ import { useSelector } from "@xstate/react";
 import { useFrame, useThree } from "@react-three/fiber";
 import quickNoise from "quick-perlin-noise-js";
 import { prewarmMaterials } from "./prewarmMaterials";
+import {
+	MATERIAL_HIGHLIGHT_FADE_DURATION,
+	MATERIAL_HIGHLIGHT_LEAD_IN_DURATION,
+	MATERIAL_HIGHLIGHT_PEAK,
+} from "../utils/materialTransition";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
+
+const getHighlightTween = (material) => {
+	if (typeof material?.uEmissive === "number") {
+		return {
+			target: material,
+			values: { uEmissive: MATERIAL_HIGHLIGHT_PEAK },
+		};
+	}
+
+	if (material?.emissive?.isColor) {
+		return {
+			target: material.emissive,
+			values: {
+				r: MATERIAL_HIGHLIGHT_PEAK,
+				g: MATERIAL_HIGHLIGHT_PEAK,
+				b: MATERIAL_HIGHLIGHT_PEAK,
+			},
+		};
+	}
+
+	return null;
+};
 
 export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
@@ -75,6 +102,9 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 
 	const squareToJet = (onCompleteFunction) => {
 		transitionTimelineRef.current?.kill();
+		const outgoingHighlight = getHighlightTween(
+			squareMeshRef.current?.material
+		);
 		gsap.killTweensOf([
 			camera.position,
 			camera.rotation,
@@ -82,10 +112,13 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			squareMeshRef.current.rotation,
 			temValueRef,
 		]);
+		if (outgoingHighlight) {
+			gsap.killTweensOf(outgoingHighlight.target);
+		}
 
-		planeMat.emissive.setRGB(1, 1, 1);
-		setGeo(jetGeo);
-		setMat(planeMat);
+		const materialSwapTime = outgoingHighlight
+			? MATERIAL_HIGHLIGHT_LEAD_IN_DURATION
+			: 0;
 
 		const timeline = gsap.timeline({
 			onComplete: () => {
@@ -94,11 +127,37 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			},
 		});
 
+		if (outgoingHighlight) {
+			timeline.to(
+				outgoingHighlight.target,
+				{
+					...outgoingHighlight.values,
+					duration: MATERIAL_HIGHLIGHT_LEAD_IN_DURATION,
+					ease: "power2.inOut",
+					overwrite: "auto",
+				},
+				0
+			);
+		}
+
 		timeline
+			.call(
+				() => {
+					planeMat.emissive.setRGB(
+						MATERIAL_HIGHLIGHT_PEAK,
+						MATERIAL_HIGHLIGHT_PEAK,
+						MATERIAL_HIGHLIGHT_PEAK
+					);
+					setGeo(jetGeo);
+					setMat(planeMat);
+				},
+				null,
+				materialSwapTime
+			)
 			.to(
 				camera.position,
 				{ x: 0, y: 4, z: 6, duration: 0.5, overwrite: "auto" },
-				0.3
+				materialSwapTime + 0.3
 			)
 			.to(
 				camera.rotation,
@@ -109,7 +168,7 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 					duration: 0.5,
 					overwrite: "auto",
 				},
-				0.3
+				materialSwapTime + 0.3
 			)
 			.to(
 				planeMat.emissive,
@@ -117,11 +176,11 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 					r: 0,
 					g: 0,
 					b: 0,
-					duration: 0.3,
+					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
 					ease: "power3",
 					overwrite: "auto",
 				},
-				0
+				materialSwapTime
 			)
 			.to(
 				squareMeshRef.current.rotation,
@@ -133,7 +192,7 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 					ease: "power1.out",
 					overwrite: "auto",
 				},
-				0
+				materialSwapTime
 			)
 			.to(
 				temValueRef,
@@ -145,7 +204,7 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 						setTemValue(temValueRef.current);
 					},
 				},
-				0
+				materialSwapTime
 			);
 
 		transitionTimelineRef.current = timeline;
@@ -184,14 +243,14 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			.to(
 				planeMat.emissive,
 				{
-					r: 1,
-					g: 1,
-					b: 1,
-					duration: 0.3,
+					r: MATERIAL_HIGHLIGHT_PEAK,
+					g: MATERIAL_HIGHLIGHT_PEAK,
+					b: MATERIAL_HIGHLIGHT_PEAK,
+					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
 					ease: "power3.in",
 					overwrite: "auto",
 				},
-				0.7
+				0.2
 			)
 			.to(
 				squareMeshRef.current.rotation,

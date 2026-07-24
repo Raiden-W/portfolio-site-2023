@@ -6,6 +6,10 @@ import * as THREE from "three";
 import gsap from "gsap";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
+import {
+	MATERIAL_HIGHLIGHT_FADE_DURATION,
+	MATERIAL_HIGHLIGHT_PEAK,
+} from "../utils/materialTransition";
 
 export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 	const viewport = useThree((state) => state.viewport);
@@ -230,11 +234,10 @@ export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 			delay: 0.3,
 		});
 		gsap.to(clothMat.emissive, {
-			r: 1,
-			b: 1,
-			g: 1,
-			duration: 0.5,
-			delay: 0.3,
+			r: MATERIAL_HIGHLIGHT_PEAK,
+			b: MATERIAL_HIGHLIGHT_PEAK,
+			g: MATERIAL_HIGHLIGHT_PEAK,
+			duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
 			ease: "power3.in",
 			onComplete: () => {
 				appStateManager.send("cloth to square finished");

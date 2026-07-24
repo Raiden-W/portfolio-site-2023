@@ -1,5 +1,9 @@
 import { createMachine, assign, interpret } from "xstate";
 import gsap from "gsap";
+import {
+	MATERIAL_HIGHLIGHT_FADE_DURATION,
+	MATERIAL_HIGHLIGHT_PEAK,
+} from "./materialTransition";
 
 export const machine = createMachine(
 	{
@@ -359,8 +363,13 @@ export const machine = createMachine(
 				//set square geo and mat
 				setGeo(squareGeo);
 				setMat(squareWorkMat);
-				squareWorkMat.uEmissive = 1;
-				gsap.to(squareWorkMat, { uEmissive: 0, duration: 0.3 });
+				squareWorkMat.uEmissive = MATERIAL_HIGHLIGHT_PEAK;
+				gsap.to(squareWorkMat, {
+					uEmissive: 0,
+					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
+					ease: "power3.out",
+					overwrite: "auto",
+				});
 			},
 
 			"set info sqaure": (ctx) => {
@@ -369,8 +378,19 @@ export const machine = createMachine(
 				setGeo(infoGeo);
 				setMat(squareInfoMat);
 
-				squareInfoMat.emissive.set(0xffffff);
-				gsap.to(squareInfoMat.emissive, { r: 0, g: 0, b: 0, duration: 0.3 });
+				squareInfoMat.emissive.setRGB(
+					MATERIAL_HIGHLIGHT_PEAK,
+					MATERIAL_HIGHLIGHT_PEAK,
+					MATERIAL_HIGHLIGHT_PEAK
+				);
+				gsap.to(squareInfoMat.emissive, {
+					r: 0,
+					g: 0,
+					b: 0,
+					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
+					ease: "power3.out",
+					overwrite: "auto",
+				});
 			},
 
 			"move profile": (ctx, event) => {
