@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useCallback, useEffect, useRef, useMemo } from "react";
 import "./InfoArea.scss";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
@@ -252,20 +252,25 @@ function InfoArea(props) {
 export default InfoArea;
 
 const Resize = ({ areaRef, ifVertical }) => {
-	const infoAreaWidthSt = useSelector(
-		appStateManager,
-		(s) => s.context.infoAreaWidth
+	const updateInfoAreaLayout = useCallback(
+		(infoAreaWidth) => {
+			if (!ifVertical) {
+				areaRef.current.style.width = `${infoAreaWidth}%`;
+				areaRef.current.style.height = "100%";
+				return;
+			}
+
+			areaRef.current.style.height = `${infoAreaWidth * 1.5}%`;
+			areaRef.current.style.width = "100%";
+		},
+		[areaRef, ifVertical]
 	);
 
 	useEffect(() => {
-		if (!ifVertical) {
-			areaRef.current.style.width = `${infoAreaWidthSt}%`;
-			areaRef.current.style.height = "100%";
-		} else {
-			areaRef.current.style.height = `${infoAreaWidthSt * 1.5}%`;
-			areaRef.current.style.width = "100%";
-		}
-	}, [infoAreaWidthSt, ifVertical]);
+		appStateManager.send("init some context", { updateInfoAreaLayout });
+		const state = appStateManager.getSnapshot?.() ?? appStateManager.state;
+		updateInfoAreaLayout(state.context.infoAreaWidth);
+	}, [updateInfoAreaLayout]);
 
 	return null;
 };

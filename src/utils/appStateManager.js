@@ -536,15 +536,8 @@ const openArea = (areaToOpen, ctx, callback) => {
 		ease: "power3",
 		onUpdate: () => {
 			const worksAreaWidth = psudoValues.worksAreaW;
-			const canvasWidth =
-				100 - (psudoValues.worksAreaW + psudoValues.infoAreaW);
 			const infoAreaWidth = psudoValues.infoAreaW;
-			callback({
-				type: "width changes",
-				worksAreaWidth,
-				canvasWidth,
-				infoAreaWidth,
-			});
+			updateAreaLayout(ctx, worksAreaWidth, infoAreaWidth);
 		},
 	}).to(params.domToOpen, {
 		opacity: 1,
@@ -553,6 +546,7 @@ const openArea = (areaToOpen, ctx, callback) => {
 		duration: 0.2,
 		ease: "none",
 		onComplete: () => {
+			storeAreaLayout(ctx, callback, psudoValues);
 			ctx.animTasks.areaDone = true;
 			callback({ type: "open area finished" });
 		},
@@ -597,19 +591,35 @@ const closeArea = (areaToClose, ctx, callback) => {
 			ease: "power2",
 			onUpdate: () => {
 				const worksAreaWidth = psudoValues.worksAreaW;
-				const canvasWidth =
-					100 - (psudoValues.worksAreaW + psudoValues.infoAreaW);
 				const infoAreaWidth = psudoValues.infoAreaW;
-				callback({
-					type: "width changes",
-					worksAreaWidth,
-					canvasWidth,
-					infoAreaWidth,
-				});
+				updateAreaLayout(ctx, worksAreaWidth, infoAreaWidth);
 			},
 			onComplete: () => {
+				storeAreaLayout(ctx, callback, psudoValues);
 				ctx.animTasks.areaDone = true;
 				callback({ type: "close area finished" });
 			},
 		});
+};
+
+const updateAreaLayout = (ctx, worksAreaWidth, infoAreaWidth) => {
+	const {
+		updateCanvasLayout,
+		updateWorksAreaLayout,
+		updateInfoAreaLayout,
+	} = ctx.initContext;
+	updateCanvasLayout?.(worksAreaWidth, infoAreaWidth);
+	updateWorksAreaLayout?.(worksAreaWidth);
+	updateInfoAreaLayout?.(infoAreaWidth);
+};
+
+const storeAreaLayout = (ctx, callback, psudoValues) => {
+	const worksAreaWidth = psudoValues.worksAreaW;
+	const infoAreaWidth = psudoValues.infoAreaW;
+	callback({
+		type: "width changes",
+		worksAreaWidth,
+		canvasWidth: 100 - (worksAreaWidth + infoAreaWidth),
+		infoAreaWidth,
+	});
 };

@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import "./WorksArea.scss";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
@@ -523,32 +530,37 @@ function WorksArea(props) {
 export default WorksArea;
 
 const Resize = ({ areaRef, ifVertical, ifAnyUnfold }) => {
-	const worksAreaWidthSt = useSelector(
-		appStateManager,
-		(s) => s.context.worksAreaWidth
-	);
+	const updateWorksAreaLayout = useCallback(
+		(worksAreaWidth) => {
+			if (!ifVertical) {
+				areaRef.current.style.width = `${worksAreaWidth}%`;
+				areaRef.current.style.height = "100%";
+				return;
+			}
 
-	useEffect(() => {
-		if (!ifVertical) {
-			areaRef.current.style.width = `${worksAreaWidthSt}%`;
-			areaRef.current.style.height = "100%";
-		} else {
 			if (ifAnyUnfold) {
 				gsap.to(areaRef.current.style, {
-					height: `${worksAreaWidthSt / 0.6}%`,
+					height: `${worksAreaWidth / 0.6}%`,
 					duration: 0.3,
 					delay: 1.2,
 					ease: "power4.in",
 				});
 			} else {
 				gsap.to(areaRef.current.style, {
-					height: `${worksAreaWidthSt}%`,
+					height: `${worksAreaWidth}%`,
 					duration: 0.3,
 				});
 			}
 			areaRef.current.style.width = "100%";
-		}
-	}, [worksAreaWidthSt, ifVertical, ifAnyUnfold]);
+		},
+		[areaRef, ifAnyUnfold, ifVertical]
+	);
+
+	useEffect(() => {
+		appStateManager.send("init some context", { updateWorksAreaLayout });
+		const state = appStateManager.getSnapshot?.() ?? appStateManager.state;
+		updateWorksAreaLayout(state.context.worksAreaWidth);
+	}, [updateWorksAreaLayout]);
 
 	return null;
 };

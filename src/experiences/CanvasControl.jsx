@@ -1,6 +1,5 @@
 import { useThree } from "@react-three/fiber";
 import appStateManager from "../utils/appStateManager";
-import { useSelector } from "@xstate/react";
 import { useCallback, useEffect, useMemo } from "react";
 import gsap from "gsap";
 
@@ -11,15 +10,6 @@ export default function CanvasControl({
 }) {
 	const viewport = useThree((s) => s.viewport);
 	const camera = useThree((s) => s.camera);
-
-	const worksAreaWidthSt = useSelector(
-		appStateManager,
-		(s) => s.context.worksAreaWidth
-	);
-	const infoAreaWidthSt = useSelector(
-		appStateManager,
-		(s) => s.context.infoAreaWidth
-	);
 
 	const smoothCameraX = useMemo(
 		() =>
@@ -112,6 +102,32 @@ export default function CanvasControl({
 		);
 	}, [canvasContainerRef, mouseMoveCamera, touchMoveCamera]);
 
+	const updateCanvasLayout = useCallback(
+		(worksAreaWidth, infoAreaWidth) => {
+			if (ifVertical) {
+				const newPosY =
+					viewport.getCurrentViewport().height *
+					(worksAreaWidth - infoAreaWidth * 1.5) *
+					0.01 *
+					0.5;
+				squareMeshRef.current.position.y = -newPosY;
+				squareMeshRef.current.position.x = 0;
+				squareMeshRef.current.scale.setScalar(0.65);
+				return;
+			}
+
+			const newPosX =
+				viewport.getCurrentViewport().width *
+				(worksAreaWidth - infoAreaWidth) *
+				0.01 *
+				0.5;
+			squareMeshRef.current.position.x = newPosX;
+			squareMeshRef.current.position.y = 0;
+			squareMeshRef.current.scale.setScalar(1);
+		},
+		[ifVertical, squareMeshRef, viewport]
+	);
+
 	useEffect(() => {
 		const smoothProfileX = gsap.quickTo(squareMeshRef.current.rotation, "x", {
 			duration: 1.5,
@@ -142,6 +158,7 @@ export default function CanvasControl({
 			smoothProfileY,
 			pauseSmoothProfile,
 			resumeSmoothProfile,
+			updateCanvasLayout,
 		});
 	}, [
 		addMoveCamera,
@@ -149,35 +166,13 @@ export default function CanvasControl({
 		removeMoveCamera,
 		resumeSmoothCamera,
 		squareMeshRef,
+		updateCanvasLayout,
 	]);
 
 	useEffect(() => {
-		//# expensive solution deals with canvas and div size
-		// setSize(canvasWidthSt * 0.01 * window.innerWidth, window.innerHeight);
-		// canvasContainerRef.current.style.width = `${canvasWidthSt}%`;
-		// canvasContainerRef.current.style.left = `${worksAreaWidthSt}%`;
-
-		//# cheap solution deals with mesh pos
-		if (ifVertical) {
-			const newPosY =
-				viewport.getCurrentViewport().height *
-				(worksAreaWidthSt - infoAreaWidthSt * 1.5) *
-				0.01 *
-				0.5;
-			squareMeshRef.current.position.y = -newPosY;
-			squareMeshRef.current.position.x = 0;
-			squareMeshRef.current.scale.setScalar(0.65);
-		} else {
-			const newPosX =
-				viewport.getCurrentViewport().width *
-				(worksAreaWidthSt - infoAreaWidthSt) *
-				0.01 *
-				0.5;
-			squareMeshRef.current.position.x = newPosX;
-			squareMeshRef.current.position.y = 0;
-			squareMeshRef.current.scale.setScalar(1);
-		}
-	}, [worksAreaWidthSt, infoAreaWidthSt, viewport, ifVertical]);
+		const state = appStateManager.getSnapshot?.() ?? appStateManager.state;
+		updateCanvasLayout(state.context.worksAreaWidth, state.context.infoAreaWidth);
+	}, [updateCanvasLayout]);
 
 	return <></>;
 }
