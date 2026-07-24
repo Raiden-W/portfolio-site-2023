@@ -533,7 +533,25 @@
 		background-color: var(--hand-bg);
 		color: var(--ink);
 		cursor: pointer;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
+		-webkit-user-drag: none;
+		-webkit-tap-highlight-color: transparent;
 		transition: background-color 0.5s ease;
+
+		* {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			user-select: none;
+			-webkit-user-drag: none;
+		}
+
+		svg,
+		text,
+		.ripple-field {
+			pointer-events: none;
+		}
 
 		&:focus-visible {
 			--hand-bg: var(--orange);

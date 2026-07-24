@@ -1,7 +1,7 @@
 import { Plane } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as CANNON from "cannon-es";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import appStateManager from "../utils/appStateManager";
@@ -10,9 +10,11 @@ import { useSelector } from "@xstate/react";
 export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 	const viewport = useThree((state) => state.viewport);
 	const camera = useThree((state) => state.camera);
+	const gl = useThree((state) => state.gl);
 
 	const initParticlePos = useRef([]);
 	const clothResourcesReleasedRef = useRef(false);
+	const staticParticleRef = useRef(null);
 
 	const [activePlaneSt, setActivePlane] = useState(true);
 
@@ -162,6 +164,7 @@ export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 			return clothPhysics.particles[0][0];
 		}
 	}, [clothGrabInitPos]);
+	staticParticleRef.current = staticParticle;
 
 	const updateGrabingParticlePos = (e) => {
 		if (currState === "Cloth Grabing") {
@@ -169,6 +172,32 @@ export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 			staticParticle.position.y = e.point.y;
 		}
 	};
+
+	const moveClothGrabFromClientPoint = useCallback(
+		({ clientX, clientY }) => {
+			const rect = gl.domElement.getBoundingClientRect();
+			if (!rect.width || !rect.height) {
+				return;
+			}
+
+			const normalizedX = (clientX - rect.left) / rect.width;
+			const normalizedY = (clientY - rect.top) / rect.height;
+			const particle = staticParticleRef.current;
+			if (!particle) {
+				return;
+			}
+
+			particle.position.x = (normalizedX - 0.5) * viewport.width;
+			particle.position.y = (0.5 - normalizedY) * viewport.height;
+		},
+		[gl, viewport]
+	);
+
+	useEffect(() => {
+		appStateManager.send("init some context", {
+			moveClothGrabFromClientPoint,
+		});
+	}, [moveClothGrabFromClientPoint]);
 
 	const setFreeCloth = () => {
 		staticParticle.mass = clothPhysics.clothMass;

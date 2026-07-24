@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import "./LandingPage.scss";
 
 const BLOCK_SIZES = {
@@ -228,12 +234,7 @@ function generateLandingLayout({ columns, rows, seed }) {
 	return bestAttempt?.placed || [];
 }
 
-function MotionBlock({
-	size,
-	variant,
-	onEnter3D,
-	onRegenerateLayout,
-}) {
+function MotionBlock({ size, variant, onEnter3D, onRegenerateLayout }) {
 	const dimensions = BLOCK_SIZES[size];
 
 	return (
@@ -252,12 +253,7 @@ function MotionBlock({
 	);
 }
 
-function BlockContent({
-	size,
-	variant,
-	onEnter3D,
-	onRegenerateLayout,
-}) {
+function BlockContent({ size, variant, onEnter3D, onRegenerateLayout }) {
 	switch (variant) {
 		case "sineWave":
 			return <SineWave size={size} />;
@@ -467,11 +463,7 @@ function CursorArrow() {
 	}, []);
 
 	return (
-		<div
-			ref={ref}
-			className="cursor-arrow no-cursor"
-			aria-hidden="true"
-		>
+		<div ref={ref} className="cursor-arrow no-cursor" aria-hidden="true">
 			<svg viewBox="0 0 120 120">
 				<path d="M15 48 H74 L53 27 L68 12 L114 59 L68 106 L53 91 L74 72 H15 Z" />
 			</svg>
@@ -559,6 +551,10 @@ function HandRipple({ onEnter3D }) {
 			return;
 		}
 
+		if (event.type === "touchstart" && event.cancelable) {
+			event.preventDefault();
+		}
+
 		onEnter3D?.({
 			event,
 			triggerElement: triggerRef.current,
@@ -573,7 +569,15 @@ function HandRipple({ onEnter3D }) {
 			className="hand-ripple"
 			role="button"
 			tabIndex={0}
-			onPointerDown={enter}
+			onPointerDown={(event) => {
+				if (event.pointerType !== "touch") {
+					enter(event);
+				}
+			}}
+			onTouchStart={enter}
+			onContextMenu={(event) => event.preventDefault()}
+			onDragStart={(event) => event.preventDefault()}
+			onSelectStart={(event) => event.preventDefault()}
 			onKeyDown={(event) => {
 				if (event.key === "Enter" || event.key === " ") {
 					event.preventDefault();
@@ -590,7 +594,7 @@ function HandRipple({ onEnter3D }) {
 				className="hand-icon"
 				viewBox="0 0 240 240"
 				role="img"
-				aria-label="click here"
+				aria-label="enter here"
 			>
 				<path
 					className="hand-shape"
@@ -598,7 +602,7 @@ function HandRipple({ onEnter3D }) {
 					fill="currentColor"
 				/>
 				<text x="80" y="157">
-					click
+					enter
 				</text>
 				<text x="84" y="181">
 					here

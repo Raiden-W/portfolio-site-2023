@@ -30,16 +30,40 @@ function eventPoint(event, triggerElement) {
 export default function Opening() {
 	const openingRef = useRef(null);
 	const hasEnteredRef = useRef(false);
-	const activePointerIdRef = useRef(null);
+	const activeInputAbortRef = useRef(null);
 
-	const handlePointerRelease = useCallback((event) => {
-		if (
-			activePointerIdRef.current !== null &&
-			event.pointerId !== activePointerIdRef.current
-		) {
+	const moveClothGrab = useCallback((clientX, clientY) => {
+		const state = appStateManager.getSnapshot();
+		if (!state.matches("Cloth Grabing")) {
 			return;
 		}
 
+		state.context.initContext.moveClothGrabFromClientPoint?.({
+			clientX,
+			clientY,
+		});
+	}, []);
+
+	const handleClothPointerMove = useCallback((event) => {
+		moveClothGrab(event.clientX, event.clientY);
+	}, [moveClothGrab]);
+
+	const handleClothTouchMove = useCallback((event) => {
+		const touch = event.touches[0] ?? event.changedTouches[0];
+		if (!touch) {
+			return;
+		}
+
+		event.preventDefault();
+		moveClothGrab(touch.clientX, touch.clientY);
+	}, [moveClothGrab]);
+
+	const clearActiveInput = useCallback(() => {
+		activeInputAbortRef.current?.abort();
+		activeInputAbortRef.current = null;
+	}, []);
+
+	const handlePointerRelease = useCallback(() => {
 		const state = appStateManager.getSnapshot();
 		if (state.matches("Cloth Grabing")) {
 			appStateManager.send("mouse up canvas");
@@ -47,10 +71,8 @@ export default function Opening() {
 			appStateManager.send("mouse up opening");
 		}
 
-		window.removeEventListener("pointerup", handlePointerRelease, true);
-		window.removeEventListener("pointercancel", handlePointerRelease, true);
-		activePointerIdRef.current = null;
-	}, []);
+		clearActiveInput();
+	}, [clearActiveInput]);
 
 	const cloneOpeningDom = useCallback(async () => {
 		const openingDom = openingRef.current;
@@ -105,15 +127,59 @@ export default function Opening() {
 				cloneOpeningDom,
 			});
 
-			if (event?.type === "pointerdown") {
-				activePointerIdRef.current = event.pointerId;
-				window.addEventListener("pointerup", handlePointerRelease, true);
-				window.addEventListener("pointercancel", handlePointerRelease, true);
+			if (
+				event?.type === "pointerdown" ||
+				event?.type === "touchstart"
+			) {
+				const inputController = new AbortController();
+				activeInputAbortRef.current?.abort();
+				activeInputAbortRef.current = inputController;
+				const listenerOptions = {
+					capture: true,
+					passive: false,
+					signal: inputController.signal,
+				};
+
+				triggerElement?.addEventListener(
+					"pointermove",
+					handleClothPointerMove,
+					listenerOptions
+				);
+				triggerElement?.addEventListener(
+					"touchmove",
+					handleClothTouchMove,
+					listenerOptions
+				);
+				triggerElement?.addEventListener(
+					"pointerup",
+					handlePointerRelease,
+					listenerOptions
+				);
+				triggerElement?.addEventListener(
+					"pointercancel",
+					handlePointerRelease,
+					listenerOptions
+				);
+				triggerElement?.addEventListener(
+					"touchend",
+					handlePointerRelease,
+					listenerOptions
+				);
+				triggerElement?.addEventListener(
+					"touchcancel",
+					handlePointerRelease,
+					listenerOptions
+				);
 			} else {
 				appStateManager.send("mouse up opening");
 			}
 		},
-		[cloneOpeningDom, handlePointerRelease]
+		[
+			cloneOpeningDom,
+			handleClothPointerMove,
+			handleClothTouchMove,
+			handlePointerRelease,
+		]
 	);
 
 	useEffect(() => {
@@ -122,11 +188,9 @@ export default function Opening() {
 		});
 
 		return () => {
-			window.removeEventListener("pointerup", handlePointerRelease, true);
-			window.removeEventListener("pointercancel", handlePointerRelease, true);
-			activePointerIdRef.current = null;
+			clearActiveInput();
 		};
-	}, [handlePointerRelease]);
+	}, [clearActiveInput]);
 
 	return (
 		<div ref={openingRef}>
