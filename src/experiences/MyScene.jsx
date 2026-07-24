@@ -20,7 +20,6 @@ export default function MyScene(props) {
 	const [matSt, setMat] = useState({});
 
 	const [effectOnSt, setEffectOn] = useState(false);
-	const [bloomOnSt, setBloomOn] = useState(false);
 
 	useEffect(() => {
 		colorRef.current.convertLinearToSRGB();
@@ -30,7 +29,6 @@ export default function MyScene(props) {
 			squareMeshRef,
 			bgColor: colorRef.current,
 			setEffectOn,
-			setBloomOn,
 		});
 	}, []);
 
@@ -39,21 +37,19 @@ export default function MyScene(props) {
 			<color ref={colorRef} args={[0x1f1f1f]} attach="background" />
 			{performanceProbeEnabled && <PerformanceProbe />}
 			<Tunnel />
+			<mesh ref={squareMeshRef}>
+				<primitive object={geoSt} />
+				<primitive object={matSt} />
+			</mesh>
 			<Cloth setGeo={setGeo} setMat={setMat} squareMeshRef={squareMeshRef} />
 			<CubeCamera frames={Infinity} resolution={512}>
 				{(texture) => (
-					<>
-						<mesh ref={squareMeshRef}>
-							<primitive object={geoSt} />
-							<primitive object={matSt} />
-						</mesh>
-						<PaperPlane
-							setGeo={setGeo}
-							setMat={setMat}
-							squareMeshRef={squareMeshRef}
-							envMap={texture}
-						/>
-					</>
+					<PaperPlane
+						setGeo={setGeo}
+						setMat={setMat}
+						squareMeshRef={squareMeshRef}
+						envMap={texture}
+					/>
 				)}
 			</CubeCamera>
 			<SquareDisplay />
@@ -63,14 +59,12 @@ export default function MyScene(props) {
 			<directionalLight intensity={0.6} color="white" position={[0, 2.5, 3]} />
 
 			<EffectComposer enabled={effectOnSt}>
-				{bloomOnSt && (
-					<Bloom
-						luminanceThreshold={0.2}
-						luminanceSmoothing={0.5}
-						height={500}
-						intensity={2}
-					/>
-				)}
+				<Bloom
+					luminanceThreshold={0.2}
+					luminanceSmoothing={0.5}
+					height={500}
+					intensity={2}
+				/>
 				<Vignette eskil={false} offset={0.2} darkness={0.7} />
 			</EffectComposer>
 		</>

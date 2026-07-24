@@ -9,42 +9,12 @@ import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 import { useFrame, useThree } from "@react-three/fiber";
 import quickNoise from "quick-perlin-noise-js";
-import { prewarmMaterials } from "./prewarmMaterials";
-import {
-	MATERIAL_HIGHLIGHT_FADE_DURATION,
-	MATERIAL_HIGHLIGHT_LEAD_IN_DURATION,
-	MATERIAL_HIGHLIGHT_PEAK,
-} from "../utils/materialTransition";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
-
-const getHighlightTween = (material) => {
-	if (typeof material?.uEmissive === "number") {
-		return {
-			target: material,
-			values: { uEmissive: MATERIAL_HIGHLIGHT_PEAK },
-		};
-	}
-
-	if (material?.emissive?.isColor) {
-		return {
-			target: material.emissive,
-			values: {
-				r: MATERIAL_HIGHLIGHT_PEAK,
-				g: MATERIAL_HIGHLIGHT_PEAK,
-				b: MATERIAL_HIGHLIGHT_PEAK,
-			},
-		};
-	}
-
-	return null;
-};
 
 export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
 	const camera = useThree((s) => s.camera);
-	const renderer = useThree((s) => s.gl);
-	const scene = useThree((s) => s.scene);
 
 	const planeMat = useMemo(() => {
 		const material = new CustomShaderMaterial({
@@ -79,204 +49,77 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 		return null;
 	}, [jetPlaneModel]);
 
-	useEffect(() => {
-		if (!jetGeo) {
-			return;
-		}
-
-		prewarmMaterials({
-			renderer,
-			scene,
-			camera,
-			entries: [{ geometry: jetGeo, material: planeMat }],
-		});
-	}, [camera, jetGeo, planeMat, renderer, scene]);
-
 	const rotateLevel1 = Math.PI / 2.3;
 	const rotateLevel2 = Math.PI / 1.8;
 	const rotateLevel3 = Math.PI * 0.85;
 
 	const [temValueSt, setTemValue] = useState(0);
-	const temValueRef = useRef(0);
-	const transitionTimelineRef = useRef(null);
+	const temValueRef = useRef();
 
 	const squareToJet = (onCompleteFunction) => {
-		transitionTimelineRef.current?.kill();
-		const outgoingHighlight = getHighlightTween(
-			squareMeshRef.current?.material
-		);
-		gsap.killTweensOf([
-			camera.position,
-			camera.rotation,
-			planeMat.emissive,
-			squareMeshRef.current.rotation,
-			temValueRef,
-		]);
-		if (outgoingHighlight) {
-			gsap.killTweensOf(outgoingHighlight.target);
-		}
-
-		const materialSwapTime = outgoingHighlight
-			? MATERIAL_HIGHLIGHT_LEAD_IN_DURATION
-			: 0;
-
-		const timeline = gsap.timeline({
+		setGeo(jetGeo);
+		setMat(planeMat);
+		gsap.to(camera.position, { x: 0, y: 4, z: 6, duration: 0.5, delay: 0.3 });
+		gsap.to(camera.rotation, {
+			x: -Math.PI / 8,
+			y: 0,
+			z: 0,
+			duration: 0.5,
+			delay: 0.3,
+		});
+		gsap.to(planeMat.emissive, {
+			r: 0,
+			g: 0,
+			b: 0,
+			duration: 0.3,
+			ease: "power3",
+		});
+		gsap.to(squareMeshRef.current.rotation, {
+			x: -Math.PI / 2,
+			y: 0,
+			z: Math.PI / 4,
+			duration: 0.5,
+			ease: "power1.out",
+		});
+		gsap.to(temValueRef, {
+			current: 1,
+			duration: 1,
+			onUpdate: () => {
+				setTemValue(temValueRef.current);
+			},
 			onComplete: () => {
-				planeMat.emissive.setRGB(0, 0, 0);
 				onCompleteFunction();
 			},
 		});
-
-		if (outgoingHighlight) {
-			timeline.to(
-				outgoingHighlight.target,
-				{
-					...outgoingHighlight.values,
-					duration: MATERIAL_HIGHLIGHT_LEAD_IN_DURATION,
-					ease: "power2.inOut",
-					overwrite: "auto",
-				},
-				0
-			);
-		}
-
-		timeline
-			.call(
-				() => {
-					planeMat.emissive.setRGB(
-						MATERIAL_HIGHLIGHT_PEAK,
-						MATERIAL_HIGHLIGHT_PEAK,
-						MATERIAL_HIGHLIGHT_PEAK
-					);
-					setGeo(jetGeo);
-					setMat(planeMat);
-				},
-				null,
-				materialSwapTime
-			)
-			.to(
-				camera.position,
-				{ x: 0, y: 4, z: 6, duration: 0.5, overwrite: "auto" },
-				materialSwapTime + 0.3
-			)
-			.to(
-				camera.rotation,
-				{
-					x: -Math.PI / 8,
-					y: 0,
-					z: 0,
-					duration: 0.5,
-					overwrite: "auto",
-				},
-				materialSwapTime + 0.3
-			)
-			.to(
-				planeMat.emissive,
-				{
-					r: 0,
-					g: 0,
-					b: 0,
-					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
-					ease: "power3",
-					overwrite: "auto",
-				},
-				materialSwapTime
-			)
-			.to(
-				squareMeshRef.current.rotation,
-				{
-					x: -Math.PI / 2,
-					y: 0,
-					z: Math.PI / 4,
-					duration: 0.5,
-					ease: "power1.out",
-					overwrite: "auto",
-				},
-				materialSwapTime
-			)
-			.to(
-				temValueRef,
-				{
-					current: 1,
-					duration: 1,
-					overwrite: "auto",
-					onUpdate: () => {
-						setTemValue(temValueRef.current);
-					},
-				},
-				materialSwapTime
-			);
-
-		transitionTimelineRef.current = timeline;
 	};
 
 	const jetToSquare = (onCompleteFunction) => {
-		transitionTimelineRef.current?.kill();
-		gsap.killTweensOf([
-			camera.position,
-			camera.rotation,
-			planeMat.emissive,
-			squareMeshRef.current.rotation,
-			temValueRef,
-		]);
-
-		planeMat.emissive.setRGB(0, 0, 0);
-
-		const timeline = gsap.timeline({
+		gsap.to(camera.position, { x: 0, y: 0, z: 4.5, duration: 0.5 });
+		gsap.to(camera.rotation, { x: 0, duration: 0.5 });
+		gsap.to(planeMat.emissive, {
+			r: 1,
+			g: 1,
+			b: 1,
+			duration: 0.3,
+			delay: 0.7,
+			ease: "power3.in",
+		});
+		gsap.to(squareMeshRef.current.rotation, {
+			x: 0,
+			y: 0,
+			z: 0,
+			duration: 0.5,
+		});
+		gsap.to(temValueRef, {
+			current: 0,
+			duration: 1,
+			onUpdate: () => {
+				setTemValue(temValueRef.current);
+			},
 			onComplete: () => {
-				planeMat.emissive.setRGB(1, 1, 1);
 				onCompleteFunction();
 			},
 		});
-
-		timeline
-			.to(
-				camera.position,
-				{ x: 0, y: 0, z: 4.5, duration: 0.5, overwrite: "auto" },
-				0
-			)
-			.to(
-				camera.rotation,
-				{ x: 0, duration: 0.5, overwrite: "auto" },
-				0
-			)
-			.to(
-				planeMat.emissive,
-				{
-					r: MATERIAL_HIGHLIGHT_PEAK,
-					g: MATERIAL_HIGHLIGHT_PEAK,
-					b: MATERIAL_HIGHLIGHT_PEAK,
-					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
-					ease: "power3.in",
-					overwrite: "auto",
-				},
-				0.2
-			)
-			.to(
-				squareMeshRef.current.rotation,
-				{
-					x: 0,
-					y: 0,
-					z: 0,
-					duration: 0.5,
-					overwrite: "auto",
-				},
-				0
-			)
-			.to(
-				temValueRef,
-				{
-					current: 0,
-					duration: 1,
-					overwrite: "auto",
-					onUpdate: () => {
-						setTemValue(temValueRef.current);
-					},
-				},
-				0
-			);
-
-		transitionTimelineRef.current = timeline;
 	};
 
 	useEffect(() => {
@@ -284,9 +127,6 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 			squareToJet,
 			jetToSquare,
 		});
-		return () => {
-			transitionTimelineRef.current?.kill();
-		};
 	}, []);
 
 	const {

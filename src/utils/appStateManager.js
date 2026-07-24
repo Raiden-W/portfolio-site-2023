@@ -1,9 +1,5 @@
 import { createMachine, assign, interpret } from "xstate";
 import gsap from "gsap";
-import {
-	MATERIAL_HIGHLIGHT_FADE_DURATION,
-	MATERIAL_HIGHLIGHT_PEAK,
-} from "./materialTransition";
 
 export const machine = createMachine(
 	{
@@ -108,7 +104,6 @@ export const machine = createMachine(
 			},
 			"Jet Idle/ Aeras Closed": {
 				entry: [
-					"turn off bloom",
 					"add point track",
 					"assign work area inactive",
 					"assign info area inactive",
@@ -355,13 +350,8 @@ export const machine = createMachine(
 			},
 
 			"turn on post effect": (ctx) => {
-				const { setEffectOn, setBloomOn } = ctx.initContext;
+				const { setEffectOn } = ctx.initContext;
 				setEffectOn(true);
-				setBloomOn(true);
-			},
-
-			"turn off bloom": (ctx) => {
-				ctx.initContext.setBloomOn(false);
 			},
 
 			"set work square": (ctx) => {
@@ -369,13 +359,8 @@ export const machine = createMachine(
 				//set square geo and mat
 				setGeo(squareGeo);
 				setMat(squareWorkMat);
-				squareWorkMat.uEmissive = MATERIAL_HIGHLIGHT_PEAK;
-				gsap.to(squareWorkMat, {
-					uEmissive: 0,
-					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
-					ease: "power3.out",
-					overwrite: "auto",
-				});
+				squareWorkMat.uEmissive = 1;
+				gsap.to(squareWorkMat, { uEmissive: 0, duration: 0.3 });
 			},
 
 			"set info sqaure": (ctx) => {
@@ -384,19 +369,8 @@ export const machine = createMachine(
 				setGeo(infoGeo);
 				setMat(squareInfoMat);
 
-				squareInfoMat.emissive.setRGB(
-					MATERIAL_HIGHLIGHT_PEAK,
-					MATERIAL_HIGHLIGHT_PEAK,
-					MATERIAL_HIGHLIGHT_PEAK
-				);
-				gsap.to(squareInfoMat.emissive, {
-					r: 0,
-					g: 0,
-					b: 0,
-					duration: MATERIAL_HIGHLIGHT_FADE_DURATION,
-					ease: "power3.out",
-					overwrite: "auto",
-				});
+				squareInfoMat.emissive.set(0xffffff);
+				gsap.to(squareInfoMat.emissive, { r: 0, g: 0, b: 0, duration: 0.3 });
 			},
 
 			"move profile": (ctx, event) => {
