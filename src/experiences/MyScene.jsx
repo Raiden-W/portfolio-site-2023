@@ -42,7 +42,7 @@ export default function MyScene(props) {
 				<primitive object={matSt} />
 			</mesh>
 			<Cloth setGeo={setGeo} setMat={setMat} squareMeshRef={squareMeshRef} />
-			<CubeCamera frames={Infinity} resolution={256}>
+			<CubeCamera frames={Infinity} resolution={512}>
 				{(texture) => (
 					<PaperPlane
 						setGeo={setGeo}
