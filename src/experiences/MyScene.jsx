@@ -56,14 +56,14 @@ export default function MyScene(props) {
 			<CanvasControl {...props} squareMeshRef={squareMeshRef} />
 			{/* <OrbitControls /> */}
 			<ambientLight color="white" intensity={0.5} />
-			<directionalLight intensity={0.6} color="white" position={[0, 2.5, 3]} />
+			<directionalLight intensity={0.55} color="white" position={[0, 2, 3.5]} />
 
 			<EffectComposer enabled={effectOnSt}>
 				<Bloom
 					luminanceThreshold={0.2}
-					luminanceSmoothing={0.5}
-					height={500}
+					luminanceSmoothing={0.6}
 					intensity={2}
+					mipmapBlur={false}
 				/>
 				<Vignette eskil={false} offset={0.2} darkness={0.7} />
 			</EffectComposer>
