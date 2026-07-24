@@ -140,6 +140,28 @@ export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 	}, []);
 
 	useEffect(() => {
+		const warmupCanvas = document.createElement("canvas");
+		warmupCanvas.width = 1;
+		warmupCanvas.height = 1;
+
+		const warmupTexture = new THREE.CanvasTexture(warmupCanvas);
+		const warmupMaterial = clothMat.clone();
+		warmupMaterial.map = warmupTexture;
+		warmupMaterial.colorWrite = false;
+		warmupMaterial.depthWrite = false;
+		warmupMaterial.needsUpdate = true;
+
+		const warmupScene = new THREE.Scene();
+		warmupScene.add(new THREE.Mesh(squareGeo, warmupMaterial));
+		gl.compile(warmupScene, camera);
+
+		return () => {
+			warmupMaterial.dispose();
+			warmupTexture.dispose();
+		};
+	}, [camera, clothMat, gl, squareGeo]);
+
+	useEffect(() => {
 		//set canvas texture to cloth mat and set cloth geo and mat to mesh
 		if (clonedCanvas) {
 			clothMat.map = new THREE.CanvasTexture(clonedCanvas);
