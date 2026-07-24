@@ -49,6 +49,7 @@ function WorksArea(props) {
 	const fadeInTimerRef = useRef();
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
+	const [allVideosSt, setAllVideosSt] = useState([]);
 	const [ifAnyUnfoldSt, setIfAnyUnfold] = useState(false);
 	const [expandedWorkIdSt, setExpandedWorkId] = useState(null);
 	const [activeCategorySt, setActiveCategory] = useState("all");
@@ -251,6 +252,15 @@ function WorksArea(props) {
 		}
 	}, [workAreaActiveSt]);
 
+	useEffect(() => {
+		if (visibleWorksDataSt.length > 0) {
+			const allVideos = listRef.current.querySelectorAll("video");
+			setAllVideosSt(allVideos);
+		} else {
+			setAllVideosSt([]);
+		}
+	}, [visibleWorksDataSt]);
+
 	const foldOtherWorks = () => {
 		Array.from(listRef.current?.children ?? []).forEach((e) => {
 			if (e.classList.contains("unfold")) {
@@ -261,7 +271,7 @@ function WorksArea(props) {
 	};
 
 	const stopAllVideos = () => {
-		listRef.current?.querySelectorAll("video").forEach((video) => {
+		allVideosSt.forEach((video) => {
 			video.pause();
 		});
 	};
