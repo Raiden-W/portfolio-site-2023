@@ -37,19 +37,21 @@ export default function MyScene(props) {
 			<color ref={colorRef} args={[0x1f1f1f]} attach="background" />
 			{performanceProbeEnabled && <PerformanceProbe />}
 			<Tunnel />
-			<mesh ref={squareMeshRef}>
-				<primitive object={geoSt} />
-				<primitive object={matSt} />
-			</mesh>
 			<Cloth setGeo={setGeo} setMat={setMat} squareMeshRef={squareMeshRef} />
 			<CubeCamera frames={Infinity} resolution={512}>
 				{(texture) => (
-					<PaperPlane
-						setGeo={setGeo}
-						setMat={setMat}
-						squareMeshRef={squareMeshRef}
-						envMap={texture}
-					/>
+					<>
+						<mesh ref={squareMeshRef}>
+							<primitive object={geoSt} />
+							<primitive object={matSt} />
+						</mesh>
+						<PaperPlane
+							setGeo={setGeo}
+							setMat={setMat}
+							squareMeshRef={squareMeshRef}
+							envMap={texture}
+						/>
+					</>
 				)}
 			</CubeCamera>
 			<SquareDisplay />
