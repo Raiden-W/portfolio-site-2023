@@ -1,13 +1,14 @@
 import { CubeCamera, OrbitControls } from "@react-three/drei";
 import Cloth from "./Cloth";
-import { useEffect, useState, useRef } from "react";
+import { lazy, Suspense, useEffect, useState, useRef } from "react";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import PaperPlane from "./PaperPlane";
 import appStateManager from "../utils/appStateManager";
 import CanvasControl from "./CanvasControl";
 import Tunnel from "./Tunnel";
 import SquareDisplay from "./SquareDisplay";
-import PerformanceProbe from "./PerformanceProbe";
+
+const PerformanceProbe = lazy(() => import("./PerformanceProbe"));
 
 export default function MyScene(props) {
 	const squareMeshRef = useRef();
@@ -35,7 +36,11 @@ export default function MyScene(props) {
 	return (
 		<>
 			<color ref={colorRef} args={[0x1f1f1f]} attach="background" />
-			{performanceProbeEnabled && <PerformanceProbe />}
+			{performanceProbeEnabled && (
+				<Suspense fallback={null}>
+					<PerformanceProbe />
+				</Suspense>
+			)}
 			<Tunnel />
 			<mesh ref={squareMeshRef}>
 				<primitive object={geoSt} />
