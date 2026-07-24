@@ -108,6 +108,7 @@ export const machine = createMachine(
 			},
 			"Jet Idle/ Aeras Closed": {
 				entry: [
+					"turn off bloom",
 					"add point track",
 					"assign work area inactive",
 					"assign info area inactive",
@@ -354,8 +355,13 @@ export const machine = createMachine(
 			},
 
 			"turn on post effect": (ctx) => {
-				const { setEffectOn } = ctx.initContext;
+				const { setEffectOn, setBloomOn } = ctx.initContext;
 				setEffectOn(true);
+				setBloomOn(true);
+			},
+
+			"turn off bloom": (ctx) => {
+				ctx.initContext.setBloomOn(false);
 			},
 
 			"set work square": (ctx) => {
