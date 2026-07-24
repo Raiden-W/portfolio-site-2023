@@ -7,11 +7,12 @@ import gsap from "gsap";
 import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 
-export default function Cloth({ setGeo, setMat }) {
+export default function Cloth({ setGeo, setMat, squareMeshRef }) {
 	const viewport = useThree((state) => state.viewport);
 	const camera = useThree((state) => state.camera);
 
 	const initParticlePos = useRef([]);
+	const clothResourcesReleasedRef = useRef(false);
 
 	const [activePlaneSt, setActivePlane] = useState(true);
 
@@ -237,16 +238,24 @@ export default function Cloth({ setGeo, setMat }) {
 			ease: "power3.in",
 			onComplete: () => {
 				appStateManager.send("cloth to square finished");
-				clothMat.map.dispose();
-				clothMat.map = null;
-				clothMat.dispose();
-				squareGeo.dispose();
 			},
 		});
 		setActivePlane(false);
 	};
 
 	useFrame(() => {
+		if (
+			!clothResourcesReleasedRef.current &&
+			currState === "Square To Jet" &&
+			squareMeshRef.current?.material !== clothMat
+		) {
+			const clothTexture = clothMat.map;
+			clothMat.map = null;
+			clothTexture?.dispose();
+			clothMat.dispose();
+			clothResourcesReleasedRef.current = true;
+		}
+
 		if (currState === "Cloth Grabing" || currState === "Cloth Falling") {
 			clothPhysics.world.fixedStep();
 			clothPhysics.updateClothGeo();
