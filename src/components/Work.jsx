@@ -11,6 +11,9 @@ const mediaOffsetMargin = 32;
 function Work({
 	title = "Unknown Title",
 	sub = "*",
+	category,
+	showCategory = false,
+	isChinese = false,
 	workId,
 	mediaSet = [],
 	techTools = "Boring tech stuff",
@@ -24,6 +27,13 @@ function Work({
 	setExpandedWorkId,
 	stopAllVideos,
 }) {
+	const categoryLabels = {
+		commercial: isChinese ? "商业项目" : "Commercial",
+		exploration: isChinese ? "个人探索" : "Exploration",
+		sandbox: isChinese ? "沙盒实验" : "Sandbox",
+	};
+	const categoryLabel = categoryLabels[category];
+
 	const mediaContainerRef = useRef();
 	const borderLeftRef = useRef(-300);
 	const borderRightRef = useRef(0);
@@ -128,7 +138,14 @@ function Work({
 						alt="arrow icon"
 					/>
 				</div>
-				<p className="work__header-sub cms-copy">{sub}</p>
+				<div className="work__header-sub-row">
+					<p className="work__header-sub cms-copy">{sub}</p>
+					{showCategory && categoryLabel && (
+						<span className="work__header-category cms-copy">
+							{categoryLabel}
+						</span>
+					)}
+				</div>
 			</header>
 			<div className="work__foldable">
 				<div className="work__media-set" {...bind()}>

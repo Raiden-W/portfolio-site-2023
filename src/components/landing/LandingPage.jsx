@@ -680,10 +680,10 @@ export default function LandingPage({ onEnter3D }) {
 				}}
 			/>
 			<SiteBanner height={`${layoutState.cellHeight}px`} />
-			<div className="grid-readout" aria-hidden="true">
+			{/* <div className="grid-readout" aria-hidden="true">
 				<span>{layoutState.columns}</span>
 				<span>{layoutState.rows}</span>
-			</div>
+			</div> */}
 			<section
 				className="landing-grid"
 				style={{

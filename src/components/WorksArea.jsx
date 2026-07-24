@@ -33,6 +33,9 @@ const getWorksForCategory = (category, works, workCategories) => {
 		.filter(Boolean);
 };
 
+const getWorkCategory = (workId, workCategories) =>
+	workCategories.find((category) => category.workIds.includes(workId))?.key;
+
 function WorksArea(props) {
 	const containerRef = useRef();
 	const listRef = useRef();
@@ -45,8 +48,10 @@ function WorksArea(props) {
 		startScrollLeft: 0,
 		moved: false,
 	});
+	const queuedWorkAreaOpenRef = useRef(false);
 	const fadeOutTimerRef = useRef();
 	const fadeInTimerRef = useRef();
+	const categoryScrollInitializedRef = useRef(false);
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
 	const [allVideosSt, setAllVideosSt] = useState([]);
@@ -83,6 +88,10 @@ function WorksArea(props) {
 		appStateManager,
 		(s) => s.context.workAreaActive
 	);
+	const workAreaCanOpenSt = useSelector(appStateManager, (s) =>
+		s.matches("Jet Idle/ Aeras Closed") ||
+		s.matches("Square Idle/ Info Areas Opened")
+	);
 	const visibleWorksDataSt = useMemo(
 		() => getWorksForCategory(activeCategorySt, worksDataSt, workCategoriesSt),
 		[activeCategorySt, worksDataSt, workCategoriesSt]
@@ -92,6 +101,8 @@ function WorksArea(props) {
 
 	useLayoutEffect(() => {
 		let animationFrame;
+		let settledLayoutFrame;
+		let hasUnmounted = false;
 		const categoriesElement = categoriesRef.current;
 		const categoryTrackElement = categoryTrackRef.current;
 
@@ -182,27 +193,72 @@ function WorksArea(props) {
 				selectedRect.left -
 				categoriesRect.left -
 				(categoriesElement.clientWidth - selectedRect.width) / 2;
-			const targetScrollLeft = Math.min(
-				Math.max(centeredScrollLeft, 0),
-				maximumScrollLeft
-			);
+			const targetScrollLeft =
+				selectedCategorySt === "all"
+					? 0
+					: Math.min(Math.max(centeredScrollLeft, 0), maximumScrollLeft);
 			const reduceMotion = window.matchMedia?.(
 				"(prefers-reduced-motion: reduce)"
 			).matches;
+
+			if (!categoryScrollInitializedRef.current) {
+				categoriesElement.scrollLeft = targetScrollLeft;
+				categoryScrollInitializedRef.current = true;
+				updateCategoryScrollEdges();
+				return;
+			}
 
 			categoriesElement.scrollTo({
 				left: targetScrollLeft,
 				behavior: reduceMotion ? "auto" : "smooth",
 			});
 		};
+		const refreshCategoryLayout = () => {
+			scheduleCategoryIndicatorUpdate();
+			updateCategoryScrollEdges();
+			scrollSelectedCategoryIntoView();
+			cancelAnimationFrame(settledLayoutFrame);
+			settledLayoutFrame = requestAnimationFrame(() => {
+				scheduleCategoryIndicatorUpdate();
+				updateCategoryScrollEdges();
+				scrollSelectedCategoryIntoView();
+			});
+		};
+		const handleCategoryTransitionEnd = (event) => {
+			const isCategoryButton = event.target.matches(
+				".works-area__bar-category"
+			);
+			const isCategoryControl = event.target === categoriesElement;
+			const affectsIndicatorGeometry =
+				(event.propertyName === "font-weight" && isCategoryButton) ||
+				(event.propertyName === "transform" &&
+					(isCategoryButton || isCategoryControl));
+
+			if (!affectsIndicatorGeometry) {
+				return;
+			}
+
+			refreshCategoryLayout();
+		};
 
 		updateCategoryIndicator();
-		updateCategoryScrollEdges();
-		scrollSelectedCategoryIntoView();
+		refreshCategoryLayout();
 		window.addEventListener("resize", scheduleCategoryIndicatorUpdate);
+		window.addEventListener("load", refreshCategoryLayout);
+		document.fonts?.ready
+			.then(() => {
+				if (!hasUnmounted) {
+					refreshCategoryLayout();
+				}
+			})
+			.catch(() => {});
 		categoriesElement?.addEventListener("scroll", updateCategoryScrollEdges, {
 			passive: true,
 		});
+		categoriesElement?.addEventListener(
+			"transitionend",
+			handleCategoryTransitionEnd
+		);
 
 		const resizeObserver = new ResizeObserver(scheduleCategoryIndicatorUpdate);
 		if (categoriesElement) {
@@ -211,16 +267,25 @@ function WorksArea(props) {
 				resizeObserver.observe(categoryTrackElement);
 			}
 			categoriesElement
-				.querySelectorAll(".works-area__bar-category")
+				.querySelectorAll(
+					".works-area__bar-category, .works-area__bar-category span"
+				)
 				.forEach((button) => resizeObserver.observe(button));
 		}
 
 		return () => {
+			hasUnmounted = true;
 			cancelAnimationFrame(animationFrame);
+			cancelAnimationFrame(settledLayoutFrame);
 			window.removeEventListener("resize", scheduleCategoryIndicatorUpdate);
+			window.removeEventListener("load", refreshCategoryLayout);
 			categoriesElement?.removeEventListener(
 				"scroll",
 				updateCategoryScrollEdges
+			);
+			categoriesElement?.removeEventListener(
+				"transitionend",
+				handleCategoryTransitionEnd
 			);
 			resizeObserver.disconnect();
 		};
@@ -252,6 +317,20 @@ function WorksArea(props) {
 			setExpandedWorkId(null);
 		}
 	}, [workAreaActiveSt]);
+
+	useEffect(() => {
+		if (workAreaActiveSt) {
+			queuedWorkAreaOpenRef.current = false;
+			return;
+		}
+
+		if (!queuedWorkAreaOpenRef.current || !workAreaCanOpenSt) {
+			return;
+		}
+
+		queuedWorkAreaOpenRef.current = false;
+		appStateManager.send("works bar click");
+	}, [workAreaActiveSt, workAreaCanOpenSt]);
 
 	useEffect(() => {
 		if (visibleWorksDataSt.length > 0) {
@@ -339,10 +418,21 @@ function WorksArea(props) {
 		categoryDragRef.current.moved = false;
 	};
 
-	const handleCategorySelect = (category) => {
-		if (!workAreaActiveSt) {
-			appStateManager.send("works bar click");
+	const requestWorkAreaOpen = () => {
+		if (workAreaActiveSt) {
+			return;
 		}
+
+		if (workAreaCanOpenSt) {
+			appStateManager.send("works bar click");
+			return;
+		}
+
+		queuedWorkAreaOpenRef.current = true;
+	};
+
+	const handleCategorySelect = (category) => {
+		requestWorkAreaOpen();
 
 		if (category === activeCategorySt || categoryTransitioningSt) {
 			return;
@@ -510,6 +600,9 @@ function WorksArea(props) {
 								workId={workData.id}
 								title={workData.title}
 								sub={workData.sub}
+								category={getWorkCategory(workData.id, workCategoriesSt)}
+								showCategory={selectedCategorySt === "all"}
+								isChinese={isChineseSt}
 								techTools={workData.techTools}
 								description={workData.description}
 								externalLinks={workData.externalLinks}

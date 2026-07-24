@@ -25,7 +25,7 @@
 	// The vertical sidebar layout is also used by portrait tablets.
 	// Phone-only overrides below make the touch targets larger on small screens.
 	--sidebar-mobile-bar-height: 1.6rem;
-	--sidebar-mobile-control-height: 1.3rem;
+	--sidebar-mobile-control-height: 1.4rem;
 	--sidebar-mobile-language-switch-width: 4rem;
 	--sidebar-mobile-title-start-margin: 2.5rem;
 	--sidebar-mobile-title-end-margin: 1.5rem;
@@ -74,7 +74,7 @@
 
 	--work-sub-size: 0.95rem;
 	--work-sub-weight: 400;
-	--work-sub-line-height: 1;
+	--work-sub-line-height: 1.2;
 
 	--work-description-size: 0.95rem;
 	--work-description-weight: 400;
@@ -112,7 +112,7 @@
 	--category-weight: 300;
 	--category-active-weight: 400;
 	--category-line-height: 1;
-	--category-letter-spacing: 0.1em;
+	--category-letter-spacing: 0.15em;
 
 	// About content
 	--info-title-size: 4rem;
@@ -143,7 +143,7 @@
 
 	--work-sub-size: 0.95rem;
 	--work-sub-weight: 300;
-	--work-sub-line-height: 1.5;
+	--work-sub-line-height: 1.35;
 	--work-sub-letter-spacing: 0.05em;
 
 	--work-description-size: 0.95rem;
@@ -185,18 +185,18 @@
 	}
 
 	.app-wrapper[data-locale="zh-CN"] {
-		--info-title-size: 4.5rem;
+		--info-title-size: 4rem;
 		--info-title-weight: 400;
-		--info-title-line-height: 1.2;
-		--info-title-letter-spacing: 0.1em;
+		--info-title-line-height: 1.4;
+		--info-title-letter-spacing: 0;
 
-		--works-bar-title-size: 0.8rem;
-		--about-label-size: 0.8rem;
+		--works-bar-title-size: 0.85rem;
+		--about-label-size: 0.85rem;
 
 		--work-title-size: 2.2rem;
 
-		--work-sub-size: 0.9rem;
-		--work-sub-line-height: 1.8;
+		--work-sub-size: 0.85rem;
+		--work-sub-line-height: 1.5;
 		--work-sub-letter-spacing: 0.05em;
 
 		--category-size: clamp(0.75rem, 3vw, 0.85rem);
