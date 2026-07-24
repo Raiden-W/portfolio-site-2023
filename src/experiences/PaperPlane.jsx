@@ -9,12 +9,15 @@ import appStateManager from "../utils/appStateManager";
 import { useSelector } from "@xstate/react";
 import { useFrame, useThree } from "@react-three/fiber";
 import quickNoise from "quick-perlin-noise-js";
+import { prewarmMaterials } from "./prewarmMaterials";
 
 useGLTF.preload("./model/jetPlane-draco.glb");
 
 export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 	const jetPlaneModel = useGLTF("./model/jetPlane-draco.glb");
 	const camera = useThree((s) => s.camera);
+	const renderer = useThree((s) => s.gl);
+	const scene = useThree((s) => s.scene);
 
 	const planeMat = useMemo(() => {
 		const material = new CustomShaderMaterial({
@@ -48,6 +51,19 @@ export default function PaperPlane({ setGeo, setMat, squareMeshRef, envMap }) {
 		}
 		return null;
 	}, [jetPlaneModel]);
+
+	useEffect(() => {
+		if (!jetGeo) {
+			return;
+		}
+
+		prewarmMaterials({
+			renderer,
+			scene,
+			camera,
+			entries: [{ geometry: jetGeo, material: planeMat }],
+		});
+	}, [camera, jetGeo, planeMat, renderer, scene]);
 
 	const rotateLevel1 = Math.PI / 2.3;
 	const rotateLevel2 = Math.PI / 1.8;

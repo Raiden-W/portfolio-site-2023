@@ -7,7 +7,8 @@ import squareWorkVert from "./shaders/squareWork.vert";
 import squareWorkFrag from "./shaders/squareWork.frag";
 import squareInfoVert from "./shaders/squareInfo.vert";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
+import { prewarmMaterials } from "./prewarmMaterials";
 
 const seed = Math.random() * 100;
 
@@ -47,6 +48,9 @@ const infoGeo = new THREE.PlaneGeometry(2, 2, 75, 150);
 
 export default function SquareDisplay() {
 	const { heroImagesDataSt } = useGetHeroImages();
+	const camera = useThree((state) => state.camera);
+	const renderer = useThree((state) => state.gl);
+	const scene = useThree((state) => state.scene);
 
 	const squareWorkMat = useMemo(() => {
 		return new SquareWorkMat();
@@ -93,8 +97,20 @@ export default function SquareDisplay() {
 				squareInfoMat,
 				infoGeo,
 			});
+
+			const workPrewarmGeo = new THREE.PlaneGeometry(2, 2);
+			prewarmMaterials({
+				renderer,
+				scene,
+				camera,
+				entries: [
+					{ geometry: workPrewarmGeo, material: squareWorkMat },
+					{ geometry: infoGeo, material: squareInfoMat },
+				],
+			});
+			workPrewarmGeo.dispose();
 		}
-	}, [heroImages, squareWorkMat]);
+	}, [camera, heroImages, renderer, scene, squareWorkMat]);
 
 	useFrame((_, delta) => {
 		squareWorkMat.uTime += delta;
