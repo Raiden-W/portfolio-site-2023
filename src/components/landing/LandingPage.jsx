@@ -48,7 +48,7 @@ const CLEAN_POEM = POEM.toLowerCase()
 	.trim();
 
 const SMALL_VARIANTS = ["sineWave", "triangleMarch", "needle", "semicircles"];
-const COUNTDOWN_START = 25;
+const COUNTDOWN_START = 30;
 
 function readSmallViewportHeight() {
 	if (!window.CSS?.supports?.("height", "100svh")) {
