@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./Work.scss";
 import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
@@ -31,11 +31,17 @@ function Work({
 	const mediaContainerWidthRef = useRef(0);
 
 	const workRef = useRef();
-	const videosRef = useRef();
+	const videosRef = useRef([]);
+	const [mediaMountedSt, setMediaMounted] = useState(false);
 
 	useEffect(() => {
 		videosRef.current = mediaContainerRef.current.querySelectorAll("video");
-	}, []);
+		if (workRef.current?.classList.contains("unfold")) {
+			videosRef.current.forEach((video) => {
+				video.play().catch(() => {});
+			});
+		}
+	}, [mediaMountedSt]);
 
 	useEffect(() => {
 		const mediaContainerWidth = Number(
@@ -97,9 +103,13 @@ function Work({
 			stopAllVideos();
 
 			classList.replace("fold", "unfold");
-			videosRef.current.forEach((video) => {
-				video.play();
-			});
+			if (!mediaMountedSt) {
+				setMediaMounted(true);
+			} else {
+				videosRef.current.forEach((video) => {
+					video.play().catch(() => {});
+				});
+			}
 			//close this work
 		} else {
 			classList.replace("unfold", "fold");
@@ -133,7 +143,7 @@ function Work({
 			<div className="work__foldable">
 				<div className="work__media-set" {...bind()}>
 					<div className="work__media-set-container" ref={mediaContainerRef}>
-						{mediaSet.map((media) => (
+						{mediaMountedSt && mediaSet.map((media) => (
 							<div key={media.id} className="work__media-set-container-item">
 								{media.type === "video" ? (
 									<video
@@ -147,6 +157,8 @@ function Work({
 								) : (
 									<img
 										draggable="false"
+										loading="lazy"
+										decoding="async"
 										src={media.url}
 										alt={media.alternativeText}
 									/>
