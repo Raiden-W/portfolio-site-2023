@@ -76,6 +76,8 @@
 	--work-sub-weight: 400;
 	--work-sub-line-height: 1.2;
 
+	--work-sub-row-padding-top: 0.1em;
+
 	--work-description-size: 0.95rem;
 	--work-description-weight: 400;
 	--work-description-line-height: normal;
@@ -138,13 +140,14 @@
 	// Work content
 	--work-title-size: 3.3rem;
 	--work-title-weight: 500;
-	--work-title-line-height: 1.5;
+	--work-title-line-height: normal;
 	--work-title-letter-spacing: 0.05em;
 
 	--work-sub-size: 0.95rem;
 	--work-sub-weight: 300;
 	--work-sub-line-height: 1.35;
 	--work-sub-letter-spacing: 0.05em;
+	--work-sub-row-padding-top: 0.55em;
 
 	--work-description-size: 0.95rem;
 	--work-description-weight: 400;
@@ -152,9 +155,9 @@
 	--work-description-letter-spacing: 0.05em;
 
 	--work-link-size: 0.85rem;
-	--work-link-weight: 600;
+	--work-link-weight: 400;
 	--work-link-line-height: normal;
-	--work-link-letter-spacing: 0.03em;
+	--work-link-letter-spacing: 0.05em;
 }
 
 .app-wrapper[data-locale] {
@@ -196,8 +199,9 @@
 		--work-title-size: 2.2rem;
 
 		--work-sub-size: 0.85rem;
-		--work-sub-line-height: 1.5;
 		--work-sub-letter-spacing: 0.05em;
+
+		--work-sub-row-padding-top: 0.35em;
 
 		--category-size: clamp(0.75rem, 3vw, 0.85rem);
 		--sidebar-mobile-category-inline-padding: 1.1rem;

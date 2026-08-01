@@ -88,9 +88,11 @@ function WorksArea(props) {
 		appStateManager,
 		(s) => s.context.workAreaActive
 	);
-	const workAreaCanOpenSt = useSelector(appStateManager, (s) =>
-		s.matches("Jet Idle/ Aeras Closed") ||
-		s.matches("Square Idle/ Info Areas Opened")
+	const workAreaCanOpenSt = useSelector(
+		appStateManager,
+		(s) =>
+			s.matches("Jet Idle/ Aeras Closed") ||
+			s.matches("Square Idle/ Info Areas Opened")
 	);
 	const visibleWorksDataSt = useMemo(
 		() => getWorksForCategory(activeCategorySt, worksDataSt, workCategoriesSt),
@@ -481,7 +483,7 @@ function WorksArea(props) {
 				}}
 			>
 				<span className="works-area__bar-title locale-copy">
-					{isChineseSt ? "项目集" : "works"}
+					{isChineseSt ? "作品集" : "works"}
 				</span>
 				<nav
 					className={`works-area__bar-categories${
@@ -503,7 +505,7 @@ function WorksArea(props) {
 									"--category-indicator-y": `${categoryIndicatorSt.y}px`,
 									"--category-indicator-width": `${categoryIndicatorSt.width}px`,
 									"--category-indicator-height": `${categoryIndicatorSt.height}px`,
-								}
+							  }
 							: undefined
 					}
 				>

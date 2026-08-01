@@ -216,14 +216,14 @@ const mapExternalLinks = (links = []) =>
 const mapWorksData = (response, locale) =>
 	response.data.attributes.works.data.map((baseWork) => {
 		const baseAttributes = baseWork.attributes;
-		const localizedWork = [
+		const localizedWorks = [
 			baseWork,
 			...(baseAttributes.localizations?.data ?? []),
-		].find((work) => work.attributes.locale === locale);
-
-		if (!localizedWork) {
-			throw new Error(`Missing ${locale} localization for work ${baseWork.id}.`);
-		}
+		];
+		const localizedWork =
+			localizedWorks.find((work) => work.attributes.locale === locale) ??
+			localizedWorks.find((work) => work.attributes.locale === "en") ??
+			baseWork;
 
 		const localizedAttributes = localizedWork.attributes;
 		const mediaSet = (baseAttributes.work_gellary?.work_media ?? [])

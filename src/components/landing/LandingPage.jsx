@@ -613,7 +613,7 @@ function HandRipple({ onEnter3D }) {
 }
 
 function SiteBanner({ height }) {
-	const label = "Rydeen Wang Club Landing";
+	const label = "Rydeen Wang Folder Unfolding";
 	const repeats = Array.from({ length: 8 });
 
 	return (
