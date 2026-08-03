@@ -13,6 +13,9 @@ const fontFace = new FontFace("Koulen", "url(/font/Koulen/Koulen-Regular.ttf)");
 document.fonts.add(fontFace);
 
 const breakWidth = 50; //unit - em
+const isVerticalLayout = () =>
+	window.matchMedia("(orientation: portrait)").matches ||
+	window.innerWidth <= breakWidth * 16;
 
 function App() {
 	const canvasContainerRef = useRef();
@@ -27,7 +30,7 @@ function App() {
 			state.context.defaultLocale
 	);
 	const [fontLoadedSt, setFontLoaded] = useState(false);
-	const [ifVerticalSt, setIfVertical] = useState(false);
+	const [ifVerticalSt, setIfVertical] = useState(isVerticalLayout);
 
 	const loadFont = async () => {
 		await fontFace.load();
@@ -36,16 +39,11 @@ function App() {
 
 	useEffect(() => {
 		loadFont();
+		const wrapper = wrapperRef.current;
 
 		const handleResize = () => {
-			wrapperRef.current.style.height = `${window.innerHeight}px`;
-
-			const portrait = window.matchMedia("(orientation: portrait)").matches;
-			if (portrait || window.innerWidth <= breakWidth * 16) {
-				setIfVertical(true);
-			} else {
-				setIfVertical(false);
-			}
+			wrapper.style.height = `${window.innerHeight}px`;
+			setIfVertical(isVerticalLayout());
 		};
 
 		const disablePinch = (e) => {
@@ -54,12 +52,15 @@ function App() {
 				e.preventDefault();
 			}
 		};
+		handleResize();
 		window.addEventListener("resize", handleResize, true);
-		wrapperRef.current.addEventListener("touchstart", disablePinch, true);
-		wrapperRef.current.addEventListener("touchmove", disablePinch, true);
+		wrapper.addEventListener("touchstart", disablePinch, true);
+		wrapper.addEventListener("touchmove", disablePinch, true);
 
 		return () => {
 			window.removeEventListener("resize", handleResize, true);
+			wrapper.removeEventListener("touchstart", disablePinch, true);
+			wrapper.removeEventListener("touchmove", disablePinch, true);
 		};
 	}, []);
 

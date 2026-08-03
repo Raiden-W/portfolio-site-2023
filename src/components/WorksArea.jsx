@@ -40,6 +40,7 @@ function WorksArea(props) {
 	const containerRef = useRef();
 	const listRef = useRef();
 	const areaRef = useRef();
+	const simpleBarRef = useRef(null);
 	const categoriesRef = useRef();
 	const categoryTrackRef = useRef();
 	const categoryDragRef = useRef({
@@ -54,7 +55,6 @@ function WorksArea(props) {
 	const categoryScrollInitializedRef = useRef(false);
 
 	const [windowWidthSt, setWindowWidth] = useState(window.innerWidth);
-	const [allVideosSt, setAllVideosSt] = useState([]);
 	const [ifAnyUnfoldSt, setIfAnyUnfold] = useState(false);
 	const [expandedWorkIdSt, setExpandedWorkId] = useState(null);
 	const [activeCategorySt, setActiveCategory] = useState("all");
@@ -321,6 +321,26 @@ function WorksArea(props) {
 	}, [workAreaActiveSt]);
 
 	useEffect(() => {
+		if (!workAreaActiveSt) {
+			return undefined;
+		}
+
+		let frame = requestAnimationFrame(() => {
+			simpleBarRef.current?.recalculate();
+			frame = requestAnimationFrame(() => {
+				simpleBarRef.current?.recalculate();
+			});
+		});
+
+		return () => cancelAnimationFrame(frame);
+	}, [
+		categoryPhaseSt,
+		expandedWorkIdSt,
+		visibleWorksDataSt,
+		workAreaActiveSt,
+	]);
+
+	useEffect(() => {
 		if (workAreaActiveSt) {
 			queuedWorkAreaOpenRef.current = false;
 			return;
@@ -334,15 +354,6 @@ function WorksArea(props) {
 		appStateManager.send("works bar click");
 	}, [workAreaActiveSt, workAreaCanOpenSt]);
 
-	useEffect(() => {
-		if (visibleWorksDataSt.length > 0) {
-			const allVideos = listRef.current.querySelectorAll("video");
-			setAllVideosSt(allVideos);
-		} else {
-			setAllVideosSt([]);
-		}
-	}, [visibleWorksDataSt]);
-
 	const foldOtherWorks = () => {
 		Array.from(listRef.current?.children ?? []).forEach((e) => {
 			if (e.classList.contains("unfold")) {
@@ -353,7 +364,7 @@ function WorksArea(props) {
 	};
 
 	const stopAllVideos = () => {
-		allVideosSt.forEach((video) => {
+		listRef.current?.querySelectorAll("video").forEach((video) => {
 			video.pause();
 		});
 	};
@@ -505,7 +516,7 @@ function WorksArea(props) {
 									"--category-indicator-y": `${categoryIndicatorSt.y}px`,
 									"--category-indicator-width": `${categoryIndicatorSt.width}px`,
 									"--category-indicator-height": `${categoryIndicatorSt.height}px`,
-							  }
+							}
 							: undefined
 					}
 				>
@@ -591,7 +602,7 @@ function WorksArea(props) {
 				</div>
 			</div>
 
-			<SimpleBar style={{ height: "100%" }}>
+			<SimpleBar ref={simpleBarRef} style={{ height: "100%" }}>
 				<div className="works-area__container" ref={containerRef}>
 					<div className={`works-area__list ${categoryPhaseSt}`} ref={listRef}>
 						{visibleWorksDataSt.map((workData) => (
@@ -609,6 +620,7 @@ function WorksArea(props) {
 								description={workData.description}
 								externalLinks={workData.externalLinks}
 								mediaSet={workData.mediaSet}
+								isExpanded={expandedWorkIdSt === workData.id}
 								foldOtherWorks={foldOtherWorks}
 								setIfAnyUnfold={setIfAnyUnfold}
 								setExpandedWorkId={setExpandedWorkId}

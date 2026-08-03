@@ -17,6 +17,7 @@ function InfoArea(props) {
 	const containerRef = useRef();
 	const joystickRef = useRef();
 	const areaRef = useRef();
+	const simpleBarRef = useRef(null);
 
 	const infoDataSt = useSelector(
 		languageStateManager,
@@ -63,6 +64,21 @@ function InfoArea(props) {
 			infoDom: containerRef.current,
 		});
 	}, []);
+
+	useEffect(() => {
+		if (!infoAreaActiveSt) {
+			return undefined;
+		}
+
+		let frame = requestAnimationFrame(() => {
+			simpleBarRef.current?.recalculate();
+			frame = requestAnimationFrame(() => {
+				simpleBarRef.current?.recalculate();
+			});
+		});
+
+		return () => cancelAnimationFrame(frame);
+	}, [infoAreaActiveSt, infoDataSt, languagePhaseSt]);
 
 	const smoothToX = useMemo(() => {
 		if (joystickRef.current) {
@@ -188,7 +204,7 @@ function InfoArea(props) {
 				</div>
 			</div>
 			<div className="info-area__container" ref={containerRef}>
-				<SimpleBar style={{ height: "100%" }}>
+				<SimpleBar ref={simpleBarRef} style={{ height: "100%" }}>
 					{infoDataSt && (
 						<div className="info">
 							<h2 className="info__header cms-copy">{infoDataSt.title}</h2>

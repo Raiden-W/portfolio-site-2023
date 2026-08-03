@@ -1,5 +1,16 @@
-$media-height: 12rem;
 $padding-side: 1.5rem;
+
+.app-wrapper {
+	--media-height: 20rem;
+
+	@include respond(desktop) {
+		--media-height: 15rem;
+	}
+
+	@include respond(tablet) {
+		--media-height: 12rem;
+	}
+}
 
 .work {
 	overflow-x: hidden;
@@ -207,7 +218,7 @@ $padding-side: 1.5rem;
 			display: flex;
 
 			&-item {
-				height: $media-height;
+				height: var(--media-height);
 				margin-right: 1rem;
 				text-align: center;
 				position: relative;
@@ -226,7 +237,7 @@ $padding-side: 1.5rem;
 	&__media-set::after {
 		content: "";
 		display: block;
-		height: $media-height;
+		height: var(--media-height);
 		width: 100%;
 	}
 

@@ -13,9 +13,9 @@ $breakpoint arguments:
 - verti
 */
 @mixin respond($breakpoint) {
-	@if $breakpoint == phone {
-		@media (max-width: 37.5em) {
-			//600px
+	@if $breakpoint == desktop {
+		@media (max-width: 100em) {
+			//1600px
 			@content;
 		}
 	}
@@ -28,6 +28,12 @@ $breakpoint arguments:
 	@if $breakpoint == verti {
 		@media (max-width: 50em), (orientation: portrait) {
 			//800px
+			@content;
+		}
+	}
+	@if $breakpoint == phone {
+		@media (max-width: 37.5em) {
+			//600px
 			@content;
 		}
 	}

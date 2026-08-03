@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import "./Work.scss";
 import { useDrag } from "@use-gesture/react";
 import { gsap } from "gsap";
@@ -16,6 +16,7 @@ function Work({
 	isChinese = false,
 	workId,
 	mediaSet = [],
+	isExpanded = false,
 	techTools = "Boring tech stuff",
 	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
 	externalLinks = [],
@@ -38,38 +39,37 @@ function Work({
 	const borderLeftRef = useRef(-300);
 	const borderRightRef = useRef(0);
 	const mediaOffsetXRef = useRef(0);
-	const mediaContainerWidthRef = useRef(0);
 
 	const workRef = useRef();
-	const videosRef = useRef();
+	const videosRef = useRef([]);
 
 	useEffect(() => {
-		videosRef.current = mediaContainerRef.current.querySelectorAll("video");
-	}, []);
-
-	useEffect(() => {
-		const mediaContainerWidth = Number(
-			getComputedStyle(mediaContainerRef.current).width.replace("px", "")
+		const videos = Array.from(
+			mediaContainerRef.current?.querySelectorAll("video") ?? []
 		);
-		mediaContainerWidthRef.current = mediaContainerWidth;
-	}, [windowWidth, workAreaActive, ifVertical]);
+		videosRef.current = videos;
+
+		if (isExpanded) {
+			videos.forEach((video) => {
+				video.play().catch(() => {});
+			});
+		}
+	}, [isExpanded, mediaSet]);
 
 	useEffect(() => {
-		const diff = ifVertical
-			? mediaContainerWidthRef.current - windowWidth
-			: mediaContainerWidthRef.current - 60 * 0.01 * windowWidth;
+		if (!isExpanded) {
+			return undefined;
+		}
 
-		if (diff >= -mediaOffsetMargin * 2) {
-			borderLeftRef.current = -diff - mediaOffsetMargin;
-			borderRightRef.current = 0;
-		} else {
-			borderLeftRef.current = 0;
-			borderRightRef.current = -diff - mediaOffsetMargin;
-		}
-		if (mediaOffsetXRef.current < borderLeftRef.current) {
-			smoothTo(borderLeftRef.current);
-		}
-	}, [windowWidth, mediaContainerWidthRef.current, workAreaActive, ifVertical]);
+		return () => {
+			videosRef.current.forEach((video) => {
+				video.pause();
+				video.removeAttribute("src");
+				video.load();
+			});
+			videosRef.current = [];
+		};
+	}, [isExpanded]);
 
 	const smoothTo = useMemo(() => {
 		if (mediaContainerRef.current) {
@@ -79,6 +79,72 @@ function Work({
 			});
 		} else return () => {};
 	}, [mediaContainerRef.current, workAreaActive, ifVertical]);
+
+	const updateMediaBounds = useCallback(() => {
+		const mediaContainer = mediaContainerRef.current;
+		const mediaContainerWidth = mediaContainer?.getBoundingClientRect().width ?? 0;
+
+		if (!isExpanded || mediaContainerWidth <= 0) {
+			return;
+		}
+
+		const diff = ifVertical
+			? mediaContainerWidth - windowWidth
+			: mediaContainerWidth - 60 * 0.01 * windowWidth;
+		const rawLeft =
+			diff >= -mediaOffsetMargin * 2 ? -diff - mediaOffsetMargin : 0;
+		const rawRight = diff >= -mediaOffsetMargin * 2 ? 0 : -diff - mediaOffsetMargin;
+
+		borderLeftRef.current = Math.min(rawLeft, rawRight);
+		borderRightRef.current = Math.max(rawLeft, rawRight);
+
+		const nextOffset = Math.min(
+			Math.max(mediaOffsetXRef.current, borderLeftRef.current),
+			borderRightRef.current
+		);
+		if (nextOffset !== mediaOffsetXRef.current) {
+			mediaOffsetXRef.current = nextOffset;
+			smoothTo(nextOffset);
+		}
+	}, [ifVertical, isExpanded, smoothTo, windowWidth]);
+
+	useEffect(() => {
+		const mediaContainer = mediaContainerRef.current;
+		if (!mediaContainer || !isExpanded) {
+			return undefined;
+		}
+
+		let animationFrame;
+		let followUpFrame;
+		const scheduleMeasurement = () => {
+			cancelAnimationFrame(animationFrame);
+			animationFrame = requestAnimationFrame(updateMediaBounds);
+		};
+		const resizeObserver = new ResizeObserver(scheduleMeasurement);
+		resizeObserver.observe(mediaContainer);
+
+		const mediaElements = mediaContainer.querySelectorAll("img, video");
+		mediaElements.forEach((mediaElement) => {
+			mediaElement.addEventListener("load", scheduleMeasurement);
+			mediaElement.addEventListener("loadedmetadata", scheduleMeasurement);
+		});
+
+		scheduleMeasurement();
+		followUpFrame = requestAnimationFrame(() => {
+			updateMediaBounds();
+			followUpFrame = requestAnimationFrame(updateMediaBounds);
+		});
+
+		return () => {
+			cancelAnimationFrame(animationFrame);
+			cancelAnimationFrame(followUpFrame);
+			resizeObserver.disconnect();
+			mediaElements.forEach((mediaElement) => {
+				mediaElement.removeEventListener("load", scheduleMeasurement);
+				mediaElement.removeEventListener("loadedmetadata", scheduleMeasurement);
+			});
+		};
+	}, [isExpanded, mediaSet, updateMediaBounds]);
 
 	const bind = useDrag(
 		({ offset: [ox] }) => {
@@ -107,17 +173,12 @@ function Work({
 			stopAllVideos();
 
 			classList.replace("fold", "unfold");
-			videosRef.current.forEach((video) => {
-				video.play();
-			});
 			//close this work
 		} else {
 			classList.replace("unfold", "fold");
 			setIfAnyUnfold(false);
 			setExpandedWorkId(null);
-			videosRef.current.forEach((video) => {
-				video.pause();
-			});
+			videosRef.current?.forEach((video) => video.pause());
 		}
 	};
 
@@ -150,26 +211,27 @@ function Work({
 			<div className="work__foldable">
 				<div className="work__media-set" {...bind()}>
 					<div className="work__media-set-container" ref={mediaContainerRef}>
-						{mediaSet.map((media) => (
-							<div key={media.id} className="work__media-set-container-item">
-								{media.type === "video" ? (
-									<video
-										muted
-										loop
-										src={media.url}
-										playsInline
-										preload="metadata"
-										controls={false}
-									/>
-								) : (
-									<img
-										draggable="false"
-										src={media.url}
-										alt={media.alternativeText}
-									/>
-								)}
-							</div>
-						))}
+						{isExpanded &&
+							mediaSet.map((media) => (
+								<div key={media.id} className="work__media-set-container-item">
+									{media.type === "video" ? (
+										<video
+											muted
+											loop
+											src={media.url}
+											playsInline
+											preload="metadata"
+											controls={false}
+										/>
+									) : (
+										<img
+											draggable="false"
+											src={media.url}
+											alt={media.alternativeText}
+										/>
+									)}
+								</div>
+							))}
 					</div>
 				</div>
 				<p className="work__tech-tools">{techTools}</p>
