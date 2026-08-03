@@ -205,13 +205,15 @@ function Work({
 
 				<div className="work__header-sub-row">
 					<p className="work__header-sub cms-copy">{sub}</p>
+				</div>
+				<div className="work__header-meta-row">
+					<p className="work__header-year">{year}</p>
 					{showCategory && categoryLabel && (
 						<span className="work__header-category cms-copy">
 							{categoryLabel}
 						</span>
 					)}
 				</div>
-				<p className="work__header-year">{year}</p>
 			</header>
 			<div className="work__foldable">
 				<div className="work__media-set" {...bind()}>
