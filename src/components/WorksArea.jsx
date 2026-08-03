@@ -333,12 +333,7 @@ function WorksArea(props) {
 		});
 
 		return () => cancelAnimationFrame(frame);
-	}, [
-		categoryPhaseSt,
-		expandedWorkIdSt,
-		visibleWorksDataSt,
-		workAreaActiveSt,
-	]);
+	}, [categoryPhaseSt, expandedWorkIdSt, visibleWorksDataSt, workAreaActiveSt]);
 
 	useEffect(() => {
 		if (workAreaActiveSt) {
@@ -516,7 +511,7 @@ function WorksArea(props) {
 									"--category-indicator-y": `${categoryIndicatorSt.y}px`,
 									"--category-indicator-width": `${categoryIndicatorSt.width}px`,
 									"--category-indicator-height": `${categoryIndicatorSt.height}px`,
-							}
+							  }
 							: undefined
 					}
 				>
@@ -618,6 +613,7 @@ function WorksArea(props) {
 								isChinese={isChineseSt}
 								techTools={workData.techTools}
 								description={workData.description}
+								year={workData.year}
 								externalLinks={workData.externalLinks}
 								mediaSet={workData.mediaSet}
 								isExpanded={expandedWorkIdSt === workData.id}

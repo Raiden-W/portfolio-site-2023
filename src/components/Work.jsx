@@ -18,6 +18,7 @@ function Work({
 	mediaSet = [],
 	isExpanded = false,
 	techTools = "Boring tech stuff",
+	year = "2026",
 	description = "Bah Lah Bah Lah Bah Lah Bah Lah",
 	externalLinks = [],
 	windowWidth,
@@ -82,7 +83,8 @@ function Work({
 
 	const updateMediaBounds = useCallback(() => {
 		const mediaContainer = mediaContainerRef.current;
-		const mediaContainerWidth = mediaContainer?.getBoundingClientRect().width ?? 0;
+		const mediaContainerWidth =
+			mediaContainer?.getBoundingClientRect().width ?? 0;
 
 		if (!isExpanded || mediaContainerWidth <= 0) {
 			return;
@@ -93,7 +95,8 @@ function Work({
 			: mediaContainerWidth - 60 * 0.01 * windowWidth;
 		const rawLeft =
 			diff >= -mediaOffsetMargin * 2 ? -diff - mediaOffsetMargin : 0;
-		const rawRight = diff >= -mediaOffsetMargin * 2 ? 0 : -diff - mediaOffsetMargin;
+		const rawRight =
+			diff >= -mediaOffsetMargin * 2 ? 0 : -diff - mediaOffsetMargin;
 
 		borderLeftRef.current = Math.min(rawLeft, rawRight);
 		borderRightRef.current = Math.max(rawLeft, rawRight);
@@ -199,6 +202,7 @@ function Work({
 						alt="arrow icon"
 					/>
 				</div>
+
 				<div className="work__header-sub-row">
 					<p className="work__header-sub cms-copy">{sub}</p>
 					{showCategory && categoryLabel && (
@@ -207,6 +211,7 @@ function Work({
 						</span>
 					)}
 				</div>
+				<p className="work__header-year">{year}</p>
 			</header>
 			<div className="work__foldable">
 				<div className="work__media-set" {...bind()}>

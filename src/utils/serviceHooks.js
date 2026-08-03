@@ -25,8 +25,7 @@ const fetchJson = async (url, options = {}) => {
 	return res.json();
 };
 
-const looksLikeExternalMediaUrl = (url) =>
-	/^[^/\s]+\.[^/\s]+\/.+/.test(url);
+const looksLikeExternalMediaUrl = (url) => /^[^/\s]+\.[^/\s]+\/.+/.test(url);
 
 const getMediaUrl = (url) => {
 	if (!url || /^https?:\/\//i.test(url)) {
@@ -96,9 +95,7 @@ const useFetch = (url) => {
 const useGetTest = () => {
 	const [testSt, setTest] = useState();
 
-	const { dataSt, errorSt, loadingSt } = useFetch(
-		getApiUrl("/api/test")
-	);
+	const { dataSt, errorSt, loadingSt } = useFetch(getApiUrl("/api/test"));
 
 	useEffect(() => {
 		if (dataSt) {
@@ -254,6 +251,7 @@ const mapWorksData = (response, locale) =>
 			id: baseWork.id,
 			title: localizedAttributes.title,
 			sub: localizedAttributes.sub,
+			year: baseAttributes.year,
 			description: localizedAttributes.description,
 			techTools: baseAttributes.tech_tools,
 			externalLinks: mapExternalLinks(localizedAttributes.links),
@@ -314,8 +312,7 @@ const mapInfoData = (response) => {
 	};
 };
 
-const fetchLocales = async () =>
-	fetchJson(getApiUrl("/api/i18n/locales"));
+const fetchLocales = async () => fetchJson(getApiUrl("/api/i18n/locales"));
 
 const fetchWorksSource = async () =>
 	fetchJson(getApiUrl("/api/works-area", getWorksQuery));

@@ -46,11 +46,22 @@ $padding-side: 1.5rem;
 
 		&-sub-row {
 			display: flex;
-			align-items: start;
+			align-items: end;
 			gap: 0.75rem;
-			padding-bottom: 1rem;
+			padding-bottom: 0.7rem;
 			padding-top: var(--work-sub-row-padding-top);
 			padding-right: 2%;
+		}
+
+		&-year {
+			margin-bottom: 0.5rem;
+			line-height: var(--work-sub-line-height);
+			font-family: var(--font-body);
+			font-style: italic;
+			font-size: 0.8rem;
+			font-weight: 400;
+			letter-spacing: var(--work-sub-letter-spacing, normal);
+			color: rgb(120, 120, 120);
 		}
 
 		&-sub {
