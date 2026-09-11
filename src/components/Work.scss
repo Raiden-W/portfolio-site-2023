@@ -196,6 +196,11 @@ $padding-side: 1.5rem;
 		line-height: var(--work-description-line-height);
 		letter-spacing: var(--work-description-letter-spacing, normal);
 		color: rgb(60, 60, 60);
+
+		p {
+			// margin-top: 0.5em;
+			margin-bottom: 0.5em;
+		}
 	}
 
 	&__links-container {

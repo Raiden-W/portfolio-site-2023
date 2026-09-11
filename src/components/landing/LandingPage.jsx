@@ -602,7 +602,7 @@ function HandRipple({ onEnter3D }) {
 					fill="currentColor"
 				/>
 				<text x="80" y="157">
-					enter
+					catch
 				</text>
 				<text x="84" y="181">
 					here
