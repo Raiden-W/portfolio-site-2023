@@ -68,7 +68,7 @@
 	--info-footer-weight: 400;
 	--info-footer-line-height: normal;
 
-	--work-title-size: 3.2rem;
+	--work-title-size: 2.8rem;
 	--work-title-weight: 500;
 	--work-title-line-height: normal;
 
@@ -138,7 +138,7 @@
 	// --info-footer-letter-spacing: 0.05em;
 
 	// Work content
-	--work-title-size: 3.3rem;
+	--work-title-size: 3rem;
 	--work-title-weight: 500;
 	--work-title-line-height: normal;
 	--work-title-letter-spacing: 0.05em;
@@ -182,7 +182,8 @@
 		--works-bar-title-size: 0.95rem;
 		--about-label-size: 0.95rem;
 
-		--work-title-size: 2rem;
+		--work-title-size: 1.7rem;
+
 		--category-size: clamp(0.8rem, 3vw, 0.85rem);
 		--sidebar-mobile-category-inline-padding: 0.9rem;
 	}
@@ -196,7 +197,8 @@
 		--works-bar-title-size: 0.85rem;
 		--about-label-size: 0.85rem;
 
-		--work-title-size: 2.2rem;
+		--work-title-size: 1.9rem;
+		--work-title-weight: 600;
 
 		--work-sub-size: 0.85rem;
 		--work-sub-letter-spacing: 0.05em;
