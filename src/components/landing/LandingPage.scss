@@ -4,6 +4,7 @@
 	--grid: rgba(32, 32, 32, 0.42);
 	--green: #05c866;
 	--orange: #ff3b0a;
+	--darkgreen: #0d8136;
 	--muted: #d9d9d4;
 	--cell-debug: 96px;
 	--debug-min-width: calc(var(--cell-debug) * 12.3);
@@ -342,13 +343,18 @@
 	}
 
 	.semi-disc {
+		position: relative;
 		width: min(72cqw, 72cqh);
 		aspect-ratio: 1;
 		border-radius: 50%;
-		background: conic-gradient(
-			var(--green) 0 180deg,
-			var(--ink) 180deg 360deg
-		);
+		overflow: hidden;
+		background: var(--ink);
+	}
+
+	.semi-disc__green-half {
+		position: absolute;
+		inset: 0 0 0 50%;
+		background: var(--green);
 	}
 
 	.semi-disc-a {
@@ -527,9 +533,14 @@
 
 	.hand-ripple {
 		--hand-bg: var(--green);
+		--hand-pulse-duration: 1s;
+		--hand-pulse-color: var(--darkgreen);
+		--hand-pulse-min-opacity: 0;
+		--hand-pulse-max-opacity: 0.9;
 		position: relative;
 		display: grid;
 		place-items: center;
+		isolation: isolate;
 		background-color: var(--hand-bg);
 		color: var(--ink);
 		cursor: pointer;
@@ -539,6 +550,18 @@
 		-webkit-user-drag: none;
 		-webkit-tap-highlight-color: transparent;
 		transition: background-color 0.5s ease;
+
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+			background: var(--hand-pulse-color);
+			opacity: var(--hand-pulse-min-opacity);
+			pointer-events: none;
+			will-change: opacity;
+			animation: hand-pulse var(--hand-pulse-duration) ease-in-out infinite;
+		}
 
 		* {
 			-webkit-touch-callout: none;
@@ -561,6 +584,7 @@
 	.ripple-field {
 		position: absolute;
 		inset: 0;
+		z-index: 1;
 		overflow: hidden;
 
 		span {
@@ -611,6 +635,11 @@
 
 		.hand-ripple:hover {
 			--hand-bg: var(--orange);
+		}
+
+		.hand-ripple:hover::before {
+			animation: none;
+			opacity: 0;
 		}
 	}
 
@@ -724,5 +753,15 @@
 	100% {
 		opacity: 0.05;
 		transform: translate(-50%, -50%) scale(14);
+	}
+}
+
+@keyframes hand-pulse {
+	0%,
+	100% {
+		opacity: var(--hand-pulse-min-opacity);
+	}
+	50% {
+		opacity: var(--hand-pulse-max-opacity);
 	}
 }

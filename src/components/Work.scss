@@ -160,7 +160,7 @@ $padding-side: 1.5rem;
 		transition: background-color 300ms;
 	}
 
-	&.fold &__header:hover::after {
+	&.fold.is-pointer-inside &__header::after {
 		background-color: rgb(238, 235, 229);
 		transition: background-color 300ms;
 	}

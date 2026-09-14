@@ -43,6 +43,7 @@ function Work({
 
 	const workRef = useRef();
 	const videosRef = useRef([]);
+	const activeTouchPointerIdRef = useRef(null);
 
 	useEffect(() => {
 		const videos = Array.from(
@@ -185,13 +186,65 @@ function Work({
 		}
 	};
 
+	const handlePointerEnter = () => {
+		workRef.current?.classList.add("is-pointer-inside");
+		appStateManager.send("enter one work", { workId });
+	};
+
+	const handlePointerDown = (event) => {
+		if (
+			event.pointerType !== "touch" ||
+			!workRef.current?.classList.contains("fold")
+		) {
+			return;
+		}
+
+		activeTouchPointerIdRef.current = event.pointerId;
+		event.currentTarget.setPointerCapture(event.pointerId);
+		workRef.current?.classList.add("is-pointer-inside");
+	};
+
+	const handlePointerLeave = (event) => {
+		if (
+			event.pointerType === "touch" &&
+			activeTouchPointerIdRef.current === event.pointerId
+		) {
+			return;
+		}
+
+		workRef.current?.classList.remove("is-pointer-inside");
+	};
+
+	const clearTouchPointer = (event) => {
+		if (activeTouchPointerIdRef.current !== event.pointerId) {
+			return;
+		}
+
+		activeTouchPointerIdRef.current = null;
+		if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+			event.currentTarget.releasePointerCapture(event.pointerId);
+		}
+		workRef.current?.classList.remove("is-pointer-inside");
+	};
+
+	const handleTouchEnd = () => {
+		if (activeTouchPointerIdRef.current === null) {
+			return;
+		}
+
+		activeTouchPointerIdRef.current = null;
+		workRef.current?.classList.remove("is-pointer-inside");
+	};
+
 	return (
 		<div
 			className="work fold"
 			ref={workRef}
-			onMouseEnter={() => {
-				appStateManager.send("enter one work", { workId });
-			}}
+			onPointerEnter={handlePointerEnter}
+			onPointerDown={handlePointerDown}
+			onPointerLeave={handlePointerLeave}
+			onPointerUp={clearTouchPointer}
+			onTouchEnd={handleTouchEnd}
 		>
 			<header className="work__header" onClick={handleDropDown}>
 				<div className="work__header-flexbox">

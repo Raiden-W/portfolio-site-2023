@@ -353,8 +353,12 @@ function SemiCircleSpin({ size }) {
 			className={`semi-spin ${vertical ? "semi-spin--vertical" : ""}`}
 			aria-hidden="true"
 		>
-			<div className="semi-disc semi-disc-a" />
-			<div className="semi-disc semi-disc-b" />
+			<div className="semi-disc semi-disc-a">
+				<span className="semi-disc__green-half" />
+			</div>
+			<div className="semi-disc semi-disc-b">
+				<span className="semi-disc__green-half" />
+			</div>
 		</div>
 	);
 }
