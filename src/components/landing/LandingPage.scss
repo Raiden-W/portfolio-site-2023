@@ -22,20 +22,6 @@
 	isolation: isolate;
 	text-rendering: geometricPrecision;
 
-	.grid-backdrop {
-		position: fixed;
-		inset: 0;
-		z-index: -1;
-		background-image: linear-gradient(
-				to right,
-				var(--grid) 1px,
-				transparent 1px
-			),
-			linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-		background-size: var(--cell-w) var(--cell-h);
-		pointer-events: none;
-	}
-
 	.site-banner {
 		--banner-h: var(--cell-debug);
 		position: fixed;
@@ -96,8 +82,16 @@
 		display: grid;
 		grid-template-columns: repeat(var(--columns), var(--cell-w));
 		grid-template-rows: repeat(var(--rows), var(--cell-h));
+		grid-auto-columns: var(--cell-w);
+		grid-auto-rows: var(--cell-h);
 		width: var(--grid-w);
 		height: var(--grid-h);
+	}
+
+	.grid-cell {
+		border-top: 1px solid var(--grid);
+		border-left: 1px solid var(--grid);
+		pointer-events: none;
 	}
 
 	.placed-block {

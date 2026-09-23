@@ -93,6 +93,8 @@ function useResponsiveGrid() {
 	return {
 		columns,
 		rows,
+		viewportWidth: viewport.width,
+		viewportHeight: viewport.height,
 		cellWidth: viewport.width / columns,
 		cellHeight: viewport.height / rows,
 		targetCellSize,
@@ -638,17 +640,18 @@ function SiteBanner({ height }) {
 	);
 }
 
-function GridBackdrop({ grid }) {
-	return (
+function GridBackdrop({ columns, rows }) {
+	return Array.from({ length: columns * rows }, (_, index) => (
 		<div
-			className="grid-backdrop"
+			key={index}
+			className="grid-cell"
 			style={{
-				"--cell-w": `${grid.cellWidth}px`,
-				"--cell-h": `${grid.cellHeight}px`,
+				gridColumn: (index % columns) + 1,
+				gridRow: Math.floor(index / columns) + 1,
 			}}
 			aria-hidden="true"
 		/>
-	);
+	));
 }
 
 export default function LandingPage({ onEnter3D }) {
@@ -674,15 +677,17 @@ export default function LandingPage({ onEnter3D }) {
 	const regenerateLayout = useCallback(() => {
 		setLayoutState(createLayoutState(grid));
 	}, [createLayoutState, grid]);
+	const visibleColumns = Math.max(
+		layoutState.columns,
+		Math.ceil(grid.viewportWidth / layoutState.cellWidth) + 1,
+	);
+	const visibleRows = Math.max(
+		layoutState.rows,
+		Math.ceil(grid.viewportHeight / layoutState.cellHeight) + 1,
+	);
 
 	return (
 		<main className="landing-page">
-			<GridBackdrop
-				grid={{
-					cellWidth: layoutState.cellWidth,
-					cellHeight: layoutState.cellHeight,
-				}}
-			/>
 			<SiteBanner height={`${layoutState.cellHeight}px`} />
 			{/* <div className="grid-readout" aria-hidden="true">
 				<span>{layoutState.columns}</span>
@@ -699,6 +704,7 @@ export default function LandingPage({ onEnter3D }) {
 					"--grid-h": `${layoutState.rows * layoutState.cellHeight}px`,
 				}}
 			>
+				<GridBackdrop columns={visibleColumns} rows={visibleRows} />
 				{layoutState.blocks.map((block) => (
 					<div
 						key={block.id}
