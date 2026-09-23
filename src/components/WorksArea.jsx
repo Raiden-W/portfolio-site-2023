@@ -511,7 +511,7 @@ function WorksArea(props) {
 									"--category-indicator-y": `${categoryIndicatorSt.y}px`,
 									"--category-indicator-width": `${categoryIndicatorSt.width}px`,
 									"--category-indicator-height": `${categoryIndicatorSt.height}px`,
-							  }
+							}
 							: undefined
 					}
 				>
